@@ -1,19 +1,14 @@
-const express = require("express");
-const app = express();
+// carica subito le variabili d'ambiente da .env
+require('dotenv').config();
 
-const cors = require("cors");
-const corsOptions = {
-  origin: ["http://localhost:5173"]
-};
+// importa l'app definita in app.js
+const app = require('./app');
 
-app.use(cors(corsOptions));
+// legge la porta dal file .env, o usa 3000 di default
+const PORT = process.env.PORT || 3000;
 
-app.get("/api", (req, res) => {
-  res.json({
-    fruits: ["apple", "orange", "banana"]
-  })
-});
-
-app.listen(8080, () => {
-  console.log("Server started on port 8080");
+// avvia effettivamente il server e scrive a console il link
+app.listen(PORT, () => {
+  console.log(`🚀 Server in ascolto su http://localhost:${PORT}`);
+  console.log('Premi CTRL+C per terminare.');
 });
