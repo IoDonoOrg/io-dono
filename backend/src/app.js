@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 
 // Rotta api standard
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.status(200).json({ message: 'Ciao Mondo!' });
 });
 
