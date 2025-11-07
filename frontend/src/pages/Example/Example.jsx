@@ -1,12 +1,16 @@
+import ExampleComponent from "src/components/exampleComponent";
+
 import logFunction from "src/utils/exampleUtility.js";
 import { useState, useEffect } from 'react';
 
 import { exampleFetch } from 'src/services/exampleServices.js';
 
 function Example() {
-  // un esempio su come utilizzare le funzioni dentro la cartella utils
   useEffect(() => {
+    // logFunction() - una funzione importata dalla cartella utils
     logFunction();  
+    // exampleFetch() - una funzione definita nella cartella services
+    // che fa una chiamata di esempio al backend
     exampleFetch().then(result => {
       console.log(result.data.message);
     });
@@ -17,6 +21,7 @@ function Example() {
       <div>
         <p>Example page</p>
       </div>
+      <ExampleComponent/>
     </>
   )
 }
