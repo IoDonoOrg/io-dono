@@ -21,6 +21,7 @@ function Example() {
       <div>
         <p>Example page</p>
       </div>
+      {/* componente preso dalla cartella components */}
       <ExampleComponent/>
     </>
   )
