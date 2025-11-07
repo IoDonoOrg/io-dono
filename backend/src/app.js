@@ -1,6 +1,12 @@
 const express = require('express');
 const app = express();
 
+const cors = require('cors');
+
+// Abilita CORS per tutte le richieste e origini
+// altrimenti server frontend non può fare delle chiamate al backend
+app.use(cors());
+
 // Middleware per leggere il JSON nei body delle richieste
 app.use(express.json());
 
