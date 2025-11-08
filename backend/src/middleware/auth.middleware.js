@@ -1,3 +1,6 @@
+const jwt = require('jsonwebtoken');
+const User = require('../api/models/User');
+require('dotenv').config(); 
 // Questo file conterrà gli Express Middleware
 
 // Middleware 1: Controlla se l'utente è loggato verificando il JWT
