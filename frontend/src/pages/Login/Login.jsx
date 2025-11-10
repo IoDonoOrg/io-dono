@@ -1,6 +1,16 @@
-import { TextField, Button, Container, Box, Grid } from "@mui/material";
+import { TextField, Button, Container, Box } from "@mui/material";
+
+import { useState } from "react";
+import handleLogin from "../../utils/handleLogin";
+
+import PasswordField from "../../components/PasswordField";
+
+import { GoogleLogin } from "@react-oauth/google";
 
 function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Container
@@ -14,35 +24,37 @@ function Login() {
               fullWidth
               label="Email"
               type="email"
-              // value={email}
-              // onChange={(e) => setEmail(e.target.value)}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
             />
-
-            <TextField
-              fullWidth
-              label="Password"
-              type="password"
-              // value={password}
-              // onChange={(e) => setPassword(e.target.value)}
+            <PasswordField
+              passwordValue={password}
+              onPasswordChange={setPassword}
             />
-
             <Button
               color="primary"
               fullWidth
               variant="contained"
-              // onClick={handleLogin}
+              onClick={() => handleLogin(email, password)}
             >
-              Sign In
+              Accedi
             </Button>
           </div>
         </Box>
         <Box>
-          <div className="flex items-center gap-4 my-6">
+          <Box className="flex items-center gap-4 my-6">
             <div className="flex-1 border-t border-gray-300"></div>
-            <span className="text-gray-600 text-sm">Or continue with</span>
+            <span className="text-gray-600 text-sm">oppure</span>
             <div className="flex-1 border-t border-gray-300"></div>
-          </div>
-          <div></div>
+          </Box>
+          <Box className="flex justify-center">
+            <GoogleLogin
+              onSuccess={(credentialResponse) => {
+                console.log(credentialResponse);
+              }}
+              onError={() => console.log("Login failed")}
+            />
+          </Box>
         </Box>
       </Container>
     </div>
