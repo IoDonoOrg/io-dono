@@ -128,8 +128,46 @@ exports.updateMyDonation = async (req, res) => {
     }
 };
 
+// DELETE /api/donations/:id 
+// Cancella una donazione (solo se 'AVAILABLE')
 exports.cancelMyDonation = async (req, res) => {
-    res.status(501).json({ message: 'TODO: Cancella la mia donazione' });
+    try {
+        const { id } = req.params; // L'ID della donazione dall'URL
+
+        // 1. Controlla che l'ID sia un ID MongoDB valido
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID donazione non valido.' });
+        }
+
+        // 2. Trova la donazione
+        const donation = await Donation.findById(id);
+
+        // 3. Controlli di sicurezza e di logica (mancano i controlli sulla data e sui parametri)
+        if (!donation) {
+            return res.status(404).json({ message: 'Donazione non trovata.' });
+        }
+
+        // controllo di sicurezza per verificare la proprietà della donazione
+        if (donation.donorId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Accesso negato: non sei il proprietario di questa donazione.' });
+        }
+
+        // Puoi eliminarla solo se non è ancora stata accettata
+        if (donation.status !== 'AVAILABLE') {
+            return res.status(400).json({ message: 'Impossibile eliminare: questa donazione è già stata accettata o completata.' });
+        }
+
+        await donation.deleteOne();
+
+        // 5. Invia la donazione aggiornata
+        res.status(200).json("Eliminata con successo");
+
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
 };
 
 exports.getAvailableDonations = async (req, res) => {
