@@ -18,7 +18,9 @@ function Login() {
         className="bg-white p-8 border-2 border-gray-100/35 rounded-lg shadow-md/15"
       >
         <Box>
-          <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
+          </div>
           <div className="flex flex-col gap-4">
             <TextField
               fullWidth
@@ -26,6 +28,7 @@ function Login() {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              required
             />
             <PasswordField
               passwordValue={password}

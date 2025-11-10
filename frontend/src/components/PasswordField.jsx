@@ -15,6 +15,7 @@ function PasswordField({ passwordValue, onPasswordChange }) {
   return (
     <TextField
       fullWidth
+      required
       label="Password"
       type={showPassword ? "text" : "password"}
       value={passwordValue}
