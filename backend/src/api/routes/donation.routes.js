@@ -6,7 +6,8 @@ const { isAuth, isDonor, isAssociation } = require('../../middleware/auth.middle
 // ROTTE PER I DONATORI 
 // Queste rotte richiedono che l'utente sia loggato (isAuth) E sia un donatore (isDonor)
 
-// POST /api/donations -> Crea una nuova donazione
+// POST /api/donations
+// Crea una nuova donazione
 router.post(
     '/',
     isAuth,
@@ -14,7 +15,8 @@ router.post(
     donationController.createDonation
 );
 
-// GET /api/donations/me -> Ottiene lo storico delle donazioni del donatore loggato
+// GET /api/donations/me
+// Ottiene lo storico delle donazioni del donatore loggato
 router.get(
     '/me',
     isAuth,
@@ -22,7 +24,8 @@ router.get(
     donationController.getMyDonations
 );
 
-// PUT /api/donations/:id -> Modifica una donazione (solo se 'AVAILABLE')
+// PUT /api/donations/:id 
+// Modifica una donazione (solo se 'AVAILABLE')
 router.put(
     '/:id',
     isAuth,
@@ -30,7 +33,8 @@ router.put(
     donationController.updateMyDonation
 );
 
-// DELETE /api/donations/:id -> Cancella una donazione (solo se 'AVAILABLE')
+// DELETE /api/donations/:id 
+// Cancella una donazione (solo se 'AVAILABLE')
 router.delete(
     '/:id',
     isAuth,
@@ -42,7 +46,8 @@ router.delete(
 // ROTTE PER LE ASSOCIAZIONI
 // Queste rotte richiedono che l'utente sia loggato (isAuth) E sia un'associazione (isAssociation)
 
-// GET /api/donations/available -> Cerca donazioni disponibili
+// GET /api/donations/available 
+// Cerca donazioni disponibili
 router.get(
     '/available',
     isAuth,
@@ -50,7 +55,8 @@ router.get(
     donationController.getAvailableDonations
 );
 
-// POST /api/donations/:id/accept -> Accetta una donazione
+// POST /api/donations/:id/accept 
+// Accetta una donazione
 router.post(
     '/:id/accept',
     isAuth,
@@ -58,7 +64,8 @@ router.post(
     donationController.acceptDonation
 );
 
-// POST /api/donations/:id/complete -> Completa una donazione
+// POST /api/donations/:id/complete 
+// Completa una donazione
 router.post(
     '/:id/complete',
     isAuth,
@@ -66,7 +73,8 @@ router.post(
     donationController.completeDonation
 );
 
-// POST /api/donations/:id/evaluate -> Valuta una donazione
+// POST /api/donations/:id/evaluate 
+// Valuta una donazione
 router.post(
     '/:id/evaluate',
     isAuth,

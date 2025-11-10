@@ -1,13 +1,12 @@
 const Donation = require('../models/Donazione');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 // --- FUNZIONI PER I DONATORI ---
 
-/**
- * Logica per: POST /api/donations
- * Azione: Creare una nuova donazione
- * Protetto da: isAuth, isDonor
- */
+
+// POST /api/donations
+// crea una nuova donazione
 exports.createDonation = async (req, res) => {
     try {
         // 1. Prendi i dati della donazione dal body
@@ -55,19 +54,78 @@ exports.createDonation = async (req, res) => {
     }
 };
 
-
-
+// /api/donations/me
+// ottieni tutte le tue donazioni
 exports.getMyDonations = async (req, res) => {
     try {
-        const donations = await Donation.find({ donorId: req.user._id });
+        const donations = await Donation.find({ donorId: req.user._id }).sort({ createdAt: -1 }); // Ordina dalla più recente;
         res.status(200).json(donations);
     } catch (error) {
         res.status(500).json({ message: 'Errore del server', error: error.message });
     }
 };
 
+// PUT /api/donations/:id
+// aggiorna una donazione
 exports.updateMyDonation = async (req, res) => {
-    res.status(501).json({ message: 'TODO: Aggiorna la mia donazione' });
+    try {
+        const { id } = req.params; // L'ID della donazione dall'URL
+        const { type, quantity, pickupTime, notes, pickupLocation } = req.body; // I nuovi dati
+
+        // 1. Controlla che l'ID sia un ID MongoDB valido
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID donazione non valido.' });
+        }
+
+        // 2. Trova la donazione
+        const donation = await Donation.findById(id);
+
+        // 3. Controlli di sicurezza e di logica (mancano i controlli sulla data e sui parametri)
+        if (!donation) {
+            return res.status(404).json({ message: 'Donazione non trovata.' });
+        }
+
+        // controllo di sicurezza per verificare la proprietà della donazione
+        if (donation.donorId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Accesso negato: non sei il proprietario di questa donazione.' });
+        }
+
+        // Puoi modificare solo se non è ancora stata accettata
+        if (donation.status !== 'AVAILABLE') {
+            return res.status(400).json({ message: 'Impossibile modificare: questa donazione è già stata accettata o completata.' });
+        }
+        
+        // 4. Se tutti i controlli passano, aggiorna la donazione
+        // Sovrascriviamo i campi che l'utente può modificare
+        donation.type = type || donation.type;
+        donation.quantity = quantity || donation.quantity;
+        donation.pickupTime = pickupTime || donation.pickupTime;
+        donation.notes = notes || donation.notes;
+
+        // Aggiorniamo l'oggetto nestato 'pickupLocation' in modo sicuro
+        if (pickupLocation) {
+            if (pickupLocation.address) {
+                donation.pickupLocation.address = pickupLocation.address;
+            }
+            // Se il frontend invia nuove coordinate
+            // ci assicuriamo di aggiornare sia le coordinate CHE il tipo
+            if (pickupLocation.geo && pickupLocation.geo.coordinates) {
+                donation.pickupLocation.geo.coordinates = pickupLocation.geo.coordinates;
+                donation.pickupLocation.geo.type = 'Point'; // mettiamo sempre Point senno mongodb non capisce
+            }
+        }
+
+        const updatedDonation = await donation.save();
+
+        // 5. Invia la donazione aggiornata
+        res.status(200).json(updatedDonation);
+
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
 };
 
 exports.cancelMyDonation = async (req, res) => {
