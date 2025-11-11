@@ -3,7 +3,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import { useState } from "react";
 
-function PasswordField({ passwordValue, onPasswordChange }) {
+function PasswordField({ passwordValue, onPasswordChange, error, errorText }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -15,11 +15,12 @@ function PasswordField({ passwordValue, onPasswordChange }) {
   return (
     <TextField
       fullWidth
-      required
-      label="Password"
+      label="Password *"
       type={showPassword ? "text" : "password"}
       value={passwordValue}
       onChange={(event) => onPasswordChange(event.target.value)}
+      error={error}
+      helperText={errorText}
       slotProps={{
         input: {
           endAdornment: (

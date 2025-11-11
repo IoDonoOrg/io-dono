@@ -1,15 +1,33 @@
 import { TextField, Button, Container, Box } from "@mui/material";
 
 import { useState } from "react";
-import handleLogin from "../../utils/handleLogin";
 
-import PasswordField from "../../components/PasswordField";
+import PasswordField from "src/components/PasswordField";
 
 import { GoogleLogin } from "@react-oauth/google";
+import { validateEmail } from "src/utils/validation";
+import { validatePassword } from "src/utils/validation";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const emailResult = validateEmail(email);
+    setEmailError(emailResult);
+
+    const passwordResult = validatePassword(password);
+    setPasswordError(passwordResult);
+
+    if (emailResult || passwordResult) return;
+
+    console.log("Form is valid. Submitting:", { email, password });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -21,28 +39,25 @@ function Login() {
           <div>
             <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
           </div>
-          <div className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="Email"
-              type="email"
+              label="Email *"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!emailError} // '!!' converts the string to a boolean
+              helperText={emailError} // Displays the error message
             />
             <PasswordField
               passwordValue={password}
               onPasswordChange={setPassword}
+              error={!!passwordError}
+              errorText={passwordError}
             />
-            <Button
-              color="primary"
-              fullWidth
-              variant="contained"
-              onClick={() => handleLogin(email, password)}
-            >
+            <Button color="primary" type="submit" fullWidth variant="contained">
               Accedi
             </Button>
-          </div>
+          </form>
         </Box>
         <Box>
           <Box className="flex items-center gap-4 my-6">
