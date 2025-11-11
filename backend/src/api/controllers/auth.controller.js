@@ -4,6 +4,23 @@ require('dotenv').config();
 
 /*
 
+{
+    "email": "test-utente-3@example.com",
+    "password": "pass123",
+    "name": "Test Utente tre",
+    "role": "DONOR",
+    "phoneNumber": "123456789",
+    "address": "Via Roma 1",
+    "profile": {
+        "donorType": "PRIVATE"
+    }
+}
+
+{
+    "email": "test-utente-3@example.com",
+    "password": "pass123"
+}
+
 in passport .config abbiamo la questione della serializzazione e viceversa che server per 
 tradurre i dati nel formato di google e voceversa e poi la configurazione di come interagire 
 con google con passport.use. in auth.controller abbiamo la funzione che genera il token con 
