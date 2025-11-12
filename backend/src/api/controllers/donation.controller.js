@@ -2,8 +2,7 @@ const Donation = require('../models/Donazione');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 
-// --- FUNZIONI PER I DONATORI ---
-
+// funzioni per i donatori
 
 // POST /api/donations
 // crea una nuova donazione
@@ -129,7 +128,7 @@ exports.updateMyDonation = async (req, res) => {
 };
 
 // DELETE /api/donations/:id 
-// Cancella una donazione (solo se 'AVAILABLE')
+// Cancella una donazione 
 exports.cancelMyDonation = async (req, res) => {
     try {
         const { id } = req.params; // L'ID della donazione dall'URL
@@ -152,10 +151,11 @@ exports.cancelMyDonation = async (req, res) => {
             return res.status(403).json({ message: 'Accesso negato: non sei il proprietario di questa donazione.' });
         }
 
-        // Puoi eliminarla solo se non è ancora stata accettata
+        /* Puoi eliminarla solo se non è ancora stata accettata
         if (donation.status !== 'AVAILABLE') {
             return res.status(400).json({ message: 'Impossibile eliminare: questa donazione è già stata accettata o completata.' });
         }
+        */
 
         await donation.deleteOne();
 
@@ -170,8 +170,17 @@ exports.cancelMyDonation = async (req, res) => {
     }
 };
 
+// funzioni per le associazioni
+
+// GET /api/donations/available 
+// ritorna le donazioni (solo se 'AVAILABLE')
 exports.getAvailableDonations = async (req, res) => {
-    res.status(501).json({ message: 'TODO: Mostra donazioni disponibili' });
+    try {
+        const donations = await Donation.find({ associationId: req.user._id },{ status: 'AVAILABLE'}).sort({ createdAt: -1 }); // Ordina dalla più recente;
+        res.status(200).json(donations);
+    } catch (error) {
+        res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
 };
 
 exports.acceptDonation = async (req, res) => {

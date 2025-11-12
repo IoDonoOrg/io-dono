@@ -53,7 +53,7 @@ const donationSchema = new mongoose.Schema({
 
     // sotto-documento per la valutazione 
     evaluation: {
-        rating: { type: Number, min: 1, max: 5 },
+        rating: { type: Number, min: 1, max: 10 },
         comment: { type: String }
     }
 }, {

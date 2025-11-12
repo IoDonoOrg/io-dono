@@ -74,7 +74,7 @@ exports.register = async (req, res) => {
             address,
             profile // Contiene donorType, ecc.
         });
-
+        
         // 3. Salva l'utente 
         await newUser.save();
 
