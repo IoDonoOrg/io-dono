@@ -183,8 +183,42 @@ exports.getAvailableDonations = async (req, res) => {
     }
 };
 
+// POST /api/donations/:id/accept 
+// accetta una donazione
 exports.acceptDonation = async (req, res) => {
-    res.status(501).json({ message: 'TODO: Accetta donazione' });
+    try {
+        const { id } = req.params; // L'ID della donazione dall'URL
+
+         // 1. Controlla che l'ID sia un ID MongoDB valido
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID donazione non valido.' });
+        }
+
+        // trova E Aggiorna la donazione in un colpo solo tipo trasazione.
+        const updatedDonation = await Donation.findOneAndUpdate(
+            { _id: id, status: 'AVAILABLE' }, // condizioni di ricerca
+            {
+                $set: {
+                    status: 'ACCEPTED', // aggiorna lo stato
+                    associationId: associationId // assegna l'associazione
+                }
+            },
+            { new: true } // restituisce l'oggetto aggornato
+        );
+
+        // controlla se l'aggiornamento è fallito
+        if (!updatedDonation) {
+            const donation = await Donation.findById(id);
+            if (!donation) {
+                return res.status(404).json({ message: 'Donazione non trovata.' });
+            }
+            // Se esiste ma lo status non è AVAILABLE
+            return res.status(400).json({ message: 'Questa donazione non è più disponibile o è già stata accettata.' });
+        }
+
+    } catch (error) {
+        res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
 };
 
 exports.completeDonation = async (req, res) => {
