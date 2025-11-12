@@ -176,7 +176,7 @@ exports.cancelMyDonation = async (req, res) => {
 // ritorna le donazioni (solo se 'AVAILABLE')
 exports.getAvailableDonations = async (req, res) => {
     try {
-        const donations = await Donation.find({ associationId: req.user._id },{ status: 'AVAILABLE'}).sort({ createdAt: -1 }); // Ordina dalla più recente;
+        const donations = await Donation.find({ status: 'AVAILABLE'}).sort({ createdAt: -1 }); // Ordina dalla più recente;
         res.status(200).json(donations);
     } catch (error) {
         res.status(500).json({ message: 'Errore del server', error: error.message });
