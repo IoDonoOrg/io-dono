@@ -55,6 +55,24 @@ router.get(
     donationController.getAvailableDonations
 );
 
+// GET /api/donations/accepted 
+// Cerca donazioni accettate
+router.get(
+    '/accepted',
+    isAuth,
+    isAssociation,
+    donationController.getAcceptedeDonations
+);
+
+// GET /api/donations/completed 
+// Cerca donazioni completate
+router.get(
+    '/completed',
+    isAuth,
+    isAssociation,
+    donationController.getCompletedDonations
+);
+
 // POST /api/donations/:id/accept 
 // Accetta una donazione
 router.post(

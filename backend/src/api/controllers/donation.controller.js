@@ -160,13 +160,13 @@ exports.cancelMyDonation = async (req, res) => {
         await donation.deleteOne();
 
         // 5. Invia la donazione aggiornata
-        res.status(200).json("Eliminata con successo");
+        return res.status(200).json("Eliminata con successo");
 
     } catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: error.message });
         }
-        res.status(500).json({ message: 'Errore del server', error: error.message });
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
     }
 };
 
@@ -177,9 +177,43 @@ exports.cancelMyDonation = async (req, res) => {
 exports.getAvailableDonations = async (req, res) => {
     try {
         const donations = await Donation.find({ status: 'AVAILABLE'}).sort({ createdAt: -1 }); // Ordina dalla più recente;
-        res.status(200).json(donations);
+        return res.status(200).json(donations);
     } catch (error) {
-        res.status(500).json({ message: 'Errore del server', error: error.message });
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
+};
+
+// GET /api/donations/accepted 
+// ritorna le donazioni (solo se 'ACCEPTED')
+exports.getAcceptedeDonations = async (req, res) => {
+    try {
+        const associationId = req.user._id;
+
+        const donations = await Donation.find({ 
+            status: 'ACCEPTED', 
+            associationId: associationId
+        }).sort({ createdAt: -1 }); 
+        
+        return res.status(200).json(donations);
+    } catch (error) {
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
+};
+
+// GET /api/donations/completed 
+// ritorna le donazioni (solo se 'COMPLETED')
+exports.getCompletedDonations = async (req, res) => {
+    try {
+        const associationId = req.user._id;
+
+        const donations = await Donation.find({ 
+            status: 'COMPLETED', 
+            associationId: associationId
+        }).sort({ createdAt: -1 });
+
+        return res.status(200).json(donations);
+    } catch (error) {
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
     }
 };
 
