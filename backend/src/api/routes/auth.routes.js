@@ -34,6 +34,10 @@ router.get('/google/callback',
     authController.handleGoogleCallback // Se l'autenticazione ha successo, esegui quest'altra funz
 );
 
+// Rotta chiamata da GOOGLE dopo che l'utente ha dato il consenso
+// POST /api/auth/google/token
+router.get('/google/token', authController.handleGoogleToken);
+
 // Rotta chiamata dal CLIENT dopo il form di completamento
 // Questa rotta  si aspetta il registrationToken
 router.post('/register-google', authController.registerGoogle);

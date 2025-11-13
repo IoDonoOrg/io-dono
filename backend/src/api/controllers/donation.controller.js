@@ -299,8 +299,7 @@ exports.completeDonation = async (req, res) => {
             session.endSession();
             return res.status(400).json({ message: 'ID donazione non valido.' });
         }
-
-        
+     
         if (!evaluation || !evaluation.rating) {
             await session.abortTransaction();
             session.endSession();

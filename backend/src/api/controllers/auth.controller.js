@@ -1,3 +1,4 @@
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -20,22 +21,6 @@ require('dotenv').config();
     "email": "test-utente-3@example.com",
     "password": "pass123"
 }
-
-in passport .config abbiamo la questione della serializzazione e viceversa che server per 
-tradurre i dati nel formato di google e voceversa e poi la configurazione di come interagire 
-con google con passport.use. in auth.controller abbiamo la funzione che genera il token con 
-userid e user role e il JWT secret che è nel file .env. 
-poi nelle registrazioni si prendono i dati dal body e si inserisce nel db un nuovo user nel 
-login si controlla che esista l'user e che non sia registrato con google, in caso confronta 
-la password e se corrisponde genera il token e si ha l'accesso. Per la parte di google,
-handleGoogleCallback è la risposta di google a seguito del login, quindi dovrebbe restituire 
-i dati che sono stati parsati in un user nel config. prende i dati e cerca se esiste un user,
-se lo trova genera il tocken e poi invia uno script post che invia al frontend il token e l'user,
-in caso non esista viene reindirizzato ad una pagina per completare il profilo, facendo un token
-temporaneo dove inseriamo i dati che invieremo al client e che poi comporranno l'user. 
-l'utente vine reindirizzato alla pagina di fine registrazione e successivamente viene chiamata
-la funzione registerGoogle che passa i dati mancanti con quelli ricevuti nel token
-e poi lo salva
 
 */
 
@@ -132,7 +117,7 @@ exports.login = async (req, res) => {
     }
 };
 
-// --- Logica Google (Step 1 - Chiamato da Passport) ---
+// vecchia logica Google
 // Logica per: GET /api/auth/google/callback
 exports.handleGoogleCallback = async (req, res) => {
     // Se arriviamo qui, Passport ha funzionato.
@@ -187,6 +172,73 @@ exports.handleGoogleCallback = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({ message: 'Errore durante l\'autenticazione Google', error: error.message });
+    }
+};
+
+// nuova logica google
+// Logica per: POST /api/auth/google/token
+exports.handleGoogleToken = async (req, res) => {
+    // 1. Estrai il token (credential) inviato dal frontend
+    const { token } = req.body;
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+    if (!token) {
+        return res.status(400).json({ message: 'Token Google (credential) mancante.' });
+    }
+
+    try {
+        // 2. Verifica il token (credential) usando la libreria Google
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID, // Specifica il Client ID
+        });
+
+        // 3. Estrai i dati dell'utente dal token verificato
+        const payload = ticket.getPayload();
+        const { sub: googleId, email, name, picture } = payload;
+
+        // 4. Controlla se l'utente esiste già (LOGIN)
+        let user = await User.findOne({ googleId });
+
+        if (user) {
+            // ===> LOGIN
+            // Utente trovato! Genera un token di accesso standard.
+            const loginToken = generateToken(user); // La tua funzione generateToken(user)
+            
+            user.password = undefined; // Non inviare mai l'hash
+            return res.status(200).json({ token: loginToken, user });
+        }
+
+        // 5. Utente NON trovato (INIZIO REGISTRAZIONE)
+
+        // Controllo di sicurezza: l'email è già usata da un account non-google?
+        let existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+            return res.status(400).json({ 
+                message: `L'email ${email} è già registrata. Accedi con la tua password e collega l'account Google dal tuo profilo.` 
+            });
+        }
+        
+        // 6. Crea il payload per il token di registrazione temporaneo
+        const registrationPayload = {
+            googleId,
+            email,
+            name,
+            picture // Puoi aggiungere 'picture' se vuoi salvarla
+        };
+        
+        // Generiamo il token di registrazione (es. 15 min)
+        const registrationToken = generateRegistrationToken(registrationPayload); // La tua funzione
+        
+        // ===> REGISTRAZIONE PARZIALE
+        // Invia al client questo token temporaneo.
+        // Il client lo userà per completare la registrazione (Step 2).
+        return res.status(200).json({ registrationToken });
+
+    } catch (error) {
+        // Se la verifica fallisce (token scaduto, audience non valida, ecc.)
+        console.error("Errore verifica token Google:", error);
+        return res.status(401).json({ message: 'Token Google non valido o scaduto', error: error.message });
     }
 };
 
