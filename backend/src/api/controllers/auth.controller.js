@@ -178,7 +178,7 @@ exports.handleGoogleCallback = async (req, res) => {
 // nuova logica google
 // Logica per: POST /api/auth/google/token
 exports.handleGoogleToken = async (req, res) => {
-    // 1. Estrai il token (credential) inviato dal frontend
+    
     const { token } = req.body;
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -187,31 +187,30 @@ exports.handleGoogleToken = async (req, res) => {
     }
 
     try {
-        // 2. Verifica il token (credential) usando la libreria Google
+        // Verifica il token (credential) usando la libreria Google
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: process.env.GOOGLE_CLIENT_ID, // Specifica il Client ID
         });
 
-        // 3. Estrai i dati dell'utente dal token verificato
+        // Estrai i dati dell'utente dal token verificato
         const payload = ticket.getPayload();
         const { sub: googleId, email, name, picture } = payload;
 
-        // 4. Controlla se l'utente esiste già (LOGIN)
+        // Controlla se l'utente esiste già (LOGIN)
         let user = await User.findOne({ googleId });
 
         if (user) {
-            // ===> LOGIN
-            // Utente trovato! Genera un token di accesso standard.
+            // Utente trovato quindi genera un token di accesso standard.
             const loginToken = generateToken(user); // La tua funzione generateToken(user)
             
-            user.password = undefined; // Non inviare mai l'hash
+            user.password = undefined; 
             return res.status(200).json({ token: loginToken, user });
         }
 
-        // 5. Utente NON trovato (INIZIO REGISTRAZIONE)
+        // Utente NON trovato 
 
-        // Controllo di sicurezza: l'email è già usata da un account non-google?
+        // Controllo di sicurezza
         let existingEmail = await User.findOne({ email });
         if (existingEmail) {
             return res.status(400).json({ 
@@ -219,20 +218,17 @@ exports.handleGoogleToken = async (req, res) => {
             });
         }
         
-        // 6. Crea il payload per il token di registrazione temporaneo
+        // Crea il payload per il token di registrazione temporaneo
         const registrationPayload = {
             googleId,
             email,
             name,
-            picture // Puoi aggiungere 'picture' se vuoi salvarla
         };
         
-        // Generiamo il token di registrazione (es. 15 min)
+        // Generiamo il token di registrazione di 15 min
         const registrationToken = generateRegistrationToken(registrationPayload); // La tua funzione
         
-        // ===> REGISTRAZIONE PARZIALE
-        // Invia al client questo token temporaneo.
-        // Il client lo userà per completare la registrazione (Step 2).
+        // Invia al client questo token temporaneo per il completamento della registrazione
         return res.status(200).json({ registrationToken });
 
     } catch (error) {
