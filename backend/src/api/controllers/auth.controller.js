@@ -178,7 +178,7 @@ exports.handleGoogleCallback = async (req, res) => {
 // nuova logica google
 // Logica per: POST /api/auth/google/token
 exports.handleGoogleToken = async (req, res) => {
-    
+
     const { token } = req.body;
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -229,7 +229,7 @@ exports.handleGoogleToken = async (req, res) => {
         const registrationToken = generateRegistrationToken(registrationPayload); // La tua funzione
         
         // Invia al client questo token temporaneo per il completamento della registrazione
-        return res.status(200).json({ registrationToken });
+        return res.status(201).json({ registrationToken });
 
     } catch (error) {
         // Se la verifica fallisce (token scaduto, audience non valida, ecc.)
