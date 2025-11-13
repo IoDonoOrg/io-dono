@@ -53,14 +53,36 @@ exports.createDonation = async (req, res) => {
     }
 };
 
-// /api/donations/me
-// ottieni tutte le tue donazioni
-exports.getMyDonations = async (req, res) => {
+// /api/donations/me/available
+// ottieni tutte le tue donazioni available
+exports.getMyDonationsAvailable = async (req, res) => {
     try {
-        const donations = await Donation.find({ donorId: req.user._id }).sort({ createdAt: -1 }); // Ordina dalla più recente;
-        res.status(200).json(donations);
+        const donations = await Donation.find({ donorId: req.user._id, status: 'AVAILABLE' }).sort({ createdAt: -1 }); // Ordina dalla più recente;
+        return res.status(200).json(donations);
     } catch (error) {
-        res.status(500).json({ message: 'Errore del server', error: error.message });
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
+};
+
+// /api/donations/me/accepted
+// ottieni tutte le tue donazioni accepted
+exports.getMyDonationsAccepted = async (req, res) => {
+    try {
+        const donations = await Donation.find({ donorId: req.user._id, status: 'ACCEPTED' }).sort({ createdAt: -1 }); // Ordina dalla più recente;
+        return res.status(200).json(donations);
+    } catch (error) {
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
+};
+
+// /api/donations/me/completed
+// ottieni tutte le tue donazioni completed
+exports.getMyDonationsCompleted = async (req, res) => {
+    try {
+        const donations = await Donation.find({ donorId: req.user._id, status: 'COMPLETED' }).sort({ createdAt: -1 }); // Ordina dalla più recente;
+        return res.status(200).json(donations);
+    } catch (error) {
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
     }
 };
 

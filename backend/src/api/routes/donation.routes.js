@@ -15,13 +15,31 @@ router.post(
     donationController.createDonation
 );
 
-// GET /api/donations/me
+// GET /api/donations/me/available
 // Ottiene lo storico delle donazioni del donatore loggato
 router.get(
-    '/me',
+    '/me/available',
     isAuth,
     isDonor,
-    donationController.getMyDonations
+    donationController.getMyDonationsAvailable
+);
+
+// GET /api/donations/me/accepted
+// Ottiene lo storico delle donazioni del donatore loggato
+router.get(
+    '/me/accepted',
+    isAuth,
+    isDonor,
+    donationController.getMyDonationsAccepted
+);
+
+// GET /api/donations/me/completed
+// Ottiene lo storico delle donazioni del donatore loggato
+router.get(
+    '/me/completed',
+    isAuth,
+    isDonor,
+    donationController.getMyDonationsCompleted
 );
 
 // PUT /api/donations/:id 
