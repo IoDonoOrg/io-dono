@@ -262,60 +262,85 @@ exports.acceptDonation = async (req, res) => {
 // POST /api/donations/:id/complete 
 // Completa una donazione
 exports.completeDonation = async (req, res) => {
-    try{
-        const { id } = req.params; // L'ID della donazione dall'URL
+    let session = null; // per la transazione del db
+
+    try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+
+        const { id } = req.params;
+        const { evaluation } = req.body; 
         const associationId = req.user._id;
-         // 1. Controlla che l'ID sia un ID MongoDB valido
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ message: 'ID donazione non valido.' });
         }
 
-        // trova E Aggiorna la donazione in un colpo solo tipo trasazione.
+        
+        if (!evaluation || !evaluation.rating) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ message: 'Valutazione (rating) richiesta per completare.' });
+        }
+
+        // Aggiorna la Donazione
         const updatedDonation = await Donation.findOneAndUpdate(
-            { _id: id, status: 'ACCEPTED', associationId: associationId }, // condizioni di ricerca
             {
-                $set: {
-                    status: 'COMPLETED', // aggiorna lo stato
-                }
+                _id: id,
+                status: 'ACCEPTED',
+                associationId: associationId
             },
-            { new: true } // restituisce l'oggetto aggornato
+            { 
+                $set: { 
+                    status: 'COMPLETED',
+                    evaluation: evaluation 
+                } 
+            },
+            { new: true, session: session } // Passa la sessione
         );
 
-        // controllo se fallisce l'operazione
+        // Controlla se l'aggiornamento è fallito
         if (!updatedDonation) {
-            const donation = await Donation.findById(id);
+            await session.abortTransaction();
+            session.endSession();
+            const donation = await Donation.findById(id).session(session); 
             if (!donation) {
                 return res.status(404).json({ message: 'Donazione non trovata.' });
             }
-            // Controlli logici per un errore più chiaro
             if (donation.associationId.toString() !== associationId.toString()) {
                  return res.status(403).json({ message: 'Accesso negato: non sei l\'associazione che ha accettato questa donazione.' });
             }
-            if (donation.status === 'AVAILABLE') {
-                 return res.status(400).json({ message: 'Errore: questa donazione deve prima essere accettata.' });
+            if (donation.status !== 'ACCEPTED') {
+                 return res.status(400).json({ message: 'Errore: questa donazione non è nello stato corretto (deve essere ACCEPTED).' });
             }
-            if (donation.status === 'COMPLETED') {
-                return res.status(400).json({ message: 'Errore: questa donazione è già stata completata.' });
-            }
-            // Errore generico
             return res.status(400).json({ message: 'Impossibile completare la donazione.' });
         }
-
-        /* da capire come fare questa cosa 
+        
+        // Assegna punti al Donatore 
         await User.findByIdAndUpdate(
             updatedDonation.donorId,
-            { $inc: { solidarityPoints: 10 } }
+            { $inc: { solidarityPoints: 10 } }, // 10 sono un esempio
+            { session: session } 
         );
-        */
 
-        // invia la donazione aggiornata
+        // fai il commit
+        await session.commitTransaction();
+
+        // Invia la risposta
         return res.status(200).json(updatedDonation);
 
     } catch (error) {
-        res.status(500).json({ message: 'Errore del server', error: error.message });
+        // fai il 'rollback'
+        if (session) {
+            await session.abortTransaction();
+        }
+        return res.status(500).json({ message: 'Errore del server durante la transazione.', error: error.message });
+    } finally {
+        // chiude la sessione
+        if (session) {
+            session.endSession();
+        }
     }
-};
-
-exports.evaluateDonation = async (req, res) => {
-    res.status(501).json({ message: 'TODO: Valuta donazione' });
 };

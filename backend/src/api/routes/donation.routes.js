@@ -25,7 +25,7 @@ router.get(
 );
 
 // PUT /api/donations/:id 
-// Modifica una donazione (solo se 'AVAILABLE')
+// Modifica una donazione 
 router.put(
     '/:id',
     isAuth,
@@ -89,15 +89,6 @@ router.post(
     isAuth,
     isAssociation,
     donationController.completeDonation
-);
-
-// POST /api/donations/:id/evaluate 
-// Valuta una donazione
-router.post(
-    '/:id/evaluate',
-    isAuth,
-    isAssociation,
-    donationController.evaluateDonation
 );
 
 module.exports = router;
