@@ -223,7 +223,7 @@ exports.handleGoogleToken = async (req, res) => {
             const loginToken = generateToken(user); // La tua funzione generateToken(user)
             
             user.password = undefined; 
-            return res.status(200).json({ token: loginToken, user });
+            return res.status(200).json({ loginToken: loginToken, user });
         }
 
         // Utente NON trovato 
