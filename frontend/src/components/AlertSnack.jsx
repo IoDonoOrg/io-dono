@@ -7,7 +7,7 @@ function AlertSnack({ children, severity, open, onClose }) {
     if (reason === "clickaway") {
       return;
     }
-    // chiama onClose solo è stato fornito nei proprs
+    // chiama onClose solo se è stato fornito nei proprs
     onClose?.();
   };
 

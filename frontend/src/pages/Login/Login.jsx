@@ -8,7 +8,9 @@ import PasswordField from "src/components/PasswordField";
 import { GoogleLogin } from "@react-oauth/google";
 import { validateEmail, validatePassword } from "src/utils/validation";
 import { localLogin } from "src/services/loginService";
-import AlertSnack from "../../components/AlertSnack";
+import AlertSnack from "src/components/AlertSnack";
+import { useGoogleAuth } from "src/hooks/useGoogleAuth";
+import { useAlert } from "src/hooks/useAlert";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -17,17 +19,14 @@ function Login() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const [alertInfo, setAlertInfo] = useState({
-    open: false,
-    message: "",
-    severity: "success", // 'success', 'error', 'warning', 'info'
-  });
-
   const navigate = useNavigate();
 
-  const handleAlertClose = () => {
-    setAlertInfo((prev) => ({ ...prev, open: false }));
-  };
+  // hook customizzati
+  const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
+  const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
+    alertSuccess,
+    alertError
+  );
 
   const handleSubmit = async (event) => {
     // non ricarica la pagina appena accade un evento (il comportamento di default)
@@ -47,7 +46,7 @@ function Login() {
     setPasswordError(passwordResult);
 
     // una stringa vuota dentro una if è considerata "false"
-    // controlla se almeno uno dei due non è vuoto
+    // controlla se almeno uno dei due non è vuoto altrimenti ritorna
     if (emailResult || passwordResult) return;
 
     // console.log("La form è valida:", { email, password });
@@ -57,41 +56,39 @@ function Login() {
     // altrimenti ritorna il messaggio d'errore passato successivamente ad un alert
     const loginResult = await localLogin(email, password);
 
+    // se la stringa loginResult non è vuota --> c'è stato un errore
+    // --> notifica l'untente tramite un alert e ritorna
     if (loginResult) {
-      setAlertInfo({
-        open: true,
-        message: loginResult,
-        severity: "error",
-      });
+      // se siamo qua allora il backend non ha autenticato l'utente
+      // --> notifica l'utente
+      console.log("error");
+      alertError(loginResult);
       return;
+    } else {
+      // se siamo qua allora la login è andata a buon fine --> notifica l'utente
+      // e lo reindirizza alla home
+      alertSuccess("Accesso effettuato con successo!");
+
+      // TODO: setuppare la localstorage e globaluser
+      // localStorage.setItem("token", loginResult.token);
+
+      setTimeout(() => {
+        // replace: true sostituice /login nel browser
+        // così che l'utente non potrò tornare al login
+        // cliccando la freccia del browser
+        navigate("/", { replace: true });
+      }, 1000); // introduce un ritardo di 1000ms (1s) per poter osservare la bellezza dell'alert
     }
-
-    setAlertInfo({
-      open: true,
-      message: "Accesso effettuato con successo!",
-      severity: "success",
-    });
-
-    // TODO: setuppare la localstorage e globaluser
-    // localStorage.setItem("token", loginResult.token);
-
-    // introduce un ritardo di 1000ms (1s) per poter osservare la belezza dell'alert
-    setTimeout(() => {
-      // replace: true sostituice /login nel browser
-      // così che l'utente non potrò tornare al login
-      // cliccando la freccia del browser
-      navigate("/", { replace: true });
-    }, 1000);
   };
 
   return (
     <>
       <AlertSnack
-        severity={alertInfo.severity}
-        open={alertInfo.open}
-        onClose={handleAlertClose}
+        severity={alertData.severity}
+        open={alertData.open}
+        onClose={hideAlert}
       >
-        {alertInfo.message}
+        {alertData.message}
       </AlertSnack>
       <div className="min-h-screen flex items-center justify-center">
         <Container
@@ -108,8 +105,9 @@ function Login() {
                 label="Email *"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                error={!!emailError} // '!!' converts the string to a boolean
-                helperText={emailError} // Displays the error message
+                // !! converta la stringa in un booleano
+                error={!!emailError}
+                helperText={emailError}
               />
               <PasswordField
                 passwordValue={password}
@@ -135,10 +133,8 @@ function Login() {
           </Box>
           <Box className="flex flex-col justify-center items-center gap-y-4">
             <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                console.log(credentialResponse);
-              }}
-              onError={() => console.log("Login failed")}
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
             />
             <Link className="" to="/registration" component={RouterLink}>
               Non hai ancora un account?
