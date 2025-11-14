@@ -3,7 +3,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-/*
+/* 
 
 {
     "email": "test-utente-3@example.com",
