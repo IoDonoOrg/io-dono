@@ -24,16 +24,34 @@ require('dotenv').config();
 
 */
 
-// --- Funzione Helper per creare Token ---
+// Funzioni Helper per creare Token 
 const generateToken = (user) => {
     // Creiamo un token JWT che contiene l'ID e il ruolo dell'utente
     // Scadrà in 3 ore (puoi cambiarlo)
+    const payload = {
+        id: user._id,
+        role: user.role, 
+        type: 'login'
+    };
     return jwt.sign(
-        { userId: user._id, role: user.role },
+        payload,
         process.env.JWT_SECRET,
         { expiresIn: '3h' }
     );
 };
+
+function generateRegistrationToken(googlePayload) {
+    // googlePayload contiene { googleId, email, name, picture } e in più il tipo
+    const payload = {
+        ...googlePayload, 
+        type: 'registration' 
+    };
+    return jwt.sign(
+        payload, // Inseriamo tutti i dati di Google
+        process.env.JWT_SECRET,
+        { expiresIn: '15m' } // Scadenza molto breve!
+    );
+}
 
 // --- Registrazione Locale (Email/Password) ---
 // Logica per: POST /api/auth/register
@@ -226,7 +244,7 @@ exports.handleGoogleToken = async (req, res) => {
         };
         
         // Generiamo il token di registrazione di 15 min
-        const registrationToken = generateRegistrationToken(registrationPayload); // La tua funzione
+        const registrationToken = generateRegistrationToken(registrationPayload); 
         
         // Invia al client questo token temporaneo per il completamento della registrazione
         return res.status(201).json({ registrationToken });
@@ -238,18 +256,18 @@ exports.handleGoogleToken = async (req, res) => {
     }
 };
 
-// --- Logica Google (Step 2 - Registrazione) ---
+// Logica registrazione Google 
 // Logica per: POST /api/auth/register-google
 exports.registerGoogle = async (req, res) => {
 
-    // 1. Estrai il token di registrazione dall'header
+    // estrae il token di registrazione dall'header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'Token di registrazione mancante o non valido.' });
     }
     const registrationToken = authHeader.split(' ')[1];
 
-    // 2. Estrai i nuovi dati dal body
+    // estrae i nuovi dati dal body
     const { role, phoneNumber, address, profile } = req.body;
 
     // Controllo di sicurezza: assicurati che i nuovi campi ci siano
@@ -258,19 +276,24 @@ exports.registerGoogle = async (req, res) => {
     }
     
     try {
-        // 3. Verifica il token di registrazione
+        // Verifica il token di registrazione
         const decodedPayload = jwt.verify(registrationToken, process.env.JWT_SECRET);
         
-        // 4. Estrai i dati di Google DAL TOKEN
+        // verifica che sia un token di "registrazione"
+        if (decodedPayload.type !== 'registration') {
+            return res.status(401).json({ message: 'Token non valido per questa operazione.' });
+        }
+
+        // estrai i dati di Google DAL TOKEN
         const { googleId, email, name } = decodedPayload;
 
-        // 5. Controlla di nuovo se l'utente esiste (controllo di sicurezza)
+        // controlla di nuovo se l'utente esiste (controllo di sicurezza)
         let existingUser = await User.findOne({ $or: [{ googleId }, { email }] });
         if (existingUser) {
             return res.status(400).json({ message: 'Questo utente o email esiste già.' });
         }
 
-        // 6. Crea il nuovo utente (combinando i dati del token e del body)
+        // crea il nuovo utente (combinando i dati del token e del body)
         const newUser = new User({
             googleId,
             email,
@@ -281,13 +304,13 @@ exports.registerGoogle = async (req, res) => {
             profile        // Dal body
         });
 
-        // 7. Salva l'utente
+        // Salva l'utente
         await newUser.save();
 
-        // 8. Crea un VERO token di login (valido 3 ore)
+        // Crea un VERO token di login 
         const loginToken = generateToken(newUser);
         
-        newUser.password = undefined; // Pulizia
+        newUser.password = undefined; 
         res.status(201).json({ token: loginToken, user: newUser });
 
     } catch (error) {
