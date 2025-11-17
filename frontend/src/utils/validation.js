@@ -49,4 +49,46 @@ const validatePassword = (password) => {
   return result;
 }
 
-export { validateEmail, validatePassword }
+const confirmPasswords = (password, confirmPassword) => {
+  if (!confirmPassword)
+    return "Confermare la password è obligatorio"
+  return (password === confirmPassword) ? "" : "Le password non coincidono";
+}
+
+const normalizeName = (name) => {
+  const trimmed = name.trim().toLowerCase();
+
+  if (!trimmed) return "";
+
+  // splita la stringa sugli spazi e rende maiuscola ogni lettera che segue subito dopo uno spazio
+  return trimmed
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+
+// aspetta un nome già normalizzato come parametro
+const validateName = (normalizedName, lastName) => {
+  let result = "";
+  const prefix = lastName ? "Il cognome" : "Il nome";
+
+  if (!normalizedName)
+    result = `${prefix} è obbligatorio`;
+
+  else if (normalizedName.length < 2)
+    result = `${prefix} è troppo corto`;
+
+  else if (normalizedName.length > 20)
+    result = `${prefix} è troppo lungo`;
+
+  else if (/\d/.test(normalizedName))
+    result = `${prefix} non può contenere numeri`;
+
+  else if (/[^A-Za-zÀ-ÖØ-öø-ÿ'\s-]/.test(normalizedName))
+    result = `${prefix} non può contenere caratteri speciali`;
+
+  return result;
+};
+
+export { validateName, normalizeName, validateEmail, validatePassword, confirmPasswords }

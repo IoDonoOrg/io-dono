@@ -3,7 +3,13 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import { useState } from "react";
 
-function PasswordField({ passwordValue, onPasswordChange, error, errorText }) {
+function PasswordField({
+  passwordValue,
+  onPasswordChange,
+  error,
+  errorText,
+  label,
+}) {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -15,7 +21,7 @@ function PasswordField({ passwordValue, onPasswordChange, error, errorText }) {
   return (
     <TextField
       fullWidth
-      label="Password *"
+      label={label}
       type={showPassword ? "text" : "password"}
       value={passwordValue}
       onChange={(event) => onPasswordChange(event.target.value)}

@@ -114,6 +114,7 @@ function Login() {
                 onPasswordChange={setPassword}
                 error={!!passwordError}
                 errorText={passwordError}
+                label="Password *"
               />
               <Button
                 color="primary"
