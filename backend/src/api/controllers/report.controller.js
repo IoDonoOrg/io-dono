@@ -41,7 +41,7 @@ exports.createReport = async (req, res) => {
 // Le mie segnalazioni (USER)
 exports.getMyOpenReports = async (req, res) => {
     try {
-        const reports = await Report.find({ reporterId: req.user._id })
+        const reports = await Report.find({ reporterId: req.user._id, status: 'OPEN' })
             .populate('reportedUserId', 'name') // dei join per evitare di avere id
             .populate('donationId', 'title')
             .sort({ createdAt: -1 });
@@ -59,7 +59,7 @@ exports.getMyOpenReports = async (req, res) => {
 // Le mie segnalazioni (USER)
 exports.getMyClosedReports = async (req, res) => {
     try {
-        const reports = await Report.find({ reporterId: req.user._id })
+        const reports = await Report.find({ reporterId: req.user._id, status: 'CLOSED' })
             .populate('reportedUserId', 'name') // dei join per evitare di avere id
             .populate('donationId', 'title')
             .sort({ createdAt: -1 });
@@ -77,9 +77,9 @@ exports.getMyClosedReports = async (req, res) => {
 // Ottieni tutte le segnalazioni (ADMIN)
 exports.getAllOpenReports = async (req, res) => {
     try {
-        // Filtri opzionali 
+        
         const filter = {};
-        if (req.query.status) filter.status = req.query.status;
+        filter.status = 'OPEN';
         if (req.query.type) filter.type = req.query.type;
 
         const reports = await Report.find(filter)
@@ -103,9 +103,9 @@ exports.getAllOpenReports = async (req, res) => {
 // Ottieni tutte le segnalazioni (ADMIN)
 exports.getAllClosedReports = async (req, res) => {
     try {
-        // Filtri opzionali 
+
         const filter = {};
-        if (req.query.status) filter.status = req.query.status;
+        filter.status = 'CLOSED';
         if (req.query.type) filter.type = req.query.type;
 
         const reports = await Report.find(filter)

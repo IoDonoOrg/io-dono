@@ -33,7 +33,7 @@ const reportSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED'], // da capire se tenere IN_PROGRESS
+        enum: ['OPEN', 'IN_PROGRESS', 'CLOSED'], // da capire se tenere IN_PROGRESS(molto probabilmente sparirà)
         default: 'OPEN'
     }
 }, {
