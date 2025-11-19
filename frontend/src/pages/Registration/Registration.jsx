@@ -12,11 +12,13 @@ import {
   validateEmail,
   validateName,
   validatePassword,
+  validatePhone,
 } from "src/utils/validation";
 import { localLogin } from "src/services/loginService";
 import AlertSnack from "src/components/AlertSnack";
 import { useGoogleAuth } from "src/hooks/useGoogleAuth";
 import { useAlert } from "src/hooks/useAlert";
+import PhoneField from "src/components/PhoneField";
 
 function Registration() {
   const [name, setName] = useState("");
@@ -35,8 +37,6 @@ function Registration() {
   const [phoneError, setPhoneError] = useState("");
   const [addressError, setAddressError] = useState("");
 
-  const navigate = useNavigate();
-
   // hook customizzati
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
   const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
@@ -44,6 +44,7 @@ function Registration() {
     alertError
   );
 
+  // TODO: far diventare handleSubmit uno hook con possibilità di riutilizzo nella login
   const handleSubmit = async (event) => {
     // non ricarica la pagina appena accade un evento (il comportamento di default)
     // così sfruttiamo il client side loading di React
@@ -72,12 +73,16 @@ function Registration() {
     const confirmPasswordResult = confirmPasswords(password, confirmPassword);
     setConfirmPasswordError(confirmPasswordResult);
 
+    const phoneResult = validatePhone(phone);
+    setPhoneError(phoneResult);
+
     if (
       nameResult ||
       lastNameResult ||
       emailResult ||
       passwordResult ||
-      confirmPasswordResult
+      confirmPasswordResult ||
+      phoneResult
     )
       return;
 
@@ -137,20 +142,24 @@ function Registration() {
               <TextField
                 fullWidth
                 label="Nome *"
+                placeholder="Mario"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 // !! converta la stringa in un booleano
                 error={!!nameError}
                 helperText={nameError}
+                size="small"
               />
               <TextField
                 fullWidth
                 label="Cognome *"
+                placeholder="Rossi"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 // !! converta la stringa in un booleano
                 error={!!lastNameError}
                 helperText={lastNameError}
+                size="small"
               />
               <TextField
                 fullWidth
@@ -160,30 +169,43 @@ function Registration() {
                 // !! converta la stringa in un booleano
                 error={!!emailError}
                 helperText={emailError}
+                size="small"
               />
-              <PasswordField
-                passwordValue={password}
-                onPasswordChange={setPassword}
-                error={!!passwordError}
-                errorText={passwordError}
-                label="Password *"
-              />
-              <PasswordField
-                passwordValue={confirmPassword}
-                onPasswordChange={setConfirmPassword}
-                error={!!confirmPasswordError}
-                errorText={confirmPasswordError}
-                label="Conferma password *"
-              />
-              <TextField
+              <Box className="flex flex-col gap-2">
+                <PasswordField
+                  passwordValue={password}
+                  onPasswordChange={setPassword}
+                  error={!!passwordError}
+                  errorText={passwordError}
+                  label="Password *"
+                  size="small"
+                />
+                <PasswordField
+                  passwordValue={confirmPassword}
+                  onPasswordChange={setConfirmPassword}
+                  error={!!confirmPasswordError}
+                  errorText={confirmPasswordError}
+                  label="Conferma password *"
+                  size="small"
+                />
+              </Box>
+              {/* <TextField
                 fullWidth
                 label="Numero di telefono *"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 error={!!phoneError}
                 helperText={phoneError}
+                size="small"
+              /> */}
+              <PhoneField
+                value={phone}
+                onChange={(e) => setPhone(e)}
+                error={!!phoneError}
+                helperText={phoneError}
+                size="small"
+                label="Cellulare *"
               />
-
               <TextField
                 fullWidth
                 label="Indirizzo *"
@@ -191,6 +213,7 @@ function Registration() {
                 onChange={(e) => setAddress(e.target.value)}
                 error={!!addressError}
                 helperText={addressError}
+                size="small"
               />
               <Button
                 color="primary"
@@ -213,9 +236,6 @@ function Registration() {
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
             />
-            <Link className="" to="/registration" component={RouterLink}>
-              Non hai ancora un account?
-            </Link>
           </Box>
         </Container>
       </div>

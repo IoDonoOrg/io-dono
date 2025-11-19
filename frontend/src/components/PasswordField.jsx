@@ -9,6 +9,7 @@ function PasswordField({
   error,
   errorText,
   label,
+  size,
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -27,6 +28,7 @@ function PasswordField({
       onChange={(event) => onPasswordChange(event.target.value)}
       error={error}
       helperText={errorText}
+      size={size}
       slotProps={{
         input: {
           endAdornment: (

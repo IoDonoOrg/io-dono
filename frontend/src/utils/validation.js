@@ -91,4 +91,32 @@ const validateName = (normalizedName, lastName) => {
   return result;
 };
 
-export { validateName, normalizeName, validateEmail, validatePassword, confirmPasswords }
+const unformatPhoneNumber = (phoneNumber) => {
+  // tolgo gli spazi
+  let unformattedPhoneNumber = phoneNumber?.split(" ").join("");
+
+  // aggiungo anche il prefisso
+  unformattedPhoneNumber = "+39" + unformattedPhoneNumber;
+
+  return unformattedPhoneNumber;
+}
+
+const validatePhone = (phone) => {
+  let result = "";
+
+  const unformattedPhoneNumber = unformatPhoneNumber(phone);
+  const formatted_length = 10;
+
+  console.log(unformattedPhoneNumber);
+
+  if (!unformattedPhoneNumber)
+    result = "Cellulare è obligatorio";
+
+  // +3 per considerare anche "+39"
+  else if (unformattedPhoneNumber.length != formatted_length + 3)
+    result = "Formato non valido";
+
+  return result;
+}
+
+export { validateName, normalizeName, validateEmail, validatePassword, confirmPasswords, validatePhone, unformatPhoneNumber }
