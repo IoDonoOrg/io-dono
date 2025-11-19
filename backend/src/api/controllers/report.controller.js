@@ -35,7 +35,7 @@ exports.createReport = async (req, res) => {
     }
 };
 
-// GET /api/reports
+// GET /api/reports/me/admin
 // Ottieni tutte le segnalazioni (ADMIN)
 exports.getAllReports = async (req, res) => {
     try {
@@ -88,7 +88,7 @@ exports.updateReportStatus = async (req, res) => {
 
         const report = await Report.findByIdAndUpdate(
             req.params.id,
-            { status },
+            { status }, // da capire se tenere IN_PROGRESS in caso basta mettere RESOLVED visto che da resolved non può passare a open 
             { new: true, runValidators: true }
         );
 

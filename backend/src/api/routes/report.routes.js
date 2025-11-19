@@ -20,10 +20,10 @@ router.get(
     reportController.getMyReports
 );
 
-// GET /api/reports 
+// GET /api/reports/me/admin
 // Vedi tutte le segnalazioni (Dashboard Admin)
 router.get(
-    '/', 
+    '/me/admin', 
     isAuth, 
     isAdmin, 
     reportController.getAllReports
