@@ -12,21 +12,38 @@ router.post(
     reportController.createReport
 );
 
-// GET /api/reports/me 
+// GET /api/reports/me/open
 //  Vedi le tue segnalazioni inviate
 router.get(
-    '/me', 
+    '/me/open', 
     isAuth, 
-    reportController.getMyReports
+    reportController.getMyOpenReports
 );
 
-// GET /api/reports/me/admin
+// GET /api/reports/me/closed
+//  Vedi le tue segnalazioni inviate
+router.get(
+    '/me/closed', 
+    isAuth, 
+    reportController.getMyClosedReports
+);
+
+// GET /api/reports/me/admin/open
 // Vedi tutte le segnalazioni (Dashboard Admin)
 router.get(
-    '/me/admin', 
+    '/admin/open', 
     isAuth, 
     isAdmin, 
-    reportController.getAllReports
+    reportController.getAllClosedOpenReports
+);
+
+// GET /api/reports/me/admin/closed
+// Vedi tutte le segnalazioni (Dashboard Admin)
+router.get(
+    '/admin/closed', 
+    isAuth, 
+    isAdmin, 
+    reportController.getAllOpenReports
 );
 
 // PATCH /api/reports/:id/status

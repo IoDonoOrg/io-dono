@@ -35,9 +35,47 @@ exports.createReport = async (req, res) => {
     }
 };
 
-// GET /api/reports/me/admin
+// PROSSIME 4 FUNZIONI DA MODIFICARE 
+
+// GET /api/reports/me/open
+// Le mie segnalazioni (USER)
+exports.getMyOpenReports = async (req, res) => {
+    try {
+        const reports = await Report.find({ reporterId: req.user._id })
+            .populate('reportedUserId', 'name') // dei join per evitare di avere id
+            .populate('donationId', 'title')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            status: 'success',
+            data: { reports }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Errore nel recupero delle tue segnalazioni', error: error.message });
+    }
+};
+
+// GET /api/reports/me/closed
+// Le mie segnalazioni (USER)
+exports.getMyClosedReports = async (req, res) => {
+    try {
+        const reports = await Report.find({ reporterId: req.user._id })
+            .populate('reportedUserId', 'name') // dei join per evitare di avere id
+            .populate('donationId', 'title')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            status: 'success',
+            data: { reports }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Errore nel recupero delle tue segnalazioni', error: error.message });
+    }
+};
+
+// GET /api/reports/admin/open
 // Ottieni tutte le segnalazioni (ADMIN)
-exports.getAllReports = async (req, res) => {
+exports.getAllOpenReports = async (req, res) => {
     try {
         // Filtri opzionali 
         const filter = {};
@@ -46,7 +84,7 @@ exports.getAllReports = async (req, res) => {
 
         const reports = await Report.find(filter)
             .populate('reporterId', 'name email')      
-            .populate('reportedUserId', 'name email')   
+            .populate('reportedUserId', 'name email')   // dei join per evitare di avere id 
             .populate('donationId', 'title')           
             .sort({ createdAt: -1 });
 
@@ -61,24 +99,33 @@ exports.getAllReports = async (req, res) => {
     }
 };
 
-// GET /api/reports/me 
-// Le mie segnalazioni (USER)
-exports.getMyReports = async (req, res) => {
+// GET /api/reports/admin/closed
+// Ottieni tutte le segnalazioni (ADMIN)
+exports.getAllClosedReports = async (req, res) => {
     try {
-        const reports = await Report.find({ reporterId: req.user._id })
-            .populate('reportedUserId', 'name')
-            .populate('donationId', 'title')
+        // Filtri opzionali 
+        const filter = {};
+        if (req.query.status) filter.status = req.query.status;
+        if (req.query.type) filter.type = req.query.type;
+
+        const reports = await Report.find(filter)
+            .populate('reporterId', 'name email')      
+            .populate('reportedUserId', 'name email')   // dei join per evitare di avere id 
+            .populate('donationId', 'title')           
             .sort({ createdAt: -1 });
 
         res.status(200).json({
             status: 'success',
+            results: reports.length,
             data: { reports }
         });
+
     } catch (error) {
-        res.status(500).json({ message: 'Errore nel recupero delle tue segnalazioni', error: error.message });
+        res.status(500).json({ message: 'Errore nel recupero delle segnalazioni', error: error.message });
     }
 };
 
+// DA QUI APPOSTO
 
 // PATCH /api/reports/:id/status
 // Aggiorna stato (ADMIN)
