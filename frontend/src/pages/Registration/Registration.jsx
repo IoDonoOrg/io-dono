@@ -19,6 +19,7 @@ import AlertSnack from "src/components/AlertSnack";
 import { useGoogleAuth } from "src/hooks/useGoogleAuth";
 import { useAlert } from "src/hooks/useAlert";
 import PhoneField from "src/components/PhoneField";
+import AddressForm from "src/components/AddressForm";
 
 function Registration() {
   const [name, setName] = useState("");
@@ -206,7 +207,7 @@ function Registration() {
                 size="small"
                 label="Cellulare *"
               />
-              <TextField
+              {/* <TextField
                 fullWidth
                 label="Indirizzo *"
                 value={address}
@@ -214,7 +215,8 @@ function Registration() {
                 error={!!addressError}
                 helperText={addressError}
                 size="small"
-              />
+              /> */}
+              <AddressForm />
               <Button
                 color="primary"
                 type="submit"
