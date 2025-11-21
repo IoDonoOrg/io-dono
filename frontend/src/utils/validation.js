@@ -6,7 +6,7 @@ const validateEmail = (email) => {
 
   // controlla se la mail e vuota
   if (!email)
-    result = "L'email è obbligatoria";
+    result = "L'email è obligatoria";
 
   // \S+ controlla se la parte utente (prima della @) non sia vuota
   // @ controlla se la stringa contiene una @
@@ -27,7 +27,7 @@ const validatePassword = (password) => {
 
   // controlla se la password e vuota
   if (!password)
-    result = "La password è obbligatoria";
+    result = "La password è obligatoria";
 
   // controlla se la lunghezza della password è almeno 8 caratteri
   else if (password.length < 8)
@@ -74,7 +74,7 @@ const validateName = (normalizedName, lastName) => {
   const prefix = lastName ? "Il cognome" : "Il nome";
 
   if (!normalizedName)
-    result = `${prefix} è obbligatorio`;
+    result = `${prefix} è obligatorio`;
 
   else if (normalizedName.length < 2)
     result = `${prefix} è troppo corto`;
@@ -82,11 +82,8 @@ const validateName = (normalizedName, lastName) => {
   else if (normalizedName.length > 20)
     result = `${prefix} è troppo lungo`;
 
-  else if (/\d/.test(normalizedName))
-    result = `${prefix} non può contenere numeri`;
-
   else if (/[^A-Za-zÀ-ÖØ-öø-ÿ'\s-]/.test(normalizedName))
-    result = `${prefix} non può contenere caratteri speciali`;
+    result = `${prefix} può contenere solo lettere`;
 
   return result;
 };
@@ -96,7 +93,7 @@ const unformatPhoneNumber = (phoneNumber) => {
   let unformattedPhoneNumber = phoneNumber?.split(" ").join("");
 
   // aggiungo anche il prefisso
-  unformattedPhoneNumber = "+39" + unformattedPhoneNumber;
+  unformattedPhoneNumber = `+39${unformattedPhoneNumber}`;
 
   return unformattedPhoneNumber;
 }

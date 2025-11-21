@@ -1,7 +1,7 @@
 import { TextField, Button, Container, Box, Link } from "@mui/material";
 
 import { useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 
 import PasswordField from "src/components/PasswordField";
 
@@ -14,12 +14,14 @@ import {
   validatePassword,
   validatePhone,
 } from "src/utils/validation";
-import { localLogin } from "src/services/loginService";
 import AlertSnack from "src/components/AlertSnack";
 import { useGoogleAuth } from "src/hooks/useGoogleAuth";
 import { useAlert } from "src/hooks/useAlert";
 import PhoneField from "src/components/PhoneField";
-import AddressForm from "src/components/AddressForm";
+import AddressFields from "src/components/AddressFields";
+import { useAddress } from "src/hooks/useAddress";
+import OpeningHoursField from "src/components/OpeningHoursField";
+import UserTypeDialog from "src/components/UserTypeDialog";
 
 function Registration() {
   const [name, setName] = useState("");
@@ -28,7 +30,6 @@ function Registration() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
 
   const [nameError, setNameError] = useState("");
   const [lastNameError, setLastNameError] = useState("");
@@ -36,7 +37,6 @@ function Registration() {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [phoneError, setPhoneError] = useState("");
-  const [addressError, setAddressError] = useState("");
 
   // hook customizzati
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
@@ -44,6 +44,8 @@ function Registration() {
     alertSuccess,
     alertError
   );
+  const { addressData, addressErrors, handleAddressChange, validateAddress } =
+    useAddress();
 
   // TODO: far diventare handleSubmit uno hook con possibilità di riutilizzo nella login
   const handleSubmit = async (event) => {
@@ -77,13 +79,16 @@ function Registration() {
     const phoneResult = validatePhone(phone);
     setPhoneError(phoneResult);
 
+    const addressResult = validateAddress();
+
     if (
       nameResult ||
       lastNameResult ||
       emailResult ||
       passwordResult ||
       confirmPasswordResult ||
-      phoneResult
+      phoneResult ||
+      addressResult
     )
       return;
 
@@ -121,6 +126,7 @@ function Registration() {
 
   return (
     <>
+      <UserTypeDialog></UserTypeDialog>
       <AlertSnack
         severity={alertData.severity}
         open={alertData.open}
@@ -140,31 +146,32 @@ function Registration() {
               </h1>
             </div>
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-              <TextField
-                fullWidth
-                label="Nome *"
-                placeholder="Mario"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                // !! converta la stringa in un booleano
-                error={!!nameError}
-                helperText={nameError}
-                size="small"
-              />
-              <TextField
-                fullWidth
-                label="Cognome *"
-                placeholder="Rossi"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                // !! converta la stringa in un booleano
-                error={!!lastNameError}
-                helperText={lastNameError}
-                size="small"
-              />
+              <Box className="flex gap-2 pb-2 pt-2">
+                <TextField
+                  fullWidth
+                  label="Nome *"
+                  placeholder="Mario"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  error={!!nameError}
+                  helperText={nameError}
+                  size="small"
+                />
+                <TextField
+                  fullWidth
+                  label="Cognome *"
+                  placeholder="Rossi"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  error={!!lastNameError}
+                  helperText={lastNameError}
+                  size="small"
+                />
+              </Box>
               <TextField
                 fullWidth
                 label="Email *"
+                placeholder="mariorossi@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 // !! converta la stringa in un booleano
@@ -172,7 +179,7 @@ function Registration() {
                 helperText={emailError}
                 size="small"
               />
-              <Box className="flex flex-col gap-2">
+              <Box className="flex flex-row gap-2 pt-2 pb-2">
                 <PasswordField
                   passwordValue={password}
                   onPasswordChange={setPassword}
@@ -190,15 +197,6 @@ function Registration() {
                   size="small"
                 />
               </Box>
-              {/* <TextField
-                fullWidth
-                label="Numero di telefono *"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                error={!!phoneError}
-                helperText={phoneError}
-                size="small"
-              /> */}
               <PhoneField
                 value={phone}
                 onChange={(e) => setPhone(e)}
@@ -207,16 +205,15 @@ function Registration() {
                 size="small"
                 label="Cellulare *"
               />
-              {/* <TextField
-                fullWidth
-                label="Indirizzo *"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                error={!!addressError}
-                helperText={addressError}
-                size="small"
-              /> */}
-              <AddressForm />
+              {/* Via del Brennero, 6, Trento, TN */}
+              <AddressFields
+                formData={addressData}
+                handleChange={handleAddressChange}
+                formErrors={addressErrors}
+              >
+                Indirizzo
+              </AddressFields>
+              <OpeningHoursField>L'orario di apertura</OpeningHoursField>
               <Button
                 color="primary"
                 type="submit"
@@ -227,7 +224,6 @@ function Registration() {
               </Button>
             </form>
           </Box>
-
           <Box className="flex items-center gap-4 my-6">
             <div className="flex-1 border-t border-gray-300"></div>
             <span className="text-gray-600 text-sm">oppure</span>
@@ -238,6 +234,9 @@ function Registration() {
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
             />
+            <Link className="" to="/login" component={RouterLink}>
+              Hai già un account?
+            </Link>
           </Box>
         </Container>
       </div>

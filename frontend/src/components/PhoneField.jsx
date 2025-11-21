@@ -1,29 +1,28 @@
 import { TextField, InputAdornment } from "@mui/material";
 
 function PhoneField({ value, onChange, error, helperText, size, label }) {
+  const UNPREFIXED_NUMBER_LEN = 10;
+
   const handleChange = (event) => {
     // Toglie dal campo tutto ciò che non è un numero
-    const rawValue = event.target.value.replace(/\D/g, "");
+    const rawDigits = event.target.value.replace(/\D/g, "");
 
     // Il campo non accetterà più di 10 cifre
-    if (rawValue.length > 10) return;
+    if (rawDigits.length > UNPREFIXED_NUMBER_LEN) return;
 
-    let formattedValue = rawValue;
+    let formattedDigits = rawDigits;
 
     // automaticamente aggiungi spazi per aiutare l'utente
     // se ci sono più di 6 cifre --> aggiunge 2 spazi
-    if (rawValue.length > 6) {
-      formattedValue = `
-        ${rawValue.slice(0, 3)} ${rawValue.slice(3,6)} ${rawValue.slice(6)}`
-      ;
+    if (rawDigits.length > 6) {
+      formattedDigits = `${rawDigits.slice(0, 3)} ${rawDigits.slice(3, 6)} ${rawDigits.slice(6)}`;
     }
     // se ci sono più di 3 cifre ma meno di 6 --> aggiungo uno spazio solo
-    else if (rawValue.length > 3) {
-      formattedValue = `${rawValue.slice(0, 3)} ${rawValue.slice(3)}`;
+    else if (rawDigits.length > 3) {
+      formattedDigits = `${rawDigits.slice(0, 3)} ${rawDigits.slice(3)}`;
     }
 
-    // 4. Send the formatted string back to the parent
-    onChange(formattedValue);
+    onChange(formattedDigits);
   };
 
   return (
