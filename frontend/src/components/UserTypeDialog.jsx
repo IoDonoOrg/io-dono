@@ -25,11 +25,18 @@ import {
 function UserTypeDialog({ onSubmit }) {
   const [open, setOpen] = useState(true);
 
+  // stato che rappresenta il tipo di utenza
+  // USER_CATEGORY è definito dentro file utils/validation.js
+  // e rappresenta tutti possibili tipi che un utente può assumere
   const [userType, setUserType] = useState({
     category: USER_CATEGORY.NO_CATEGORY,
     donatorType: DONATOR_TYPE.NO_TYPE,
   });
 
+  // stato per errori rilevati
+  // 2 tipi di error:
+  // userCategory - l'utente non ha selezionato una categoria (donatore / associazione)
+  // donatorType - l'utente non ha selezionato il tipo di donatore (privato / attività commerciale)
   const [error, setError] = useState({
     userCategory: "",
     donatorType: "",
@@ -56,6 +63,8 @@ function UserTypeDialog({ onSubmit }) {
     e.preventDefault();
     // console.log(userType);
 
+    // chiama la funzione definita dentro utils/validation
+    // per dettagli guardare la definizone
     const valdiationError = validateUserType(userType);
 
     setError({
@@ -63,8 +72,10 @@ function UserTypeDialog({ onSubmit }) {
       donatorType: valdiationError.donatorType,
     });
 
+    // se c'è stato rilevato almeno un error -> non chiude il dialogo
     if (!!valdiationError.userCategory || !!valdiationError.donatorType) return;
 
+    // se non ci sono error -> chiude il dialogo
     setOpen(false);
     onSubmit(userType);
   };
