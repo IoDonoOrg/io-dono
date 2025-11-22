@@ -38,6 +38,8 @@ function Registration() {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [phoneError, setPhoneError] = useState("");
 
+  const [selectedUserType, setSelectedUserType] = useState(null);
+
   // hook customizzati
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
   const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
@@ -46,6 +48,11 @@ function Registration() {
   );
   const { addressData, addressErrors, handleAddressChange, validateAddress } =
     useAddress();
+
+  const handleDialogSubmit = (userType) => {
+    console.log(userType);
+    setSelectedUserType(userType);
+  };
 
   // TODO: far diventare handleSubmit uno hook con possibilità di riutilizzo nella login
   const handleSubmit = async (event) => {
@@ -126,7 +133,7 @@ function Registration() {
 
   return (
     <>
-      <UserTypeDialog></UserTypeDialog>
+      <UserTypeDialog onSubmit={handleDialogSubmit} />
       <AlertSnack
         severity={alertData.severity}
         open={alertData.open}

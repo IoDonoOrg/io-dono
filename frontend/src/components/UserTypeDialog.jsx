@@ -16,69 +16,57 @@ import {
   TextField,
 } from "@mui/material";
 import { useState } from "react";
+import {
+  USER_CATEGORY,
+  DONATOR_TYPE,
+  validateUserType,
+} from "src/utils/validation";
 
-function UserTypeDialog() {
+function UserTypeDialog({ onSubmit }) {
   const [open, setOpen] = useState(true);
-
-  const USER_CATEGORY = {
-    DONATOR: "donator",
-    ASSOCIATION: "association",
-    NO_CATEGORY: "",
-  };
-
-  const DONATOR_TYPE = {
-    PRIVATE: "private",
-    COMMERCIAL: "commercial",
-    NO_TYPE: "",
-  };
-
-  // const [userCategory, setUserCategory] = useState(USER_CATEGORY.NO_CATEGORY);
-  // const [donatorType, setDonatorType] = useState(DONATOR_TYPE.NO_TYPE);
 
   const [userType, setUserType] = useState({
     category: USER_CATEGORY.NO_CATEGORY,
     donatorType: DONATOR_TYPE.NO_TYPE,
   });
 
-  const [userCategoryError, setUserCategoryError] = useState("");
-  const [donatorTypeError, setDonatorTypeError] = useState("");
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const [error, setError] = useState({
+    userCategory: "",
+    donatorType: "",
+  });
 
   const handleUserCategory = (e) => {
     let value = e.target.value;
     setUserType({ ...userType, category: value });
-
-    // sanity check
-    // if (value != USER_CATEGORY.DONATOR)
-    //   setUserType({ ...userType, donatorType: DONATOR_TYPE.NO_TYPE });
-    setUserCategoryError("");
+    setError({ ...error, userCategory: "" });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log(userType);
+  const handleDonatorType = (e) => {
+    let value = e.target.value;
 
-    let isValid = true;
+    setUserType({
+      ...userType,
+      donatorType: value,
+    });
 
-    if (userType.category === USER_CATEGORY.NO_CATEGORY) {
-      setUserCategoryError("Selezionare il tipo di utenza è obbligatorio");
-      isValid = false;
-    }
+    setError({ ...error, donatorType: "" });
+  };
 
-    if (
-      userType.category === USER_CATEGORY.DONATOR &&
-      userType.donatorType === DONATOR_TYPE.NO_TYPE
-    ) {
-      setDonatorTypeError("Selezionare il tipo di donatore è obbligatorio");
-      isValid = false;
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // console.log(userType);
 
-    if (isValid) {
-      handleClose();
-    }
+    const valdiationError = validateUserType(userType);
+
+    setError({
+      userCategory: valdiationError.userCategory,
+      donatorType: valdiationError.donatorType,
+    });
+
+    if (!!valdiationError.userCategory || !!valdiationError.donatorType) return;
+
+    setOpen(false);
+    onSubmit(userType);
   };
 
   return (
@@ -86,12 +74,12 @@ function UserTypeDialog() {
       <DialogTitle color="red">Aspetta!</DialogTitle>
       <DialogContent>
         <Box className="flex flex-col gap-4">
-          <DialogContentText color="black" fontSize={16}>
+          <DialogContentText color="black" fontSize={17}>
             Prima di procedere con la registrazione devi specificare il tipo di
             utente che rappresenti
           </DialogContentText>
           <form onSubmit={handleSubmit} id="user-type-form">
-            <FormControl error={!!userCategoryError}>
+            <FormControl error={!!error.userCategory}>
               <FormLabel id="radio-user-type">Rappresenti un..</FormLabel>
               <RadioGroup
                 aria-labelledby="radio-user-type"
@@ -110,16 +98,11 @@ function UserTypeDialog() {
                     select
                     label="Tipo del donatore"
                     value={userType.donatorType}
-                    onChange={(e) =>
-                      setUserType({
-                        ...userType,
-                        donatorType: e.target.value,
-                      })
-                    }
+                    onChange={handleDonatorType}
                     fullWidth
                     size="small"
-                    error={!!donatorTypeError}
-                    helperText={donatorTypeError}
+                    error={!!error.donatorType}
+                    helperText={error.donatorType}
                   >
                     <MenuItem value={DONATOR_TYPE.PRIVATE}>
                       Privato (Un individuo)
@@ -135,8 +118,8 @@ function UserTypeDialog() {
                   label="Associazione"
                 />
               </RadioGroup>
-              {!!userCategoryError && (
-                <FormHelperText>{userCategoryError}</FormHelperText>
+              {!!error.userCategory && (
+                <FormHelperText>{error.userCategory}</FormHelperText>
               )}
             </FormControl>
           </form>

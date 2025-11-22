@@ -1,3 +1,16 @@
+const USER_CATEGORY = {
+  DONATOR: "donator",
+  ASSOCIATION: "association",
+  NO_CATEGORY: "",
+};
+
+const DONATOR_TYPE = {
+  PRIVATE: "private",
+  COMMERCIAL: "commercial",
+  NO_TYPE: "",
+};
+
+
 // controlla la validita dell'email
 // restituisce una stringa che rappresenta il messaggio d'errore
 // se la stringa e vuota --> non ci sono errori
@@ -116,4 +129,22 @@ const validatePhone = (phone) => {
   return result;
 }
 
-export { validateName, normalizeName, validateEmail, validatePassword, confirmPasswords, validatePhone, unformatPhoneNumber }
+const validateUserType = (user) => {
+  let error = {
+    userCategory: "",
+    donatorType: ""
+  };
+
+  if (user.category === USER_CATEGORY.NO_CATEGORY)
+    error.userCategory = "Selezionare il tipo di utenza è obbligatorio";
+
+  if (
+    user.category === USER_CATEGORY.DONATOR &&
+    user.donatorType === DONATOR_TYPE.NO_TYPE
+  )
+    error.donatorType = "Selezionare il tipo di donatore è obbligatorio";
+
+  return error;
+}
+
+export { USER_CATEGORY, DONATOR_TYPE, validateName, normalizeName, validateEmail, validatePassword, confirmPasswords, validatePhone, unformatPhoneNumber, validateUserType }
