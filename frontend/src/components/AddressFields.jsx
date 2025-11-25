@@ -2,7 +2,7 @@ import { TextField, Grid, MenuItem } from "@mui/material";
 
 const PROVINCES = ["TN"];
 
-function AddressFields({ children, formData, handleChange, formErrors }) {
+function AddressFields({ children, addressData, addressErrors, handleChange }) {
   return (
     <>
       <div>
@@ -14,12 +14,12 @@ function AddressFields({ children, formData, handleChange, formErrors }) {
             fullWidth
             label="Via / Piazza *"
             name="street"
-            value={formData.street}
+            value={addressData.street}
             onChange={handleChange}
             placeholder="Via Roma"
             size="small"
-            error={!!formErrors.streetError}
-            helperText={formErrors.streetError}
+            error={!!addressErrors.street}
+            helperText={addressErrors.street}
           />
         </Grid>
         <Grid item size={2}>
@@ -27,12 +27,12 @@ function AddressFields({ children, formData, handleChange, formErrors }) {
             fullWidth
             label="N. *"
             name="civicNumber"
-            value={formData.civicNumber}
+            value={addressData.civicNumber}
             onChange={handleChange}
             placeholder="10"
             size="small"
-            error={!!formErrors.civicNumberError}
-            helperText={formErrors.civicNumberError}
+            error={!!addressErrors.civicNumber}
+            helperText={addressErrors.civicNumber}
           />
         </Grid>
         <Grid item size={10}>
@@ -40,12 +40,12 @@ function AddressFields({ children, formData, handleChange, formErrors }) {
             fullWidth
             label="Comune *"
             name="comune"
-            value={formData.comune}
+            value={addressData.comune}
             onChange={handleChange}
             placeholder="Trento"
             size="small"
-            error={!!formErrors.comuneError}
-            helperText={formErrors.comuneError}
+            error={!!addressErrors.comune}
+            helperText={addressErrors.comune}
           />
         </Grid>
         <Grid item size={2}>
@@ -57,9 +57,9 @@ function AddressFields({ children, formData, handleChange, formErrors }) {
             name="province"
             onChange={handleChange}
             size="small"
-            value={formData.province}
-            error={!!formErrors.provinceError}
-            helperText={formErrors.provinceError}
+            value={addressData.province}
+            error={!!addressErrors.province}
+            helperText={addressErrors.province}
           >
             {PROVINCES.map((prov) => (
               <MenuItem key={prov} value={prov}>

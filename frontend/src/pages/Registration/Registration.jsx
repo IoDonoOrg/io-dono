@@ -1,19 +1,10 @@
 import { TextField, Button, Container, Box, Link } from "@mui/material";
 
-import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import PasswordField from "src/components/PasswordField";
 
 import { GoogleLogin } from "@react-oauth/google";
-import {
-  confirmPasswords,
-  normalizeName,
-  validateEmail,
-  validateName,
-  validatePassword,
-  validatePhone,
-} from "src/utils/validation";
 import AlertSnack from "src/components/AlertSnack";
 import { useGoogleAuth } from "src/hooks/useGoogleAuth";
 import { useAlert } from "src/hooks/useAlert";
@@ -22,114 +13,26 @@ import AddressFields from "src/components/AddressFields";
 import { useAddress } from "src/hooks/useAddress";
 import OpeningHoursField from "src/components/OpeningHoursField";
 import UserTypeDialog from "src/components/UserTypeDialog";
+import { useRegistration } from "src/hooks/useRegistration";
+import { USER_CATEGORY } from "src/utils/validation";
 
 function Registration() {
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [phone, setPhone] = useState("");
+  const {
+    formData,
+    formErrors,
+    handleInputChange,
+    handleSubmit,
+    handleDialogSubmit,
+  } = useRegistration();
 
-  const [nameError, setNameError] = useState("");
-  const [lastNameError, setLastNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-
-  const [selectedUserType, setSelectedUserType] = useState(null);
-
-  // hook customizzati
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
+
   const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
     alertSuccess,
     alertError
   );
-  const { addressData, addressErrors, handleAddressChange, validateAddress } =
-    useAddress();
 
-  const handleDialogSubmit = (userType) => {
-    console.log(userType);
-    setSelectedUserType(userType);
-  };
-
-  // TODO: far diventare handleSubmit uno hook con possibilità di riutilizzo nella login
-  const handleSubmit = async (event) => {
-    // non ricarica la pagina appena accade un evento (il comportamento di default)
-    // così sfruttiamo il client side loading di React
-    event.preventDefault();
-
-    // normalizza il nome prima di validarlo
-    const normalizedName = normalizeName(name);
-    setName(normalizedName);
-
-    const nameResult = validateName(normalizedName, false);
-    setNameError(nameResult);
-
-    // normalizza il cognome prima di validarlo
-    const normalizedLastName = normalizeName(lastName);
-    setLastName(normalizedLastName);
-
-    const lastNameResult = validateName(normalizedLastName, true);
-    setLastNameError(lastNameResult);
-
-    const emailResult = validateEmail(email);
-    setEmailError(emailResult);
-
-    const passwordResult = validatePassword(password);
-    setPasswordError(passwordResult);
-
-    const confirmPasswordResult = confirmPasswords(password, confirmPassword);
-    setConfirmPasswordError(confirmPasswordResult);
-
-    const phoneResult = validatePhone(phone);
-    setPhoneError(phoneResult);
-
-    const addressResult = validateAddress();
-
-    if (
-      nameResult ||
-      lastNameResult ||
-      emailResult ||
-      passwordResult ||
-      confirmPasswordResult ||
-      phoneResult ||
-      addressResult
-    )
-      return;
-
-    // console.log("La form è valida:", { email, password });
-
-    // la funzione che fa la chiamata al backend fornendo gli la mail e password
-    // se login è stato effettuato con successo --> rittorna una stringa vuota
-    // altrimenti ritorna il messaggio d'errore passato successivamente ad un alert
-    // const loginResult = await localLogin(email, password);
-
-    // se la stringa loginResult non è vuota --> c'è stato un errore
-    // --> notifica l'untente tramite un alert e ritorna
-    // if (loginResult) {
-    //   // se siamo qua allora il backend non ha autenticato l'utente
-    //   // --> notifica l'utente
-    //   console.log("error");
-    //   alertError(loginResult);
-    //   return;
-    // } else {
-    //   // se siamo qua allora la login è andata a buon fine --> notifica l'utente
-    //   // e lo reindirizza alla home
-    //   alertSuccess("Accesso effettuato con successo!");
-
-    //   // TODO: setuppare la localstorage e globaluser
-    //   // localStorage.setItem("token", loginResult.token);
-
-    //   setTimeout(() => {
-    //     // replace: true sostituice /login nel browser
-    //     // così che l'utente non potrò tornare al login
-    //     // cliccando la freccia del browser
-    //     navigate("/", { replace: true });
-    //   }, 1000); // introduce un ritardo di 1000ms (1s) per poter osservare la bellezza dell'alert
-    // }
-  };
+  const { addressData, addressErrors, handleAddressChange } = useAddress();
 
   return (
     <>
@@ -158,20 +61,22 @@ function Registration() {
                   fullWidth
                   label="Nome *"
                   placeholder="Mario"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  error={!!nameError}
-                  helperText={nameError}
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                   size="small"
                 />
                 <TextField
                   fullWidth
                   label="Cognome *"
                   placeholder="Rossi"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  error={!!lastNameError}
-                  helperText={lastNameError}
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
+                  error={!!formErrors.lastName}
+                  helperText={formErrors.lastName}
                   size="small"
                 />
               </Box>
@@ -179,48 +84,50 @@ function Registration() {
                 fullWidth
                 label="Email *"
                 placeholder="mariorossi@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                // !! converta la stringa in un booleano
-                error={!!emailError}
-                helperText={emailError}
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                error={!!formErrors.email}
+                helperText={formErrors.email}
                 size="small"
               />
               <Box className="flex flex-row gap-2 pt-2 pb-2">
                 <PasswordField
-                  passwordValue={password}
-                  onPasswordChange={setPassword}
-                  error={!!passwordError}
-                  errorText={passwordError}
+                  passwordValue={formData.password}
+                  onPasswordChange={(val) => handleInputChange("password", val)}
+                  error={!!formErrors.password}
+                  errorText={formErrors.password}
                   label="Password *"
                   size="small"
                 />
                 <PasswordField
-                  passwordValue={confirmPassword}
-                  onPasswordChange={setConfirmPassword}
-                  error={!!confirmPasswordError}
-                  errorText={confirmPasswordError}
+                  passwordValue={formData.confirmPassword}
+                  onPasswordChange={(val) =>
+                    handleInputChange("confirmPassword", val)
+                  }
+                  error={!!formErrors.confirmPassword}
+                  errorText={formErrors.confirmPassword}
                   label="Conferma password *"
                   size="small"
                 />
               </Box>
               <PhoneField
-                value={phone}
-                onChange={(e) => setPhone(e)}
-                error={!!phoneError}
-                helperText={phoneError}
+                value={formData.phone}
+                onChange={(val) => handleInputChange("phone", val)}
+                error={!!formErrors.phone}
+                helperText={formErrors.phone}
                 size="small"
                 label="Cellulare *"
               />
-              {/* Via del Brennero, 6, Trento, TN */}
               <AddressFields
-                formData={addressData}
+                addressData={addressData}
+                addressErrors={addressErrors}
                 handleChange={handleAddressChange}
-                formErrors={addressErrors}
               >
                 Indirizzo
               </AddressFields>
-              <OpeningHoursField>L'orario di apertura</OpeningHoursField>
+              {formData.user.category === USER_CATEGORY.ASSOCIATION && (
+                <OpeningHoursField>L'orario di apertura</OpeningHoursField>
+              )}
               <Button
                 color="primary"
                 type="submit"

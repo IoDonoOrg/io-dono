@@ -1,7 +1,28 @@
 import { TextField, InputAdornment } from "@mui/material";
 
-function PhoneField({ value, onChange, error, helperText, size, label }) {
+function PhoneField({ value, onChange, size, label, error, helperText }) {
+  // lunghezza di numero di telefono senza prefisso e senza spazi
   const UNPREFIXED_NUMBER_LEN = 10;
+
+  // la funzione che formatta il campo "Cellulare", aggiungendo degli spazi
+  const formatPhone = (rawDigits) => {
+    let formattedDigits = rawDigits;
+
+    // automaticamente aggiungi spazi per aiutare l'utente
+    // se ci sono più di 6 cifre --> aggiunge 2 spazi (dopo la 4 e 7 cifra)
+    if (rawDigits.length > 6) {
+      formattedDigits = `${rawDigits.slice(0, 3)} ${rawDigits.slice(
+        3,
+        6
+      )} ${rawDigits.slice(6)}`;
+    }
+    // se ci sono più di 3 cifre ma meno di 6 --> aggiungo uno spazio solo (dopo la 4 cifra)
+    else if (rawDigits.length > 3) {
+      formattedDigits = `${rawDigits.slice(0, 3)} ${rawDigits.slice(3)}`;
+    }
+
+    return formattedDigits;
+  };
 
   const handleChange = (event) => {
     // Toglie dal campo tutto ciò che non è un numero
@@ -10,17 +31,8 @@ function PhoneField({ value, onChange, error, helperText, size, label }) {
     // Il campo non accetterà più di 10 cifre
     if (rawDigits.length > UNPREFIXED_NUMBER_LEN) return;
 
-    let formattedDigits = rawDigits;
-
-    // automaticamente aggiungi spazi per aiutare l'utente
-    // se ci sono più di 6 cifre --> aggiunge 2 spazi
-    if (rawDigits.length > 6) {
-      formattedDigits = `${rawDigits.slice(0, 3)} ${rawDigits.slice(3, 6)} ${rawDigits.slice(6)}`;
-    }
-    // se ci sono più di 3 cifre ma meno di 6 --> aggiungo uno spazio solo
-    else if (rawDigits.length > 3) {
-      formattedDigits = `${rawDigits.slice(0, 3)} ${rawDigits.slice(3)}`;
-    }
+    // Aiuta l'utente aggiungendo spazi
+    const formattedDigits = formatPhone(rawDigits);
 
     onChange(formattedDigits);
   };

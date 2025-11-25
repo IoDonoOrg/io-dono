@@ -1,12 +1,12 @@
 // un oggetto tipo enum che rappresenta tutte possibili categorie di un utente
-const USER_CATEGORY = {
+export const USER_CATEGORY = {
   DONATOR: "donator",
   ASSOCIATION: "association",
   NO_CATEGORY: "",
 };
 
 // un oggetto tipo enum che rappresenta tutte possibili tipi di donatori
-const DONATOR_TYPE = {
+export const DONATOR_TYPE = {
   PRIVATE: "private",
   COMMERCIAL: "commercial",
   NO_TYPE: "",
@@ -16,12 +16,12 @@ const DONATOR_TYPE = {
 // controlla la validita dell'email
 // restituisce una stringa che rappresenta il messaggio d'errore
 // se la stringa e vuota --> non ci sono errori
-const validateEmail = (email) => {
+export const validateEmail = (email) => {
   let result = "";
 
   // controlla se la mail e vuota
   if (!email)
-    result = "L'email è obligatoria";
+    result = "L'email è obbligatoria";
 
   // \S+ controlla se la parte utente (prima della @) non sia vuota
   // @ controlla se la stringa contiene una @
@@ -37,12 +37,12 @@ const validateEmail = (email) => {
 // controlla la validita della password
 // restituisce una stringa che rappresenta il messaggio d'errore
 // se la stringa e vuota --> non ci sono errori
-const validatePassword = (password) => {
+export const validatePassword = (password) => {
   let result = "";
 
   // controlla se la password e vuota
   if (!password)
-    result = "La password è obligatoria";
+    result = "La password è obbligatoria";
 
   // controlla se la lunghezza della password è almeno 8 caratteri
   else if (password.length < 8)
@@ -64,13 +64,13 @@ const validatePassword = (password) => {
   return result;
 }
 
-const confirmPasswords = (password, confirmPassword) => {
+export const confirmPasswords = (password, confirmPassword) => {
   if (!confirmPassword)
-    return "Confermare la password è obligatorio"
+    return "Confermare la password è obbligatorio"
   return (password === confirmPassword) ? "" : "Le password non coincidono";
 }
 
-const normalizeName = (name) => {
+export const normalizeName = (name) => {
   const trimmed = name.trim().toLowerCase();
 
   if (!trimmed) return "";
@@ -84,12 +84,12 @@ const normalizeName = (name) => {
 
 
 // aspetta un nome già normalizzato come parametro
-const validateName = (normalizedName, lastName) => {
+export const validateName = (normalizedName, lastName) => {
   let result = "";
   const prefix = lastName ? "Il cognome" : "Il nome";
 
   if (!normalizedName)
-    result = `${prefix} è obligatorio`;
+    result = `${prefix} è obbligatorio`;
 
   else if (normalizedName.length < 2)
     result = `${prefix} è troppo corto`;
@@ -103,7 +103,7 @@ const validateName = (normalizedName, lastName) => {
   return result;
 };
 
-const unformatPhoneNumber = (phoneNumber) => {
+export const unformatPhoneNumber = (phoneNumber) => {
   // tolgo gli spazi
   let unformattedPhoneNumber = phoneNumber?.split(" ").join("");
 
@@ -113,16 +113,16 @@ const unformatPhoneNumber = (phoneNumber) => {
   return unformattedPhoneNumber;
 }
 
-const validatePhone = (phone) => {
+export const validatePhone = (phone) => {
   let result = "";
 
   const unformattedPhoneNumber = unformatPhoneNumber(phone);
   const formatted_length = 10;
 
-  console.log(unformattedPhoneNumber);
+  // console.log(unformattedPhoneNumber);
 
   if (!unformattedPhoneNumber)
-    result = "Cellulare è obligatorio";
+    result = "Cellulare è obbligatorio";
 
   // +3 per considerare anche "+39"
   else if (unformattedPhoneNumber.length != formatted_length + 3)
@@ -131,8 +131,29 @@ const validatePhone = (phone) => {
   return result;
 }
 
+export const validateAddress = (addressData) => {
+  let addressErrors = {
+    street: "",
+    civicNumber: "",
+    comune: "",
+    province: "",
+  };
+
+  if (!addressData.street)
+    addressErrors.street = "La via è obbligatoria";
+
+  if (!addressData.civicNumber)
+    addressErrors.civicNumber = "Civico è obbligatorio";
+
+  if (!addressData.comune)
+    addressErrors.comune = "Il comune è obbligatorio";
+
+  return addressErrors;
+};
+
+
 // la funzione che valida il tipo di utenza
-const validateUserType = (user) => {
+export const validateUserType = (user) => {
   // l'oggetto che contiene 2 possibili tipi di errori
   // userCategory -> l'utente non ha selezionato una categoria
   // donatorType -> l'utente ha selezionato la categoria donatore, 
@@ -155,5 +176,3 @@ const validateUserType = (user) => {
   // se un campo contiene stringa vuota -> non ci sono errori
   return error;
 }
-
-export { USER_CATEGORY, DONATOR_TYPE, validateName, normalizeName, validateEmail, validatePassword, confirmPasswords, validatePhone, unformatPhoneNumber, validateUserType }

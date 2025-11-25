@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { validateAddress } from "src/utils/validation";
 
 export function useAddress() {
   const [addressData, setAddressData] = useState({
@@ -8,12 +9,11 @@ export function useAddress() {
     province: "TN",
   });
 
-  // 1. State keeps the "Error" suffix
   const [addressErrors, setAddressErrors] = useState({
-    streetError: "",
-    civicNumberError: "",
-    comuneError: "",
-    provinceError: "",
+    street: "",
+    civicNumber: "",
+    comune: "",
+    province: "",
   });
 
   const handleAddressChange = (e) => {
@@ -25,31 +25,23 @@ export function useAddress() {
     }
   };
 
-  const validateAddress = () => {
-    const newErrors = {};
-    let isValid = true;
+  const isAddressValid = () => {
+    const errors = validateAddress(addressData);
 
-    if (!addressData.street.trim()) {
-      newErrors.streetError = "Obbligatorio";
-      isValid = false;
-    }
-    if (!addressData.civicNumber.trim()) {
-      newErrors.civicNumberError = "!";
-      isValid = false;
-    }
-    if (!addressData.comune.trim()) {
-      newErrors.comuneError = "Obbligatorio";
-      isValid = false;
-    }
+    setAddressErrors(errors);
 
-    setAddressErrors(newErrors);
-    return isValid;
+    console.log(errors)
+
+    if (!!errors.street || !!errors.civicNumber || !!errors.comune || !!errors.province)
+      return false;
+    else
+      return true;
   };
 
   return {
     addressData,
     addressErrors,
     handleAddressChange,
-    validateAddress,
+    isAddressValid,
   };
 }
