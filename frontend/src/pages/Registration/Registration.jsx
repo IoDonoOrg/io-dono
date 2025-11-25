@@ -132,7 +132,12 @@ function Registration() {
                 errors={formErrors.address}
               />
               {formData.user.category === USER_CATEGORY.ASSOCIATION && (
-                <OpeningHoursField>L'orario di apertura</OpeningHoursField>
+                <OpeningHoursField
+                  value={formData.openingHours}
+                  errors={formErrors.openingHours}
+                  fieldName="L'orario di apertura"
+                  onChange={(val) => handleInputChange("openingHours", val)}
+                />
               )}
               <Button
                 color="primary"

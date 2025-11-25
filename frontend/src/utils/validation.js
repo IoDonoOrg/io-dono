@@ -176,3 +176,21 @@ export const validateUserType = (user) => {
   // se un campo contiene stringa vuota -> non ci sono errori
   return error;
 }
+
+export const validateOpeningHours = (openingHours) => {
+  let errors = {
+    start: "",
+    end: ""
+  }
+
+  if (!openingHours.start) errors.start = "Orario richiesto";
+  if (!openingHours.end) errors.end = "Orario richiesto";
+
+  if (!errors.start && !errors.end) {
+    if (openingHours.start >= openingHours.end) {
+      errors.start = "Deve essere prima della chiusura";
+    }
+  }
+
+  return errors;
+}

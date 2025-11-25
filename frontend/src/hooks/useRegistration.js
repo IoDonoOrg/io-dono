@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { confirmPasswords, DONATOR_TYPE, normalizeName, USER_CATEGORY, validateAddress, validateEmail, validateName, validatePassword, validatePhone } from "src/utils/validation";
+import { confirmPasswords, DONATOR_TYPE, normalizeName, USER_CATEGORY, validateAddress, validateEmail, validateName, validateOpeningHours, validatePassword, validatePhone } from "src/utils/validation";
 
 export const useRegistration = () => {
-  // address field è un componente speciale, perché gestisce i propri stati / errori
-  // attraverso un hook customizzato useAddress, quindi non fa parte di formData o formErrors
   const [formData, setFormData] = useState({
     name: "",
     lastName: "",
@@ -11,12 +9,19 @@ export const useRegistration = () => {
     password: "",
     confirmPassword: "",
     phone: "",
+
     address: {
       street: "",
       civicNumber: "",
       comune: "",
       province: "TN",
     },
+
+    openingHours: {
+      start: "09:00",
+      end: "18:00",
+    },
+
     user: {
       category: USER_CATEGORY.NO_CATEGORY,
       donatorType: DONATOR_TYPE.NO_TYPE,
@@ -37,6 +42,10 @@ export const useRegistration = () => {
       civicNumber: "",
       comune: "",
       province: "",
+    },
+    openingHours: {
+      start: "",
+      end: ""
     }
   });
 
@@ -75,7 +84,8 @@ export const useRegistration = () => {
         formData.confirmPassword
       ),
       phone: validatePhone(formData.phone),
-      address: validateAddress(formData.address)
+      address: validateAddress(formData.address),
+      openingHours: validateOpeningHours(formData.openingHours)
     };
 
     setFormErrors(detectedErrors);
