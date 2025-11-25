@@ -36,6 +36,7 @@ function OpeningHoursField({ children }) {
             maxTime={endTime}
             format="HH:mm"
             onError={(newError) => setStartError(newError)}
+            size="small"
             slotProps={{
               textField: {
                 helperText: getErrorMessage(startError),
@@ -51,6 +52,7 @@ function OpeningHoursField({ children }) {
             minTime={startTime}
             format="HH:mm"
             onError={(newError) => setEndError(newError)}
+            size="small"
             slotProps={{
               textField: {
                 helperText: getErrorMessage(endError),

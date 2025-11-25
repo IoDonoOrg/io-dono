@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { confirmPasswords, DONATOR_TYPE, normalizeName, USER_CATEGORY, validateEmail, validateName, validatePassword, validatePhone } from "src/utils/validation";
+import { confirmPasswords, DONATOR_TYPE, normalizeName, USER_CATEGORY, validateAddress, validateEmail, validateName, validatePassword, validatePhone } from "src/utils/validation";
 
 export const useRegistration = () => {
   // address field è un componente speciale, perché gestisce i propri stati / errori
@@ -11,6 +11,12 @@ export const useRegistration = () => {
     password: "",
     confirmPassword: "",
     phone: "",
+    address: {
+      street: "",
+      civicNumber: "",
+      comune: "",
+      province: "TN",
+    },
     user: {
       category: USER_CATEGORY.NO_CATEGORY,
       donatorType: DONATOR_TYPE.NO_TYPE,
@@ -26,6 +32,12 @@ export const useRegistration = () => {
     password: "",
     confirmPassword: "",
     phone: "",
+    address: {
+      street: "",
+      civicNumber: "",
+      comune: "",
+      province: "",
+    }
   });
 
   // la funzione che passa su i dati dal componente-figlio UserTypeDialog
@@ -63,6 +75,7 @@ export const useRegistration = () => {
         formData.confirmPassword
       ),
       phone: validatePhone(formData.phone),
+      address: validateAddress(formData.address)
     };
 
     setFormErrors(detectedErrors);
@@ -76,10 +89,7 @@ export const useRegistration = () => {
       (error) => error !== ""
     );
 
-    // TODO
-    const addressErrors = isAddressValid();
-
-    if (hasErrors || !addressErrors) return;
+    if (hasErrors) return;
 
     // console.log("La form è valida:", { email, password });
 

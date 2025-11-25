@@ -81,39 +81,55 @@ function UserTypeDialog({ onSubmit }) {
   };
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)}>
+    <Dialog open={open} disableEscapeKeyDown maxWidth="xs">
       <DialogTitle color="red">Aspetta!</DialogTitle>
       <DialogContent>
         <Box className="flex flex-col gap-4">
-          <DialogContentText color="black" fontSize={17}>
+          <DialogContentText color="textPrimary" fontSize={17}>
             Prima di procedere con la registrazione devi specificare il tipo di
             utente che rappresenti
           </DialogContentText>
           <form onSubmit={handleSubmit} id="user-type-form">
             <FormControl error={!!error.userCategory}>
-              <FormLabel id="radio-user-type">Rappresenti un..</FormLabel>
+              <FormLabel id="radio-user-type" className="mb-3">
+                Rappresenti un..
+              </FormLabel>
               <RadioGroup
                 aria-labelledby="radio-user-type"
                 defaultValue="female"
                 name="radio-buttons-group"
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-1"
                 onChange={handleUserCategory}
               >
                 <FormControlLabel
                   value={USER_CATEGORY.DONATOR}
                   control={<Radio />}
-                  label="Donatore privato"
+                  label="Donatore"
                 />
                 {userType.category === USER_CATEGORY.DONATOR && (
                   <TextField
                     select
-                    label="Tipo del donatore"
+                    label="Tipo"
                     value={userType.donatorType}
                     onChange={handleDonatorType}
                     fullWidth
                     size="small"
                     error={!!error.donatorType}
                     helperText={error.donatorType}
+                    slotProps={{
+                      select: {
+                        MenuProps: {
+                          anchorOrigin: {
+                            vertical: "bottom",
+                            horizontal: "left",
+                          },
+                          transformOrigin: {
+                            vertical: "top",
+                            horizontal: "left",
+                          },
+                        },
+                      },
+                    }}
                   >
                     <MenuItem value={DONATOR_TYPE.PRIVATE}>
                       Privato (Un individuo)

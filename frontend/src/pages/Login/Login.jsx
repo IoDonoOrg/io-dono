@@ -1,9 +1,16 @@
-import { TextField, Button, Container, Box, Link } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Container,
+  Box,
+  Link,
+  Typography,
+} from "@mui/material";
 
 import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
-import PasswordField from "src/components/PasswordField";
+import PasswordField from "src/components/form/PasswordField";
 
 import { GoogleLogin } from "@react-oauth/google";
 import { validateEmail, validatePassword } from "src/utils/validation";
@@ -96,9 +103,14 @@ function Login() {
           className="bg-white p-8 border-2 border-gray-100/35 rounded-lg shadow-md/15"
         >
           <Box>
-            <div>
-              <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
-            </div>
+            <Typography
+              className="text-center"
+              variant="h5"
+              gutterBottom
+              fontWeight="bold"
+            >
+              Login
+            </Typography>
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
               <TextField
                 fullWidth

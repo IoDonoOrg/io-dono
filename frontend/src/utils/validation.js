@@ -143,7 +143,7 @@ export const validateAddress = (addressData) => {
     addressErrors.street = "La via è obbligatoria";
 
   if (!addressData.civicNumber)
-    addressErrors.civicNumber = "Civico è obbligatorio";
+    addressErrors.civicNumber = "Obbligatorio";
 
   if (!addressData.comune)
     addressErrors.comune = "Il comune è obbligatorio";
