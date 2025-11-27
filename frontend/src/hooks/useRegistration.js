@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { localRegistration } from "src/services/registrationService";
 import { confirmPasswords, DONATOR_TYPE, normalizeName, USER_CATEGORY, validateAddress, validateEmail, validateName, validateOpeningHours, validatePassword, validatePhone } from "src/utils/validation";
 
-export const useRegistration = () => {
+export const useRegistration = (alertSuccess, alertError) => {
   const [formData, setFormData] = useState({
     name: "",
     lastName: "",
@@ -56,17 +58,23 @@ export const useRegistration = () => {
     console.log(userType);
   };
 
+  const navigate = useNavigate();
+
   // la funzione che gestisce submit
   const handleSubmit = async (event) => {
     // non ricarica la pagina appena accade un evento (il comportamento di default)
     // così sfruttiamo il client side loading di React
     event.preventDefault();
 
-    console.log(formData.user);
+    // console.log(formData.user);
 
     // normalizza il nome / cognome prima di validarlo
     const normalizedName = normalizeName(formData.name);
     const normalizedLastName = normalizeName(formData.lastName);
+
+    const isPrivateDonator =
+      formData.user.category === USER_CATEGORY.DONATOR &&
+      formData.user.donatorType === DONATOR_TYPE.PRIVATE;
 
     setFormData({
       ...formData,
@@ -76,7 +84,9 @@ export const useRegistration = () => {
 
     const detectedErrors = {
       name: validateName(normalizedName, false),
-      lastName: validateName(normalizedLastName, true),
+      // se l'utente è un donatore privato -> controlla il congome
+      // altrimenti non valiada il campo
+      lastName: isPrivateDonator ? validateName(normalizedLastName, true) : "",
       email: validateEmail(formData.email),
       password: validatePassword(formData.password),
       confirmPassword: confirmPasswords(
@@ -90,47 +100,46 @@ export const useRegistration = () => {
 
     setFormErrors(detectedErrors);
 
-    // scorre ogni campo
-    // se almeno uno contiene una stringa non vuota --> hasErrors diventa true
+    const hasErrors = checkFormErrors(detectedErrors);
 
-    // .values() transforma l'oggeto detectedErrors in un array
-    // .some() ritorna true se almeno un elemento soddisfa la condizone
-    const hasErrors = Object.values(detectedErrors).some(
-      (error) => error !== ""
-    );
+    if (hasErrors) {
+      console.log("Errore", detectedErrors);
+      return;
+    }
 
-    if (hasErrors) return;
+    // console.log("La form è valida ", formData);
 
-    // console.log("La form è valida:", { email, password });
+    // restituisce una stringa vuota se non ci sono errori nel backend
+    // altrimenti restituisce una stringa d'errore
+    const result = await localRegistration(formData);
 
-    // la funzione che fa la chiamata al backend fornendo gli la mail e password
-    // se login è stato effettuato con successo --> rittorna una stringa vuota
-    // altrimenti ritorna il messaggio d'errore passato successivamente ad un alert
-    // const loginResult = await localLogin(email, password);
+    if (result) {
+      alertError(result);
+    } else {
+      alertSuccess("Registrazione effettuata con successo! Ora puoi accedere.");
 
-    // se la stringa loginResult non è vuota --> c'è stato un errore
-    // --> notifica l'untente tramite un alert e ritorna
-    // if (loginResult) {
-    //   // se siamo qua allora il backend non ha autenticato l'utente
-    //   // --> notifica l'utente
-    //   console.log("error");
-    //   alertError(loginResult);
-    //   return;
-    // } else {
-    //   // se siamo qua allora la login è andata a buon fine --> notifica l'utente
-    //   // e lo reindirizza alla home
-    //   alertSuccess("Accesso effettuato con successo!");
+      setTimeout(() => navigate('/login'), 2000);
+    }
+  };
 
-    //   // TODO: setuppare la localstorage e globaluser
-    //   // localStorage.setItem("token", loginResult.token);
+  // funzione helper che scorre l'oggetto composto che contiene sia 
+  // elementi del tipo key -> string
+  // che elemeneti del tipo key -> object
+  const checkFormErrors = (errors) => {
+    // .values() transforma l'oggeto errors in un array
+    const errors_array = Object.values(errors);
 
-    //   setTimeout(() => {
-    //     // replace: true sostituice /login nel browser
-    //     // così che l'utente non potrò tornare al login
-    //     // cliccando la freccia del browser
-    //     navigate("/", { replace: true });
-    //   }, 1000); // introduce un ritardo di 1000ms (1s) per poter osservare la bellezza dell'alert
-    // }
+    // scorre ogni elemento dell'arra
+    for (const val of errors_array) {
+      // se l'elemento è una stringa ed non è vuoto -> c'è un errore -> ritorna true
+      if (typeof val === "string" && val !== "") return true;
+
+      // invece, se l'elemento è un ogggetto -> chiama ricorsivamente se stesso sull'oggetto
+      if (val && typeof val === "object" && checkFormErrors(val)) return true;
+    }
+
+    // se non sono stati trovati degli errori -> ritorna false
+    return false;
   };
 
   const handleInputChange = (fieldName, val) => {

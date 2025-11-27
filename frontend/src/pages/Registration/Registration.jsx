@@ -20,23 +20,37 @@ import AddressFields from "src/components/form/AddressFields";
 import OpeningHoursField from "src/components/form/OpeningHoursField";
 import UserTypeDialog from "src/components/UserTypeDialog";
 import { useRegistration } from "src/hooks/useRegistration";
-import { USER_CATEGORY } from "src/utils/validation";
+import { DONATOR_TYPE, USER_CATEGORY } from "src/utils/validation";
 
 function Registration() {
+  const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
+
   const {
     formData,
     formErrors,
     handleInputChange,
     handleSubmit,
     handleDialogSubmit,
-  } = useRegistration();
-
-  const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
+  } = useRegistration(alertSuccess, alertError);
 
   const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
     alertSuccess,
     alertError
   );
+
+  const handleNameLabel = (user) => {
+    if (
+      user.category === USER_CATEGORY.DONATOR &&
+      user.donatorType === DONATOR_TYPE.PRIVATE
+    )
+      return "Nome *";
+    else if (
+      user.category === USER_CATEGORY.DONATOR &&
+      user.donatorType === DONATOR_TYPE.COMMERCIAL
+    )
+      return "Nome attività commerciale *";
+    else return "Nome associazione *";
+  };
 
   return (
     <>
@@ -55,7 +69,7 @@ function Registration() {
         >
           <Box>
             <Typography
-              className="text-center"
+              className="text-center pb-2"
               variant="h5"
               gutterBottom
               fontWeight="bold"
@@ -63,29 +77,37 @@ function Registration() {
               Registrazione
             </Typography>
             <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-              <Box className="flex gap-2 pb-2 pt-2">
+              <Box className="flex gap-2 pt-2">
                 <TextField
                   fullWidth
-                  label="Nome *"
-                  placeholder="Mario"
+                  label={handleNameLabel(formData.user)}
+                  placeholder={
+                    formData.user.category === USER_CATEGORY.DONATOR &&
+                    formData.user.donatorType === DONATOR_TYPE.PRIVATE
+                      ? "Mario"
+                      : "Mulino Bianco"
+                  }
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   error={!!formErrors.name}
                   helperText={formErrors.name}
                   size="small"
                 />
-                <TextField
-                  fullWidth
-                  label="Cognome *"
-                  placeholder="Rossi"
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    handleInputChange("lastName", e.target.value)
-                  }
-                  error={!!formErrors.lastName}
-                  helperText={formErrors.lastName}
-                  size="small"
-                />
+                {formData.user.category === USER_CATEGORY.DONATOR &&
+                  formData.user.donatorType === DONATOR_TYPE.PRIVATE && (
+                    <TextField
+                      fullWidth
+                      label="Cognome *"
+                      placeholder="Rossi"
+                      value={formData.lastName}
+                      onChange={(e) =>
+                        handleInputChange("lastName", e.target.value)
+                      }
+                      error={!!formErrors.lastName}
+                      helperText={formErrors.lastName}
+                      size="small"
+                    />
+                  )}
               </Box>
               <TextField
                 fullWidth
@@ -131,7 +153,7 @@ function Registration() {
                 onChange={(val) => handleInputChange("address", val)}
                 errors={formErrors.address}
               />
-              {formData.user.category === USER_CATEGORY.ASSOCIATION && (
+              {formData.user.donatorType === DONATOR_TYPE.COMMERCIAL && (
                 <OpeningHoursField
                   value={formData.openingHours}
                   errors={formErrors.openingHours}
