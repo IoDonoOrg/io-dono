@@ -1,12 +1,13 @@
 import api from "./api";
 
-// rotta: POST /auth/login
+
 // formato della richiesta aspettato:
 // {
 // "email": "test@test.com",
 // "password": "Test123$"
 // }
-// TODO: rivedere la funzione loginResult così che restituisce solo il codice HTTP
+
+// rotta: POST /auth/login
 const localLogin = async (email, password) => {
   const loginData = {
     email: email,
@@ -17,15 +18,20 @@ const localLogin = async (email, password) => {
     const response = await api.post('/auth/login', loginData);
 
     console.log('Login effettuato con successo:', response.data);
-    return ""
 
-  } catch (err) {
-    if (err.response) {
-      console.error('Login fallito:', err.response.data.message);
-      return err.response.data.message;
-    } else {
-      console.error('Errore:', err.message);
-      return err.message;
+    return {
+      success: true,
+      token: response.data.token,
+      user: response.data.user
+    }
+
+  } catch (error) {
+    if (error.response) {
+      const message = error.response?.data?.message || "Errore durante il login";
+      return {
+        success: false,
+        message: message
+      }
     }
   }
 }

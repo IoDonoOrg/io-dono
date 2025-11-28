@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 
 import { useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import PasswordField from "src/components/form/PasswordField";
 
@@ -18,6 +18,7 @@ import { localLogin } from "src/services/loginService";
 import AlertSnack from "src/components/AlertSnack";
 import { useGoogleAuth } from "src/hooks/useGoogleAuth";
 import { useAlert } from "src/hooks/useAlert";
+import { useAuth } from "src/hooks/useAuth";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -27,6 +28,8 @@ function Login() {
   const [passwordError, setPasswordError] = useState("");
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   // hook customizzati
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
@@ -34,6 +37,11 @@ function Login() {
     alertSuccess,
     alertError
   );
+
+  // determina se c'è un percorso "from"
+  // si -> dopo l'autenticazione l'utente sarà reindirizzato lì
+  // altrimenti verrà rindirizzato alla rotta "/"
+  const from = location.state?.from?.pathname || "/";
 
   const handleSubmit = async (event) => {
     // non ricarica la pagina appena accade un evento (il comportamento di default)
@@ -58,34 +66,29 @@ function Login() {
 
     // console.log("La form è valida:", { email, password });
 
-    // la funzione che fa la chiamata al backend fornendo gli la mail e password
-    // se login è stato effettuato con successo --> rittorna una stringa vuota
-    // altrimenti ritorna il messaggio d'errore passato successivamente ad un alert
-    const loginResult = await localLogin(email, password);
+    // fa una chiamata al backend
+    const response = await localLogin(email, password);
 
-    // se la stringa loginResult non è vuota --> c'è stato un errore
-    // --> notifica l'untente tramite un alert e ritorna
-    if (loginResult) {
+    console.log(response);
+    if (!response.success) {
       // se siamo qua allora il backend non ha autenticato l'utente
       // --> notifica l'utente
-      console.log("error");
-      alertError(loginResult);
+      alertError(response.message);
       return;
-    } else {
-      // se siamo qua allora la login è andata a buon fine --> notifica l'utente
-      // e lo reindirizza alla home
-      alertSuccess("Accesso effettuato con successo!");
-
-      // TODO: setuppare la localstorage e globaluser
-      // localStorage.setItem("token", loginResult.token);
-
-      setTimeout(() => {
-        // replace: true sostituice /login nel browser
-        // così che l'utente non potrò tornare al login
-        // cliccando la freccia del browser
-        navigate("/", { replace: true });
-      }, 1000); // introduce un ritardo di 1000ms (1s) per poter osservare la bellezza dell'alert
     }
+
+    // se siamo qua allora la login è andata a buon fine --> notifica l'utente
+    // e lo reindirizza alla home
+    alertSuccess("Accesso effettuato con successo!");
+
+    // la funzione che salva nel localStorage il token e l'oggetto user ricevuti dal backend
+    login(response.token, response.user);
+
+    setTimeout(() => {
+      // replace: true sostituice /login nel browser
+      // così che l'utente non potrà tornare al login cliccando la freccia del browser
+      navigate(from, { replace: true });
+    }, 500); // introduce un ritardo di 500ms per poter osservare la bellezza degli alert
   };
 
   return (
