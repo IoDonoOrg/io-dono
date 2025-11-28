@@ -28,7 +28,7 @@ router.get(
   reportController.getMyClosedReports
 );
 
-// GET /api/reports/me/admin/open
+// GET /api/reports/admin/open
 // Vedi tutte le segnalazioni (Dashboard Admin)
 // router.get(
 //     '/admin/open', 
@@ -37,7 +37,7 @@ router.get(
 //     reportController.getAllClosedOpenReports
 // );
 
-// GET /api/reports/me/admin/closed
+// GET /api/reports/admin/closed
 // Vedi tutte le segnalazioni (Dashboard Admin)
 router.get(
   '/admin/closed',

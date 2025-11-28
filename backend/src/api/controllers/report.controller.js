@@ -77,9 +77,10 @@ exports.getMyClosedReports = async (req, res) => {
 // Ottieni tutte le segnalazioni (ADMIN)
 exports.getAllOpenReports = async (req, res) => {
     try {
-        
+
         const filter = {};
         filter.status = 'OPEN';
+        // da capire se separare la logica o tenerla tramite l'utilizzo di un parametro 
         if (req.query.type) filter.type = req.query.type;
 
         const reports = await Report.find(filter)
