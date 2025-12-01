@@ -1,7 +1,7 @@
 // ATTENZIONE: i valori sotto devono corrispondere ai valori aspettati dal backend
 // un oggetto tipo enum che rappresenta tutte possibili categorie di un utente
 export const USER_CATEGORY = {
-  DONATOR: "DONATOR",
+  DONATOR: "DONOR",
   ASSOCIATION: "ASSOCIATION",
   NO_CATEGORY: "",
 };

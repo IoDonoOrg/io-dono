@@ -15,7 +15,7 @@ import PasswordField from "src/components/form/PasswordField";
 import { GoogleLogin } from "@react-oauth/google";
 import { validateEmail, validatePassword } from "src/utils/validation";
 import { localLogin } from "src/services/loginService";
-import AlertSnack from "src/components/AlertSnack";
+import AlertSnack from "src/components/ui/AlertSnack";
 import { useGoogleAuth } from "src/hooks/useGoogleAuth";
 import { useAlert } from "src/hooks/useAlert";
 import { useAuth } from "src/hooks/useAuth";

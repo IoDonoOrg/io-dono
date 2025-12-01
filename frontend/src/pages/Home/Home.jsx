@@ -5,7 +5,7 @@ import DonorDashboard from "../Dashboard/DonorDashboard";
 import AdminDashboard from "../Example/Example";
 
 // un componente "switch"
-// cambia il contenuto della rotta dashboard in base all tipo dello user
+// cambia il contenuto della rotta "/" in base al tipo dell'user
 function Home() {
   const { user } = useAuth();
 

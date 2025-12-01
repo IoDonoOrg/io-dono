@@ -12,13 +12,13 @@ import { Link as RouterLink } from "react-router-dom";
 import PasswordField from "src/components/form/PasswordField";
 
 import { GoogleLogin } from "@react-oauth/google";
-import AlertSnack from "src/components/AlertSnack";
+import AlertSnack from "src/components/ui/AlertSnack";
 import { useGoogleAuth } from "src/hooks/useGoogleAuth";
 import { useAlert } from "src/hooks/useAlert";
 import PhoneField from "src/components/form/PhoneField";
 import AddressFields from "src/components/form/AddressFields";
 import OpeningHoursField from "src/components/form/OpeningHoursField";
-import UserTypeDialog from "src/components/UserTypeDialog";
+import UserTypeDialog from "src/components/ui/UserTypeDialog";
 import { useRegistration } from "src/hooks/useRegistration";
 import { DONATOR_TYPE, USER_CATEGORY } from "src/utils/validation";
 
