@@ -42,56 +42,45 @@ const localLogin = async (email, password) => {
 // {
 //   token: 'stringalungacredenzialegoogle'
 // }
-const googleLogin = async (googleCredentials) => {
+const googleLogin = async (googleCredential) => {
   try {
-    const googleCredential = googleCredentials.credential;
-
-    // manda la credenziale al backend sulla rotta api/auth/google/token
     const response = await api.post("/auth/google/token", {
       token: googleCredential,
     });
 
+    // l'utente si è registrato con google e sta cercando di fare login con google
+    // good
+    if (response.data.loginToken) {
+      // console.log("login token: ", response.data.loginToken);
+      return {
+        loginToken: response.data.loginToken,
+        user: response.data.user
+      };
+    }
+
+    // l'utente cerca di accedere con un account google non ancora registrato
+    if (response.data.registrationToken) {
+      // console.log("registration token: ", response.data.registrationToken);
+      return {
+        registrationToken: response.data.registrationToken
+      };
+    }
+
     return response.data
   } catch (error) {
-    return error;
+    console.log("Google Service Error:", error);
+
+    // l'utente ha già un account registrato localmente ma cerca di accedere con google
+    if (error.response && error.response.status === 400)
+      return {
+        localAccount: error.response.data.message
+      };
+
+    // Fallback
+    return {
+      message: "Errore imprevisto durante il login Google."
+    };
   }
 }
 
-const processGoogleResponse = (backendResponse) => {
-  /*
-    Scenario A:
-    L'utente è già registrato con google --> salvo i dati nella localstorage
-    e lo reindirizzo alla pagina home
-  */
-  if (backendResponse.loginToken) {
-    return {
-      case: "login",
-      token: backendResponse.loginToken,
-      user: backendResponse.user,
-    };
-  }
-
-  /*
-    Scenario B:
-    L'utente ha un account google valido ma non l'ha ancora registrato
-    nella nostra app --> completo la registrazione reindirizzando l'utente alla pagina
-    registrazione per utenti google
-  */
-  if (backendResponse.registrationToken) {
-    return {
-      case: "registration",
-      token: backendResponse.registrationToken,
-    };
-  }
-
-  /* 
-    Scenario C: errore Backend --> notifico l'utente
-  */
-  return {
-    case: "error",
-    message: backendResponse?.response?.data?.message || "Errore sconosciuto",
-  };
-}
-
-
-export { localLogin, googleLogin, processGoogleResponse }
+export { localLogin, googleLogin }

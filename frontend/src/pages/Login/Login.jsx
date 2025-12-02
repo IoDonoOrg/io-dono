@@ -32,10 +32,12 @@ function Login() {
   const { login } = useAuth();
 
   // hook customizzati
-  const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
+  const { alertData, alertSuccess, alertError, alertInfo, hideAlert } =
+    useAlert();
   const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
+    alertError,
     alertSuccess,
-    alertError
+    alertInfo
   );
 
   // determina se c'è un percorso "from"
@@ -69,7 +71,7 @@ function Login() {
     // fa una chiamata al backend
     const response = await localLogin(email, password);
 
-    console.log(response);
+    // console.log(response);
     if (!response.success) {
       // se siamo qua allora il backend non ha autenticato l'utente
       // --> notifica l'utente

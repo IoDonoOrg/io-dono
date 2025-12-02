@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { localRegistration } from "src/services/registrationService";
-import { confirmPasswords, DONATOR_TYPE, normalizeName, USER_CATEGORY, validateAddress, validateEmail, validateName, validateOpeningHours, validatePassword, validatePhone } from "src/utils/validation";
+import { googleRegistration, localRegistration } from "src/services/registrationService";
+import { confirmPasswords, normalizeName, validateAddress, validateEmail, validateName, validateOpeningHours, validatePassword, validatePhone } from "src/utils/validation";
+import { USER_ROLE, DONOR_TYPE } from "src/utils/constants"
+import { useAuth } from "./useAuth";
 
 export const useRegistration = (alertSuccess, alertError) => {
+  // flag che segnalizza che l'utente sta cercando di registrarsi tramite google
+  const isGoogleMode = !!sessionStorage.getItem("registrationToken");
+  console.log("Google mode: ", isGoogleMode);
+
+  const { login } = useAuth();
+
   const [formData, setFormData] = useState({
     name: "",
     lastName: "",
@@ -25,8 +33,8 @@ export const useRegistration = (alertSuccess, alertError) => {
     },
 
     user: {
-      category: USER_CATEGORY.NO_CATEGORY,
-      donatorType: DONATOR_TYPE.NO_TYPE,
+      category: USER_ROLE.NO_CATEGORY,
+      donatorType: DONOR_TYPE.NO_TYPE,
     }
   });
 
@@ -73,8 +81,8 @@ export const useRegistration = (alertSuccess, alertError) => {
     const normalizedLastName = normalizeName(formData.lastName);
 
     const isPrivateDonator =
-      formData.user.category === USER_CATEGORY.DONATOR &&
-      formData.user.donatorType === DONATOR_TYPE.PRIVATE;
+      formData.user.category === USER_ROLE.DONOR &&
+      formData.user.donatorType === DONOR_TYPE.PRIVATE;
 
     setFormData({
       ...formData,
@@ -87,9 +95,9 @@ export const useRegistration = (alertSuccess, alertError) => {
       // se l'utente è un donatore privato -> controlla il congome
       // altrimenti non valiada il campo
       lastName: isPrivateDonator ? validateName(normalizedLastName, true) : "",
-      email: validateEmail(formData.email),
-      password: validatePassword(formData.password),
-      confirmPassword: confirmPasswords(
+      email: isGoogleMode ? "" : validateEmail(formData.email),
+      password: isGoogleMode ? "" : validatePassword(formData.password),
+      confirmPassword: isGoogleMode ? "" : confirmPasswords(
         formData.password,
         formData.confirmPassword
       ),
@@ -111,17 +119,37 @@ export const useRegistration = (alertSuccess, alertError) => {
 
     // restituisce una stringa vuota se non ci sono errori nel backend
     // altrimenti restituisce una stringa d'errore
-    const result = await localRegistration(formData);
+    let result;
 
-    if (result) {
-      alertError(result);
+    if (isGoogleMode)
+      result = await googleRegistration(formData);
+    else
+      result = await localRegistration(formData);
+
+    // --- registrazione locale
+    if (!isGoogleMode) {
+      if (result)
+        alertError(result);
+      else {
+        alertSuccess("Registrazione effettuata con successo! Ora puoi accedere.");
+        // naviga l'utente alla pagina di login
+        setTimeout(() => navigate('/login'), 2000);
+      }
+      return;
+    }
+
+    // --- registrazione google
+    if (result.success) {
+      sessionStorage.removeItem("registrationToken");
+      login(result.token, result.user);
+      alertSuccess("Registrazione completata! Benvenuto.");
+
+      // naviga l'utente alla pagina Home
+      setTimeout(() => navigate('/', { replace: true }), 1000);
     } else {
-      alertSuccess("Registrazione effettuata con successo! Ora puoi accedere.");
-
-      setTimeout(() => navigate('/login'), 2000);
+      alertError(result.message || "Errore durante la registrazione Google.");
     }
   };
-
   // funzione helper che scorre l'oggetto composto che contiene sia 
   // elementi del tipo key -> string
   // che elemeneti del tipo key -> object
@@ -155,6 +183,7 @@ export const useRegistration = (alertSuccess, alertError) => {
     formErrors,
     handleInputChange,
     handleSubmit,
-    handleDialogSubmit
+    handleDialogSubmit,
+    isGoogleMode
   }
 }

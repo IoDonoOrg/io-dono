@@ -1,21 +1,8 @@
-// ATTENZIONE: i valori sotto devono corrispondere ai valori aspettati dal backend
-// un oggetto tipo enum che rappresenta tutte possibili categorie di un utente
-export const USER_CATEGORY = {
-  DONATOR: "DONOR",
-  ASSOCIATION: "ASSOCIATION",
-  NO_CATEGORY: "",
-};
-
-// un oggetto tipo enum che rappresenta tutte possibili tipi di donatori
-export const DONATOR_TYPE = {
-  PRIVATE: "PRIVATE",
-  COMMERCIAL: "COMMERCIAL",
-  NO_TYPE: "",
-};
-
-
 // controlla la validita dell'email
 // restituisce una stringa che rappresenta il messaggio d'errore
+
+import { DONOR_TYPE, USER_ROLE } from "./constants";
+
 // se la stringa e vuota --> non ci sono errori
 export const validateEmail = (email) => {
   let result = "";
@@ -164,12 +151,12 @@ export const validateUserType = (user) => {
     donatorType: ""
   };
 
-  if (user.category === USER_CATEGORY.NO_CATEGORY)
+  if (user.category === USER_ROLE.NO_CATEGORY)
     error.userCategory = "Selezionare il tipo di utenza è obbligatorio";
 
   if (
-    user.category === USER_CATEGORY.DONATOR &&
-    user.donatorType === DONATOR_TYPE.NO_TYPE
+    user.category === USER_ROLE.DONOR &&
+    user.donatorType === DONOR_TYPE.NO_TYPE
   )
     error.donatorType = "Selezionare il tipo di donatore è obbligatorio";
 

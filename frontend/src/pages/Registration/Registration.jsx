@@ -20,7 +20,7 @@ import AddressFields from "src/components/form/AddressFields";
 import OpeningHoursField from "src/components/form/OpeningHoursField";
 import UserTypeDialog from "src/components/ui/UserTypeDialog";
 import { useRegistration } from "src/hooks/useRegistration";
-import { DONATOR_TYPE, USER_CATEGORY } from "src/utils/validation";
+import { DONOR_TYPE, USER_ROLE } from "src/utils/constants";
 
 function Registration() {
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
@@ -31,6 +31,7 @@ function Registration() {
     handleInputChange,
     handleSubmit,
     handleDialogSubmit,
+    isGoogleMode,
   } = useRegistration(alertSuccess, alertError);
 
   const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
@@ -40,13 +41,13 @@ function Registration() {
 
   const handleNameLabel = (user) => {
     if (
-      user.category === USER_CATEGORY.DONATOR &&
-      user.donatorType === DONATOR_TYPE.PRIVATE
+      user.category === USER_ROLE.DONOR &&
+      user.donatorType === DONOR_TYPE.PRIVATE
     )
       return "Nome *";
     else if (
-      user.category === USER_CATEGORY.DONATOR &&
-      user.donatorType === DONATOR_TYPE.COMMERCIAL
+      user.category === USER_ROLE.DONOR &&
+      user.donatorType === DONOR_TYPE.COMMERCIAL
     )
       return "Nome attività commerciale *";
     else return "Nome associazione *";
@@ -74,7 +75,7 @@ function Registration() {
               gutterBottom
               fontWeight="bold"
             >
-              Registrazione
+              {isGoogleMode ? "Registrazione Google" : "Registrazione"}
             </Typography>
             <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
               <Box className="flex gap-2 pt-2">
@@ -82,8 +83,8 @@ function Registration() {
                   fullWidth
                   label={handleNameLabel(formData.user)}
                   placeholder={
-                    formData.user.category === USER_CATEGORY.DONATOR &&
-                    formData.user.donatorType === DONATOR_TYPE.PRIVATE
+                    formData.user.category === USER_ROLE.DONOR &&
+                    formData.user.donatorType === DONOR_TYPE.PRIVATE
                       ? "Mario"
                       : "Mulino Bianco"
                   }
@@ -93,8 +94,8 @@ function Registration() {
                   helperText={formErrors.name}
                   size="small"
                 />
-                {formData.user.category === USER_CATEGORY.DONATOR &&
-                  formData.user.donatorType === DONATOR_TYPE.PRIVATE && (
+                {formData.user.category === USER_ROLE.DONOR &&
+                  formData.user.donatorType === DONOR_TYPE.PRIVATE && (
                     <TextField
                       fullWidth
                       label="Cognome *"
@@ -109,36 +110,42 @@ function Registration() {
                     />
                   )}
               </Box>
-              <TextField
-                fullWidth
-                label="Email *"
-                placeholder="mariorossi@gmail.com"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                error={!!formErrors.email}
-                helperText={formErrors.email}
-                size="small"
-              />
-              <Box className="flex flex-row gap-2 pt-2 pb-2">
-                <PasswordField
-                  passwordValue={formData.password}
-                  onPasswordChange={(val) => handleInputChange("password", val)}
-                  error={!!formErrors.password}
-                  errorText={formErrors.password}
-                  label="Password *"
+              {!isGoogleMode && (
+                <TextField
+                  fullWidth
+                  label="Email *"
+                  placeholder="mariorossi@gmail.com"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  error={!!formErrors.email}
+                  helperText={formErrors.email}
                   size="small"
                 />
-                <PasswordField
-                  passwordValue={formData.confirmPassword}
-                  onPasswordChange={(val) =>
-                    handleInputChange("confirmPassword", val)
-                  }
-                  error={!!formErrors.confirmPassword}
-                  errorText={formErrors.confirmPassword}
-                  label="Conferma password *"
-                  size="small"
-                />
-              </Box>
+              )}
+              {!isGoogleMode && (
+                <Box className="flex flex-row gap-2 pt-2 pb-2">
+                  <PasswordField
+                    passwordValue={formData.password}
+                    onPasswordChange={(val) =>
+                      handleInputChange("password", val)
+                    }
+                    error={!!formErrors.password}
+                    errorText={formErrors.password}
+                    label="Password *"
+                    size="small"
+                  />
+                  <PasswordField
+                    passwordValue={formData.confirmPassword}
+                    onPasswordChange={(val) =>
+                      handleInputChange("confirmPassword", val)
+                    }
+                    error={!!formErrors.confirmPassword}
+                    errorText={formErrors.confirmPassword}
+                    label="Conferma password *"
+                    size="small"
+                  />
+                </Box>
+              )}
               <PhoneField
                 value={formData.phone}
                 onChange={(val) => handleInputChange("phone", val)}
@@ -153,7 +160,7 @@ function Registration() {
                 onChange={(val) => handleInputChange("address", val)}
                 errors={formErrors.address}
               />
-              {formData.user.donatorType === DONATOR_TYPE.COMMERCIAL && (
+              {formData.user.donatorType === DONOR_TYPE.COMMERCIAL && (
                 <OpeningHoursField
                   value={formData.openingHours}
                   errors={formErrors.openingHours}
@@ -177,10 +184,12 @@ function Registration() {
             <div className="flex-1 border-t border-gray-300"></div>
           </Box>
           <Box className="flex flex-col justify-center items-center gap-y-2">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-            />
+            {!isGoogleMode && (
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+              />
+            )}
             <Link className="" to="/login" component={RouterLink}>
               Hai già un account?
             </Link>

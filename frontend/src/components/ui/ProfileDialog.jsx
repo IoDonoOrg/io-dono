@@ -8,21 +8,21 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import { Box } from "@mui/material";
-import { DONATOR_TYPE, USER_CATEGORY } from "src/utils/validation";
+import { DONOR_TYPE, USER_ROLE } from "src/utils/constants";
 
 export default function UserProfileDialog({ open, onClose, user }) {
   if (!user) return null;
 
   const getNameLabel = (user) => {
-    console.log(user);
+    // console.log(user);
     if (
-      user.role === USER_CATEGORY.DONATOR &&
-      user.donatorType === DONATOR_TYPE.PRIVATE
+      user.role === USER_ROLE.DONOR &&
+      user.donatorType === DONOR_TYPE.PRIVATE
     )
       return "Nome";
     else if (
-      user.role === USER_CATEGORY.DONATOR &&
-      user.profile?.donorType === DONATOR_TYPE.COMMERCIAL
+      user.role === USER_ROLE.DONOR &&
+      user.profile?.donorType === DONOR_TYPE.COMMERCIAL
     )
       return "Nome attività";
     else return "Nome associazione";
