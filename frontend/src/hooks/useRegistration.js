@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { googleRegistration, localRegistration } from "src/services/registrationService";
 import { confirmPasswords, normalizeName, validateAddress, validateEmail, validateName, validateOpeningHours, validatePassword, validatePhone } from "src/utils/validation";
@@ -9,6 +9,15 @@ export const useRegistration = (alertSuccess, alertError) => {
   // flag che segnalizza che l'utente sta cercando di registrarsi tramite google
   const isGoogleMode = !!sessionStorage.getItem("registrationToken");
   console.log("Google mode: ", isGoogleMode);
+
+  // risetta la sessionStorage quando il componente viene renderizzato / derenderizzato
+  // serve per gestire il caso in cui l'utente prima decide di fare la registrazione con google
+  // ma poi torna di nuovo alla pagina di login
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem("registrationToken");
+    };
+  }, [])
 
   const { login } = useAuth();
 

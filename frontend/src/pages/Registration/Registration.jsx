@@ -23,7 +23,8 @@ import { useRegistration } from "src/hooks/useRegistration";
 import { DONOR_TYPE, USER_ROLE } from "src/utils/constants";
 
 function Registration() {
-  const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
+  const { alertData, alertSuccess, alertError, alertInfo, hideAlert } =
+    useAlert();
 
   const {
     formData,
@@ -35,8 +36,9 @@ function Registration() {
   } = useRegistration(alertSuccess, alertError);
 
   const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
+    alertError,
     alertSuccess,
-    alertError
+    alertInfo
   );
 
   const handleNameLabel = (user) => {
