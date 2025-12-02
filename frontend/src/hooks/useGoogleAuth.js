@@ -1,10 +1,11 @@
 import { googleLogin } from 'src/services/loginService';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from './useAuth';
 
 export const useGoogleAuth = (alertError, alertSuccess, alertInfo) => {
   const navigate = useNavigate();
 
-  // const { login } = useAuth();
+  const { login } = useAuth();
 
   const handleGoogleSuccess = async (googleResponse) => {
     console.log(googleResponse);
@@ -17,7 +18,7 @@ export const useGoogleAuth = (alertError, alertSuccess, alertInfo) => {
       if (response.loginToken) {
         console.log("login token: ", response.loginToken);
         // salva il token e lo user in localStorage
-        // login(response.loginToken, response.user);
+        login(response.loginToken, response.user);
 
         alertSuccess("Accesso effettuato con successo!");
 
