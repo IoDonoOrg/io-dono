@@ -11,6 +11,11 @@ import router from "src/router.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "./context/AuthProvider";
 
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import "dayjs/locale/it";
+import dayjs from "dayjs";
+
 // --- Entry point del frontend ---
 // RouterProvider fornisce le rotte dell'applicazione (più dettagli nel file src/router.jsx)
 // AuthProvider salve l'utente nel contesto globale per l'autenticazione
@@ -18,15 +23,18 @@ import { AuthProvider } from "./context/AuthProvider";
 // GoogleOAuthProvider componente per l'autenticazione google, permette di usare il button "login con google"
 
 const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
+dayjs.locale("it");
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={CLIENT_ID}>
-      <ThemeProvider theme={theme}>
-        <AuthProvider>
-          <RouterProvider router={router} />
-        </AuthProvider>
-      </ThemeProvider>
-    </GoogleOAuthProvider>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="it">
+      <GoogleOAuthProvider clientId={CLIENT_ID}>
+        <ThemeProvider theme={theme}>
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
+        </ThemeProvider>
+      </GoogleOAuthProvider>
+    </LocalizationProvider>
   </StrictMode>
 );

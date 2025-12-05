@@ -4,7 +4,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
-import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import { Box } from "@mui/material";
@@ -30,8 +29,15 @@ export default function UserProfileDialog({ open, onClose, user }) {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle className="flex justify-center items-center">
-        Dettagli Profilo
+      <DialogTitle>
+        <Typography
+          className="text-center"
+          variant="h5"
+          gutterBottom
+          fontWeight="bold"
+        >
+          Profilo
+        </Typography>
       </DialogTitle>
       <DialogContent dividers>
         <Box className="flex justify-between items-center w-full mb-2">

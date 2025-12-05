@@ -13,3 +13,9 @@ export const DONOR_TYPE = {
   COMMERCIAL: "COMMERCIAL",
   NO_TYPE: "",
 };
+
+export const DONATION_TYPES = {
+  CLOTHING: "Vestiti",
+  FOOD: "Cibo",
+  NO_TYPE: "",
+};

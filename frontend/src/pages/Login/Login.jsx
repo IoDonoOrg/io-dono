@@ -71,6 +71,11 @@ function Login() {
     // fa una chiamata al backend
     const response = await localLogin(email, password);
 
+    if (!response) {
+      alertError("Errore backend");
+      return;
+    }
+
     // console.log(response);
     if (!response.success) {
       // se siamo qua allora il backend non ha autenticato l'utente
