@@ -7,13 +7,17 @@ import {
   Paper,
   Typography,
   Stack,
+  MenuItem,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function ProductsInput({ value = [], onChange, error }) {
   const addEntry = () => {
-    onChange([...value, { id: Date.now(), quantity: "", product: "" }]);
+    onChange([
+      ...value,
+      { id: Date.now(), product: "", quantity: "1", units: "kg" },
+    ]);
   };
 
   const removeEntry = (id) => {
@@ -49,27 +53,53 @@ export default function ProductsInput({ value = [], onChange, error }) {
             >
               <TextField
                 label="Nome"
-                placeholder="es. Pane"
+                placeholder="Pane"
                 value={entry.product}
                 onChange={(e) =>
                   updateEntry(entry.id, "product", e.target.value)
                 }
                 size="small"
-                sx={{ flex: 2 }}
+                sx={{ flex: 5 }}
                 error={!!error}
               />
               <TextField
                 label="Quantità"
-                placeholder="es. 5kg"
+                placeholder="5"
                 value={entry.quantity}
                 onChange={(e) =>
                   updateEntry(entry.id, "quantity", e.target.value)
                 }
                 size="small"
-                sx={{ flex: 1 }}
+                sx={{ flex: 1.5 }}
                 error={!!error}
                 type="number"
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                  htmlInput: {
+                    min: 1,
+                    max: 100,
+                    step: "0.5",
+                  },
+                }}
               />
+              <TextField
+                select
+                label="Unità"
+                value={entry.units}
+                onChange={(e) => updateEntry(entry.id, "units", e.target.value)}
+                size="small"
+                sx={{ flex: 1 }}
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              >
+                <MenuItem value="kg">Kg</MenuItem>
+                <MenuItem value="pz">Pz</MenuItem>
+              </TextField>
               {value.length > 1 && (
                 <IconButton
                   color="error"

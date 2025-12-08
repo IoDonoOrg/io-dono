@@ -17,5 +17,6 @@ export const DONOR_TYPE = {
 export const DONATION_TYPES = {
   CLOTHING: "Vestiti",
   FOOD: "Cibo",
+  MIXED: "Misto",
   NO_TYPE: "",
 };
