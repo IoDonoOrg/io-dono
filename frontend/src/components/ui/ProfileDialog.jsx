@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
-import { Box } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { DONOR_TYPE, USER_ROLE } from "src/utils/constants";
 
 export default function UserProfileDialog({ open, onClose, user }) {

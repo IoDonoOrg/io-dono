@@ -52,7 +52,7 @@ export default function ProductsInput({ value = [], onChange, error }) {
               sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}
             >
               <TextField
-                label="Nome"
+                label="Nome *"
                 placeholder="Pane"
                 value={entry.product}
                 onChange={(e) =>
@@ -63,7 +63,7 @@ export default function ProductsInput({ value = [], onChange, error }) {
                 error={!!error}
               />
               <TextField
-                label="Quantità"
+                label="Quantità *"
                 placeholder="5"
                 value={entry.quantity}
                 onChange={(e) =>
@@ -86,7 +86,7 @@ export default function ProductsInput({ value = [], onChange, error }) {
               />
               <TextField
                 select
-                label="Unità"
+                label="Unità *"
                 value={entry.units}
                 onChange={(e) => updateEntry(entry.id, "units", e.target.value)}
                 size="small"
@@ -112,14 +112,6 @@ export default function ProductsInput({ value = [], onChange, error }) {
             </Box>
           ))}
         </Stack>
-        <Button
-          startIcon={<AddIcon />}
-          onClick={addEntry}
-          variant="text"
-          sx={{ mt: 2 }}
-        >
-          Aggiungi Prodotto
-        </Button>
         {error && (
           <Typography
             variant="caption"
@@ -129,6 +121,14 @@ export default function ProductsInput({ value = [], onChange, error }) {
             {error}
           </Typography>
         )}
+        <Button
+          startIcon={<AddIcon />}
+          onClick={addEntry}
+          variant="text"
+          sx={{ mt: 2 }}
+        >
+          Aggiungi Prodotto
+        </Button>
       </Paper>
     </Box>
   );

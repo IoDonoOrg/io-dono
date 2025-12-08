@@ -26,9 +26,6 @@ function DonorDashboard() {
         open={isDonationOpen}
         onClose={() => setIsDonationOpen(false)}
       />
-      <Link className="" to="/registration" component={RouterLink}>
-        Non hai ancora un account?
-      </Link>
       <div>
         <p>Donor dashboard</p>
       </div>

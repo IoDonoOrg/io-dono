@@ -17,10 +17,17 @@ import { DONATION_TYPES } from "src/utils/constants";
 import { createDonation } from "src/services/donationService";
 import { useAlert } from "src/hooks/useAlert";
 import AlertSnack from "./AlertSnack";
+import {
+  validateDonationType,
+  validateItems,
+  validateNotes,
+  validatePickupTime,
+} from "src/utils/validation";
 
 export default function CreateDonationDialog({ open, onClose }) {
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
 
+  // dati del form
   const [formData, setFormData] = useState({
     type: "",
     items: [{ id: Date.now(), product: "", quantity: "1", units: "kg" }], // un array di oggetti
@@ -29,6 +36,7 @@ export default function CreateDonationDialog({ open, onClose }) {
     pickupLocation: null, // un oggetto
   });
 
+  // descrizione degli errori
   const [formErrors, setFormErrors] = useState({
     type: "",
     items: "",
@@ -37,14 +45,27 @@ export default function CreateDonationDialog({ open, onClose }) {
     pickupLocation: "",
   });
 
+  // funzione chiamata appena l'utente schiccia il buttone "Crea donazione"
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     console.log(formData);
 
+    const detectedErrors = {
+      type: validateDonationType(formData.type),
+      pickupTime: validatePickupTime(formData.pickupTime),
+      items: validateItems(formData.items),
+      notes: validateNotes(formData.notes),
+      pickupLocation: "",
+    };
+
+    setFormErrors(detectedErrors);
+
     // errors
-    if (hasErrors(formErrors)) {
-      console.log("Form error");
+    // IMPORTANTE: bisogna passare detectedErrors a hasErrors() e non formErrors
+    // perché formErrors è uno stato React e viene aggiornato con il componente
+    if (hasErrors(detectedErrors)) {
+      console.log("Form invalido", detectedErrors);
       return;
     }
 
@@ -59,17 +80,25 @@ export default function CreateDonationDialog({ open, onClose }) {
     if (!result.success) alertError(result.message);
   };
 
+  // scorre l'oggette formErrors
+  // se almeno un campo non sia una stringa vuota --> ritorna true
+  // altrimenti false
   const hasErrors = (errors) => {
     const errorsArray = Object.values(errors);
     const isError = errorsArray.some((value) => value != "");
     return isError;
   };
 
+  // cambia il valore del campo fornito come il primo parametro
   const handleInputChange = (fieldName, val) => {
+    // mantiene i campi già esistenti e modifica quello specificato
+    // col valore nuovo
     setFormData({
       ...formData,
       [fieldName]: val,
     });
+
+    // risetta gli errori appena l'utente interagisce con un campo
     setFormErrors({ ...formErrors, [fieldName]: "" });
   };
 
@@ -100,10 +129,12 @@ export default function CreateDonationDialog({ open, onClose }) {
                 <TextField
                   select
                   fullWidth
-                  label="Tipo"
+                  label="Tipo *"
                   value={formData.type}
                   onChange={(e) => handleInputChange("type", e.target.value)}
                   variant="outlined"
+                  error={!!formErrors.type}
+                  helperText={formErrors.type}
                 >
                   <MenuItem value={DONATION_TYPES.FOOD}>
                     {DONATION_TYPES.FOOD}
@@ -118,10 +149,15 @@ export default function CreateDonationDialog({ open, onClose }) {
               </Grid>
               <Grid item size={7}>
                 <DateTimePicker
-                  label="Data e Ora Ritiro"
+                  label="Data e Ora Ritiro *"
                   value={formData.pickupTime}
                   onChange={(val) => handleInputChange("pickupTime", val)}
-                  error={formErrors.pickupTime}
+                  slotProps={{
+                    textField: {
+                      error: !!formErrors.pickupTime,
+                      helperText: formErrors.pickupTime,
+                    },
+                  }}
                   disablePast
                 />
               </Grid>

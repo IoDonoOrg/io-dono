@@ -1,7 +1,7 @@
 // controlla la validita dell'email
 // restituisce una stringa che rappresenta il messaggio d'errore
 
-import { DONOR_TYPE, USER_ROLE } from "./constants";
+import { DONOR_TYPE, USER_ROLE, DONATION_TYPES } from "./constants";
 
 // se la stringa e vuota --> non ci sono errori
 export const validateEmail = (email) => {
@@ -182,3 +182,56 @@ export const validateOpeningHours = (openingHours) => {
 
   return errors;
 }
+
+
+// valida il campo tipo di donazione
+export const validateDonationType = (type) => {
+  if (!type) return "Seleziona un tipo di donazione.";
+
+  return "";
+};
+
+export const validatePickupTime = (dateValue) => {
+  // Controlla se la data di ritiro è stata selezionata
+  if (!dateValue) return "Data e ora di ritiro sono obbligatorie.";
+
+  const selectedDate = new Date(dateValue);
+  const now = new Date();
+
+  // Sanity check: controlla che la data di ritoro sia nel futuro
+  if (selectedDate <= now) return "La data di ritiro deve essere nel futuro.";
+
+  return "";
+};
+
+export const validateItems = (items) => {
+  // una donazione deve contenere almeno una riga
+  if (!items || items.length === 0) {
+    return "Aggiungi almeno un prodotto alla donazione.";
+  }
+
+  // controlla se tutti i prodotti aggiunti hanno:
+  // 1. un nome prodotto
+  // 2. una quantità 
+  // 3. una quantità positiva
+  const hasInvalidItems = items.some(
+    (item) =>
+      !item.product.trim() ||     // nome obbligatorio
+      !item.quantity ||           // quantità obbligatoria
+      Number(item.quantity) <= 0  // quantità positiva
+  );
+
+  if (hasInvalidItems) {
+    return "Compila il nome e una quantità valida per tutti i prodotti.";
+  }
+
+  return "";
+};
+
+// una nota non può contenere più di 500 caratteri
+export const validateNotes = (notes) => {
+  if (notes && notes.length > 500) {
+    return "Le note non possono superare i 500 caratteri.";
+  }
+  return "";
+};
