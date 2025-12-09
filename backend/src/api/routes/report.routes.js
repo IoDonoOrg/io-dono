@@ -30,12 +30,12 @@ router.get(
 
 // GET /api/reports/admin/open
 // Vedi tutte le segnalazioni (Dashboard Admin)
-// router.get(
-//     '/admin/open', 
-//     isAuth, 
-//     isAdmin, 
-//     reportController.getAllOpenReports
-// );
+router.get(
+    '/admin/open', 
+    isAuth, 
+    isAdmin, 
+    reportController.getAllOpenReports
+);
 
 // GET /api/reports/admin/closed
 // Vedi tutte le segnalazioni (Dashboard Admin)
@@ -43,7 +43,7 @@ router.get(
   '/admin/closed',
   isAuth,
   isAdmin,
-  reportController.getAllOpenReports
+  reportController.getAllClosedReports
 );
 
 // PATCH /api/reports/:id/status
