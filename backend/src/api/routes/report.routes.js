@@ -34,7 +34,7 @@ router.get(
 //     '/admin/open', 
 //     isAuth, 
 //     isAdmin, 
-//     reportController.getAllClosedOpenReports
+//     reportController.getAllOpenReports
 // );
 
 // GET /api/reports/admin/closed
