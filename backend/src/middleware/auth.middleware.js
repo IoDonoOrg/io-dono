@@ -14,7 +14,7 @@ exports.isAuth = async (req, res, next) => {
 
     try {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(payload.userId).select('-password');
+        const user = await User.findById(payload.id).select('-password');
 
         if (!user) {
             return res.status(401).json({ message: 'Utente non trovato.' });

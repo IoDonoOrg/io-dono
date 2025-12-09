@@ -1,12 +1,13 @@
 import api from "./api";
 
-// rotta: POST /auth/login
+
 // formato della richiesta aspettato:
 // {
 // "email": "test@test.com",
 // "password": "Test123$"
 // }
-// TODO: rivedere la funzione loginResult così che restituisce solo il codice HTTP
+
+// rotta: POST /auth/login
 const localLogin = async (email, password) => {
   const loginData = {
     email: email,
@@ -17,15 +18,20 @@ const localLogin = async (email, password) => {
     const response = await api.post('/auth/login', loginData);
 
     console.log('Login effettuato con successo:', response.data);
-    return ""
 
-  } catch (err) {
-    if (err.response) {
-      console.error('Login fallito:', err.response.data.message);
-      return err.response.data.message;
-    } else {
-      console.error('Errore:', err.message);
-      return err.message;
+    return {
+      success: true,
+      token: response.data.token,
+      user: response.data.user
+    }
+
+  } catch (error) {
+    if (error.response) {
+      const message = error.response?.data?.message || "Errore durante il login";
+      return {
+        success: false,
+        message: message
+      }
     }
   }
 }
@@ -36,56 +42,45 @@ const localLogin = async (email, password) => {
 // {
 //   token: 'stringalungacredenzialegoogle'
 // }
-const googleLogin = async (googleCredentials) => {
+const googleLogin = async (googleCredential) => {
   try {
-    const googleCredential = googleCredentials.credential;
-
-    // manda la credenziale al backend sulla rotta api/auth/google/token
     const response = await api.post("/auth/google/token", {
       token: googleCredential,
     });
 
+    // l'utente si è registrato con google e sta cercando di fare login con google
+    // good
+    if (response.data.loginToken) {
+      // console.log("login token: ", response.data.loginToken);
+      return {
+        loginToken: response.data.loginToken,
+        user: response.data.user
+      };
+    }
+
+    // l'utente cerca di accedere con un account google non ancora registrato
+    if (response.data.registrationToken) {
+      // console.log("registration token: ", response.data.registrationToken);
+      return {
+        registrationToken: response.data.registrationToken
+      };
+    }
+
     return response.data
   } catch (error) {
-    return error;
+    console.log("Google Service Error:", error);
+
+    // l'utente ha già un account registrato localmente ma cerca di accedere con google
+    if (error.response && error.response.status === 400)
+      return {
+        localAccount: error.response.data.message
+      };
+
+    // Fallback
+    return {
+      message: "Errore imprevisto durante il login Google."
+    };
   }
 }
 
-const processGoogleResponse = (backendResponse) => {
-  /*
-    Scenario A:
-    L'utente è già registrato con google --> salvo i dati nella localstorage
-    e lo reindirizzo alla pagina home
-  */
-  if (backendResponse.loginToken) {
-    return {
-      case: "login",
-      token: backendResponse.loginToken,
-      user: backendResponse.user,
-    };
-  }
-
-  /*
-    Scenario B:
-    L'utente ha un account google valido ma non l'ha ancora registrato
-    nella nostra app --> completo la registrazione reindirizzando l'utente alla pagina
-    registrazione per utenti google
-  */
-  if (backendResponse.registrationToken) {
-    return {
-      case: "registration",
-      token: backendResponse.registrationToken,
-    };
-  }
-
-  /* 
-    Scenario C: errore Backend --> notifico l'utente
-  */
-  return {
-    case: "error",
-    message: backendResponse?.response?.data?.message || "Errore sconosciuto",
-  };
-}
-
-
-export { localLogin, googleLogin, processGoogleResponse }
+export { localLogin, googleLogin }

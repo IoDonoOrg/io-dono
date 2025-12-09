@@ -14,4 +14,22 @@ const api = axios.create({
   }
 });
 
+// intercetta ogni richiesta mandata dal frontend e aggiunge l'authToken all'header
+api.interceptors.request.use(
+  (config) => {
+    // legge il token dal localStorage
+    const token = localStorage.getItem("authToken");
+
+    // se il token esiste -> lo aggiunge all'header
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export default api;

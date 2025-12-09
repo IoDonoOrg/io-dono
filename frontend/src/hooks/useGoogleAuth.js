@@ -1,80 +1,73 @@
+import { googleLogin } from 'src/services/loginService';
 import { useNavigate } from 'react-router-dom';
-import { googleLogin, processGoogleResponse } from 'src/services/loginService';
+import { useAuth } from './useAuth';
 
-export const useGoogleAuth = (alertData, setAlertData) => {
+export const useGoogleAuth = (alertError, alertSuccess, alertInfo) => {
   const navigate = useNavigate();
 
+  const { login } = useAuth();
+
   const handleGoogleSuccess = async (googleResponse) => {
+    console.log(googleResponse);
     try {
-      const backendResponse = await googleLogin(googleResponse);
+      const response = await googleLogin(googleResponse.credential);
 
-      // la funzione che gestice tipi di autenticazione con google
-      // per dettagli guardare la definizione
-      const result = processGoogleResponse(backendResponse);
+      console.log(response);
 
-      switch (result.case) {
-        case "login":
-          // TODO: localstorage
-          // localStorage.setItem("token", backendResponse.loginToken);
-          // localStorage.setItem("user", JSON.stringify(backendResponse.user));
-          console.log("login");
+      // l'utente registrato con google cerca di accedere
+      if (response.loginToken) {
+        console.log("login token: ", response.loginToken);
+        // salva il token e lo user in localStorage
+        login(response.loginToken, response.user);
 
-          setAlertData({
-            open: true,
-            message: "Accesso effettuato con successo!",
-            severity: "success",
-          });
+        alertSuccess("Accesso effettuato con successo!");
 
-          setTimeout(() => {
-            navigate("/", { replace: true });
-          }, 1000);
-          break;
-
-        case "registration":
-          // sessionStorage.setItem("registrationToken", backendResponse.registrationToken);
-          console.log("registration");
-          navigate("/registration-google", { replace: true });
-          break;
-
-        case "error":
-          setAlertData({
-            open: true,
-            message: backendResponse.response.data.message,
-            severity: "error",
-          });
-          console.log(backendResponse.response.data.message);
-          break;
-
-        default:
-          setAlertData({
-            open: true,
-            message: "Errore sconosciuto durante il login.",
-            severity: "error",
-          });
+        // naviga l'utente alla home, introducendo un ritardo di 500ms 
+        // per poter osservare la bellezza degli alert
+        setTimeout(() => {
+          navigate("/", { replace: true });
+        }, 500);
+        return;
       }
+
+      // l'utente non ancora registrato cerca di accedere con google
+      if (response.registrationToken) {
+        alertInfo("Bisogna completare la registrazione. Reindirizzamento in corso.")
+        console.log("registration token: ", response.registrationToken);
+
+        // sessionStorage perché registrationToken non deve persistere oltre una sessione
+        sessionStorage.setItem("registrationToken", response.registrationToken);
+        setTimeout(() => {
+          navigate("/registration", { replace: true });
+        }, 3000);
+
+        return;
+      }
+
+
+      // l'utente già registrato localmente cerca di accedere con google
+      if (response.localAccount) {
+        alertError(response.localAccount)
+        return;
+      }
+
+      // fallback: errore imprevisto
+      alertError(response.message);
+
+      // gestione errori del server
     } catch (error) {
-      console.error("Errore imprevisto durante Google login:", error);
-      setAlertData({
-        open: true,
-        message: "Si è verificato un errore imprevisto. Riprova.",
-        severity: "error",
-      });
+      console.log(error);
     }
   };
 
+  // gestione fallimento API google
   const handleGoogleError = (error) => {
     console.log("Errore Google Login: ", error);
-    setAlertData({
-      open: true,
-      message: "Login con Google non riuscito, riprova.",
-      severity: "error",
-    });
+    alertError("Errore API Google");
   };
 
   return {
     handleGoogleSuccess,
     handleGoogleError,
-    alertData,
-    setAlertData,
   };
 };

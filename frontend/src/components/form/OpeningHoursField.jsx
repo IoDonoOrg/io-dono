@@ -1,6 +1,4 @@
 import { TimeField } from "@mui/x-date-pickers";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { Box, Typography } from "@mui/material";
@@ -38,36 +36,34 @@ function OpeningHoursField({ value, errors, fieldName, onChange }) {
         {fieldName}
       </Typography>
       <Box className="flex flex-row gap-2 justify-center">
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <TimeField
-            fullWidth
-            label="Dalle"
-            value={startDayjs}
-            onChange={(newValue) => handleTimeChange("start", newValue)}
-            format="HH:mm"
-            size="small"
-            slotProps={{
-              textField: {
-                helperText: errors.start,
-                error: !!errors.start,
-              },
-            }}
-          />
-          <TimeField
-            fullWidth
-            label="Alle"
-            value={endDayjs}
-            onChange={(newValue) => handleTimeChange("end", newValue)}
-            format="HH:mm"
-            size="small"
-            slotProps={{
-              textField: {
-                helperText: errors.end,
-                error: !!errors.end,
-              },
-            }}
-          />
-        </LocalizationProvider>
+        <TimeField
+          fullWidth
+          label="Dalle"
+          value={startDayjs}
+          onChange={(newValue) => handleTimeChange("start", newValue)}
+          format="HH:mm"
+          size="small"
+          slotProps={{
+            textField: {
+              helperText: errors.start,
+              error: !!errors.start,
+            },
+          }}
+        />
+        <TimeField
+          fullWidth
+          label="Alle"
+          value={endDayjs}
+          onChange={(newValue) => handleTimeChange("end", newValue)}
+          format="HH:mm"
+          size="small"
+          slotProps={{
+            textField: {
+              helperText: errors.end,
+              error: !!errors.end,
+            },
+          }}
+        />
       </Box>
     </>
   );

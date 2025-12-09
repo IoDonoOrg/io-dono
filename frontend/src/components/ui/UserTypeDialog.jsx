@@ -16,21 +16,18 @@ import {
   TextField,
 } from "@mui/material";
 import { useState } from "react";
-import {
-  USER_CATEGORY,
-  DONATOR_TYPE,
-  validateUserType,
-} from "src/utils/validation";
+import { validateUserType } from "src/utils/validation";
+import { USER_ROLE, DONOR_TYPE } from "src/utils/constants";
 
 function UserTypeDialog({ onSubmit }) {
   const [open, setOpen] = useState(true);
 
   // stato che rappresenta il tipo di utenza
-  // USER_CATEGORY è definito dentro file utils/validation.js
+  // USER_ROLE è definito dentro file utils/validation.js
   // e rappresenta tutti possibili tipi che un utente può assumere
   const [userType, setUserType] = useState({
-    category: USER_CATEGORY.NO_CATEGORY,
-    donatorType: DONATOR_TYPE.NO_TYPE,
+    category: USER_ROLE.NO_CATEGORY,
+    donatorType: DONOR_TYPE.NO_TYPE,
   });
 
   // stato per errori rilevati
@@ -102,11 +99,11 @@ function UserTypeDialog({ onSubmit }) {
                 onChange={handleUserCategory}
               >
                 <FormControlLabel
-                  value={USER_CATEGORY.DONATOR}
+                  value={USER_ROLE.DONOR}
                   control={<Radio />}
                   label="Donatore"
                 />
-                {userType.category === USER_CATEGORY.DONATOR && (
+                {userType.category === USER_ROLE.DONOR && (
                   <TextField
                     select
                     label="Tipo"
@@ -131,16 +128,16 @@ function UserTypeDialog({ onSubmit }) {
                       },
                     }}
                   >
-                    <MenuItem value={DONATOR_TYPE.PRIVATE}>
+                    <MenuItem value={DONOR_TYPE.PRIVATE}>
                       Privato (Un individuo)
                     </MenuItem>
-                    <MenuItem value={DONATOR_TYPE.COMMERCIAL}>
+                    <MenuItem value={DONOR_TYPE.COMMERCIAL}>
                       Commerciale (Un attività commericiale)
                     </MenuItem>
                   </TextField>
                 )}
                 <FormControlLabel
-                  value={USER_CATEGORY.ASSOCIATION}
+                  value={USER_ROLE.ASSOCIATION}
                   control={<Radio />}
                   label="Associazione"
                 />

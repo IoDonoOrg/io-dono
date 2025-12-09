@@ -1,7 +1,9 @@
-import { DONATOR_TYPE, unformatPhoneNumber, USER_CATEGORY } from "src/utils/validation";
+import { unformatPhoneNumber } from "src/utils/validation";
+import { USER_ROLE, DONOR_TYPE } from "src/utils/constants";
 import api from "./api";
 
 // POST /api/auth/register
+// TODO: handle the token received from the backend
 export const localRegistration = async (formData) => {
   // formatta i dati prima di inviarli
   const payload = preparePayload(formData);
@@ -48,8 +50,8 @@ export const localRegistration = async (formData) => {
 //     },
 
 //     user: {
-//       category: USER_CATEGORY.NO_CATEGORY,
-//       donatorType: DONATOR_TYPE.NO_TYPE,
+//       category: USER_ROLE.NO_CATEGORY,
+//       donatorType: DONOR_TYPE.NO_TYPE,
 //     }
 // }
 
@@ -66,8 +68,8 @@ const preparePayload = (data) => {
 
   // se l'utente è un donatore privato il campo nome è composto da nome + cognome
   if (
-    user.category === USER_CATEGORY.DONATOR &&
-    user.donatorType === DONATOR_TYPE.PRIVATE
+    user.category === USER_ROLE.DONOR &&
+    user.donatorType === DONOR_TYPE.PRIVATE
   ) {
     finalName = `${data.name} ${data.lastName}`;
   }
@@ -82,7 +84,7 @@ const preparePayload = (data) => {
     profile.donorType = user.donatorType;
 
     // se l'utente rappresenta un'attività commerciale -> aggiunge l'orario
-    if (user.donatorType === DONATOR_TYPE.COMMERCIAL) {
+    if (user.donatorType === DONOR_TYPE.COMMERCIAL) {
       // Formato: "09:00-18:00"
       profile.commercialHours = `${openingHours.start}-${openingHours.end}`;
     }
@@ -99,5 +101,55 @@ const preparePayload = (data) => {
     address: addressString,
     profile: profile,
   };
+};
+
+export const googleRegistration = async (formData) => {
+  const registrationToken = sessionStorage.getItem("registrationToken");
+
+  if (!registrationToken) {
+    return {
+      success: false,
+      message: "Sessione scaduta. Riprova il login con Google."
+    };
+  }
+
+  // formatta i dati
+  const payload = preparePayload(formData);
+
+  console.log("Google Registration Payload:", payload);
+
+  try {
+    // È FONDAMENTALE aggiungere l'header Authorization manualmente qui
+    // perché l'interceptor standard (definitio in api.js) cerca il token di login,
+    // mentre qui serve quello di registrazione
+    const response = await api.post('/auth/register-google', payload, {
+      headers: {
+        Authorization: `Bearer ${registrationToken}`
+      }
+    });
+
+    console.log('Registrazione Google completata:', response.data);
+
+    return {
+      success: true,
+      token: response.data.token,
+      user: response.data.user
+    };
+
+  } catch (err) {
+    if (err.response) {
+      console.error('Registrazione Google fallita:', err.response.data.message);
+      return {
+        success: false,
+        message: err.response.data.message
+      };
+    } else {
+      console.error('Errore:', err.message);
+      return {
+        success: false,
+        message: err.message
+      };
+    }
+  }
 };
 
