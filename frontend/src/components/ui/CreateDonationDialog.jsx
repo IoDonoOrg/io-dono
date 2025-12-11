@@ -23,9 +23,11 @@ import {
   validateNotes,
   validatePickupTime,
 } from "src/utils/validation";
+import { useDonation } from "src/hooks/useDonation";
 
 export default function CreateDonationDialog({ open, onClose }) {
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
+  const { refreshDonations } = useDonation();
 
   // dati del form
   const [formData, setFormData] = useState({
@@ -74,6 +76,8 @@ export default function CreateDonationDialog({ open, onClose }) {
 
     if (result.success) {
       alertSuccess(result.message);
+      // aggiorna il context di DonationProvider
+      refreshDonations();
       onClose();
     }
 

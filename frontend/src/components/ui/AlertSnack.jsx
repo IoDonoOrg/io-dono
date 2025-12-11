@@ -16,6 +16,7 @@ function AlertSnack({ children, severity, open, onClose }) {
       open={open}
       autoHideDuration={10000}
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      sx={{ top: "10% !important" }}
       onClose={handleClose}
     >
       <Alert

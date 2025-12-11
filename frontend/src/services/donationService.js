@@ -1,10 +1,11 @@
 import api from "./api";
 
+// POST api/donations
 export const createDonation = async (formData) => {
   const payload = preparePayload(formData);
 
   try {
-    const response = await api.post("/donations", payload);
+    await api.post("/donations", payload);
 
     return {
       success: true,
@@ -52,3 +53,28 @@ const preparePayload = (formData) => {
     }
   };
 };
+
+// GET /api/donations/me/available
+export const activeDonations = async () => {
+  try {
+    const response = await api.get("/donations/me/available");
+
+    return response.data;
+  } catch (e) {
+    console.log("Errore backend: ", e.response?.data.message);
+    return [];
+  }
+
+}
+
+// DELETE /api/donations/:id 
+export const deleteDonation = async (id) => {
+  try {
+    await api.delete(`donations/${id}`);
+    console.log("Donazione con id", id, "cancellata")
+    return true;
+  } catch (e) {
+    console.log("Errore backend: ", e.response?.data.message);
+    return false;
+  }
+}
