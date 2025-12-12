@@ -2,9 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../api/models/User');
 require('dotenv').config(); 
 
-// TODO: sistemare i middleware e fare la struttura del backend   
-
-// Middleware 1: Autenticazione
+// Middleware Autenticazione
 exports.isAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
@@ -32,7 +30,7 @@ exports.isAuth = async (req, res, next) => {
     }
 };
 
-// Middleware 2: Donatore
+// Middleware Donatore
 exports.isDonor = (req, res, next) => {
     if (req.user && req.user.role === 'DONOR') {
         return next();
@@ -40,7 +38,7 @@ exports.isDonor = (req, res, next) => {
     return res.status(403).json({ message: 'Accesso negato. Richiesto ruolo Donatore.' });
 };
 
-// Middleware 3: Associazione
+// Middleware Associazione
 exports.isAssociation = (req, res, next) => {
     if (req.user && req.user.role === 'ASSOCIATION') {
         return next();
@@ -48,7 +46,7 @@ exports.isAssociation = (req, res, next) => {
     return res.status(403).json({ message: 'Accesso negato. Richiesto ruolo Associazione.' });
 };
 
-// Middleware 4: Admin
+// Middleware Admin
 exports.isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'ADMIN') {
         return next();
