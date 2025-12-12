@@ -16,14 +16,20 @@ const donationSchema = new mongoose.Schema({
         enum: ['AVAILABLE', 'ACCEPTED', 'COMPLETED', 'CANCELLED'],
         default: 'AVAILABLE'
     },
-    type: { // cibo o vestiti
-        type: String,
-        required: true
-    },
-    quantity: { 
-        type: String,
-        required: true
-    },
+    items: [{
+        type: { 
+            type: String, 
+            required: [true, 'Il tipo di oggetto è obbligatorio'] 
+        }, 
+        name: { 
+            type: String, 
+            required: [true, 'Il nome/descrizione dell\'oggetto è obbligatorio'] 
+        },
+        quantity: { 
+            type: String, 
+            required: [true, 'La quantità è obbligatoria'] 
+        }
+    }],
     pickupTime: { 
         type: Date,
         required: true

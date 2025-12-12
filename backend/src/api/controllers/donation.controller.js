@@ -8,41 +8,43 @@ const mongoose = require('mongoose');
 // crea una nuova donazione
 exports.createDonation = async (req, res) => {
     try {
-        // 1. Prendi i dati della donazione dal body
-        const { type, quantity, pickupTime, notes, pickupLocation } = req.body;
+        // Prendi i dati della donazione dal body
+        const { items, pickupTime, notes, pickupLocation } = req.body;
 
-        // 2. Prendi l'ID del donatore dal token (allegato da isAuth)
+        // Prendi l'ID del donatore dal token (allegato da isAuth)
         const donorId = req.user._id;
 
-        // 3. Controllo di validità per la data
+        // Controllo di validità per la data
         const pickupDate = new Date(pickupTime);
         if (isNaN(pickupDate.getTime())) {
-            return res.status(400).json({ message: 'Formato data non valido. Usare ISO 8601 (es. YYYY-MM-DDTHH:MM:SS.sssZ)' });
+            return res.status(400).json({ message: 'Formato data non valido.' });
         }
         if (pickupDate < new Date()) {
             return res.status(400).json({ message: 'La data di ritiro non può essere nel passato.' });
         }
 
-        // 4. Controllo di validità
-        if (!type || !quantity || !pickupLocation || !pickupLocation.address || !pickupLocation.geo) {
-            return res.status(400).json({ message: 'Dati incompleti per la creazione della donazione.' });
+        // Controllo di validità per items e location
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ message: 'La lista degli oggetti (items) non può essere vuota.' });
         }
 
-        // 5. Crea la nuova donazione
+        if (!pickupLocation || !pickupLocation.address || !pickupLocation.geo) {
+            return res.status(400).json({ message: 'Dati incompleti per la posizione (pickupLocation).' });
+        }
+
+        // Crea la nuova donazione
         const newDonation = new Donation({
             donorId,
-            type,
-            quantity,
+            items, 
             pickupTime: pickupDate, 
             notes,
             pickupLocation,
             status: 'AVAILABLE'
         });
 
-        // 6. Salva nel database
+        // Salva nel database
         await newDonation.save();
-
-        // 7. Invia la risposta 201 (e TERMINA la richiesta)
+        // Invia la risposta 201 
         return res.status(201).json(newDonation);
 
     } catch (error) {
@@ -90,37 +92,55 @@ exports.getMyDonationsCompleted = async (req, res) => {
 // aggiorna una donazione
 exports.updateMyDonation = async (req, res) => {
     try {
-        const { id } = req.params; // L'ID della donazione dall'URL
-        const { type, quantity, pickupTime, notes, pickupLocation } = req.body; // I nuovi dati
+        const { id } = req.params;
+        // Estraiamo 'items' invece di type/quantity
+        const { items, pickupTime, notes, pickupLocation } = req.body;
 
-        // 1. Controlla che l'ID sia un ID MongoDB valido
+        // Controlla che l'ID sia un ID MongoDB valido
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'ID donazione non valido.' });
         }
 
-        // 2. Trova la donazione
+        // Trova la donazione
         const donation = await Donation.findById(id);
 
-        // 3. Controlli di sicurezza e di logica (mancano i controlli sulla data e sui parametri)
+        // Controlli di sicurezza e di logica 
         if (!donation) {
             return res.status(404).json({ message: 'Donazione non trovata.' });
         }
 
+        // Controllo di validità per la data
+        if(pickupTime){
+            const pickupDate = new Date(pickupTime);
+            if (isNaN(pickupDate.getTime())) {
+                return res.status(400).json({ message: 'Formato data non valido.' });
+            }
+            if (pickupDate < new Date()) {
+                return res.status(400).json({ message: 'La data di ritiro non può essere nel passato.' });
+            }
+
+            donation.pickupTime = pickupDate;
+        }
+
         // controllo di sicurezza per verificare la proprietà della donazione
         if (donation.donorId.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: 'Accesso negato: non sei il proprietario di questa donazione.' });
+            return res.status(403).json({ message: 'Accesso negato: non sei il proprietario.' });
         }
 
         // Puoi modificare solo se non è ancora stata accettata
         if (donation.status !== 'AVAILABLE') {
-            return res.status(400).json({ message: 'Impossibile modificare: questa donazione è già stata accettata o completata.' });
+            return res.status(400).json({ message: 'Impossibile modificare: donazione già accettata o completata.' });
         }
         
-        // 4. Se tutti i controlli passano, aggiorna la donazione
+        // Se tutti i controlli passano, aggiorna la donazione
         // Sovrascriviamo i campi che l'utente può modificare
-        donation.type = type || donation.type;
-        donation.quantity = quantity || donation.quantity;
-        donation.pickupTime = pickupTime || donation.pickupTime;
+        if (items) {
+            if (!Array.isArray(items) || items.length === 0) {
+                return res.status(400).json({ message: 'La lista degli oggetti non può essere vuota.' });
+            }
+            donation.items = items;
+        }
+    
         donation.notes = notes || donation.notes;
 
         // Aggiorniamo l'oggetto nestato 'pickupLocation' in modo sicuro
@@ -138,7 +158,7 @@ exports.updateMyDonation = async (req, res) => {
 
         const updatedDonation = await donation.save();
 
-        // 5. Invia la donazione aggiornata
+        // Invia la donazione aggiornata
         res.status(200).json(updatedDonation);
 
     } catch (error) {

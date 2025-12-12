@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../api/models/User');
 require('dotenv').config(); 
 
+// TODO: sistemare i middleware e fare la struttura del backend   
+
 // Middleware 1: Autenticazione
 exports.isAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;

@@ -28,6 +28,7 @@ router.get(
   reportController.getMyClosedReports
 );
 
+
 // GET /api/reports/admin/open
 // Vedi tutte le segnalazioni (Dashboard Admin)
 router.get(

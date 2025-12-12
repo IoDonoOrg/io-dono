@@ -3,26 +3,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-/* 
 
-{
-    "email": "test-utente-3@example.com",
-    "password": "pass123",
-    "name": "Test Utente tre",
-    "role": "DONOR",
-    "phoneNumber": "123456789",
-    "address": "Via Roma 1",
-    "profile": {
-        "donorType": "PRIVATE"
-    }
-}
-
-{
-    "email": "test-utente-3@example.com",
-    "password": "pass123"
-}
-
-*/
 
 // Funzioni Helper per creare Token 
 const generateToken = (user) => {
