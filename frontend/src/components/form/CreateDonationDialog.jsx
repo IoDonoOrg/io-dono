@@ -8,17 +8,13 @@ import {
   Button,
   Typography,
   Grid,
-  MenuItem,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers";
-import ProductsInput from "../form/ProductsInput";
-
-import { DONATION_TYPES } from "src/utils/constants";
+import ProductsInput from "./ProductsInput";
 import { createDonation } from "src/services/donationService";
 import { useAlert } from "src/hooks/useAlert";
-import AlertSnack from "./AlertSnack";
+import AlertSnack from "../ui/AlertSnack";
 import {
-  validateDonationType,
   validateItems,
   validateNotes,
   validatePickupTime,
@@ -32,7 +28,15 @@ export default function CreateDonationDialog({ open, onClose }) {
   // dati del form
   const [formData, setFormData] = useState({
     type: "",
-    items: [{ id: Date.now(), product: "", quantity: "1", units: "kg" }], // un array di oggetti
+    items: [
+      {
+        id: Date.now(),
+        type: "",
+        name: "",
+        quantity: "1",
+        units: "kg",
+      },
+    ], // un array di oggetti
     pickupTime: null, // un oggetto
     notes: "",
     pickupLocation: null, // un oggetto
@@ -54,7 +58,6 @@ export default function CreateDonationDialog({ open, onClose }) {
     console.log(formData);
 
     const detectedErrors = {
-      type: validateDonationType(formData.type),
       pickupTime: validatePickupTime(formData.pickupTime),
       items: validateItems(formData.items),
       notes: validateNotes(formData.notes),
@@ -78,6 +81,16 @@ export default function CreateDonationDialog({ open, onClose }) {
       alertSuccess(result.message);
       // aggiorna il context di DonationProvider
       refreshDonations();
+
+      // risetta l'ui dopo che la creazione è andata a buon fine
+      setFormData({
+        type: "",
+        items: [{ id: Date.now(), name: "", quantity: "1", units: "kg" }], // un array di oggetti
+        pickupTime: null, // un oggetto
+        notes: "",
+        pickupLocation: null, // un oggetto
+      });
+
       onClose();
     }
 
@@ -129,29 +142,7 @@ export default function CreateDonationDialog({ open, onClose }) {
         <form onSubmit={handleSubmit}>
           <DialogContent dividers>
             <Grid container spacing={2}>
-              <Grid item size={3}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Tipo *"
-                  value={formData.type}
-                  onChange={(e) => handleInputChange("type", e.target.value)}
-                  variant="outlined"
-                  error={!!formErrors.type}
-                  helperText={formErrors.type}
-                >
-                  <MenuItem value={DONATION_TYPES.FOOD}>
-                    {DONATION_TYPES.FOOD}
-                  </MenuItem>
-                  <MenuItem value={DONATION_TYPES.CLOTHING}>
-                    {DONATION_TYPES.CLOTHING}
-                  </MenuItem>
-                  <MenuItem value={DONATION_TYPES.MIXED}>
-                    {DONATION_TYPES.MIXED}
-                  </MenuItem>
-                </TextField>
-              </Grid>
-              <Grid item size={7}>
+              <Grid item size={12}>
                 <DateTimePicker
                   label="Data e Ora Ritiro *"
                   value={formData.pickupTime}

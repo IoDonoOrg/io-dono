@@ -1,7 +1,7 @@
 // controlla la validita dell'email
 // restituisce una stringa che rappresenta il messaggio d'errore
 
-import { DONOR_TYPE, USER_ROLE, DONATION_TYPES } from "./constants";
+import { DONOR_TYPE, USER_ROLE } from "./constants";
 
 // se la stringa e vuota --> non ci sono errori
 export const validateEmail = (email) => {
@@ -183,14 +183,6 @@ export const validateOpeningHours = (openingHours) => {
   return errors;
 }
 
-
-// valida il campo tipo di donazione
-export const validateDonationType = (type) => {
-  if (!type) return "Seleziona un tipo di donazione.";
-
-  return "";
-};
-
 export const validatePickupTime = (dateValue) => {
   // Controlla se la data di ritiro è stata selezionata
   if (!dateValue) return "Data e ora di ritiro sono obbligatorie.";
@@ -216,13 +208,14 @@ export const validateItems = (items) => {
   // 3. una quantità positiva
   const hasInvalidItems = items.some(
     (item) =>
-      !item.product.trim() ||     // nome obbligatorio
+      !item.type ||               // tipo obbligatoria
+      !item.name.trim() ||        // nome obbligatorio
       !item.quantity ||           // quantità obbligatoria
       Number(item.quantity) <= 0  // quantità positiva
   );
 
   if (hasInvalidItems) {
-    return "Compila il nome e una quantità valida per tutti i prodotti.";
+    return "Compila il tipo, nome e quantità valida per tutti i prodotti";
   }
 
   return "";

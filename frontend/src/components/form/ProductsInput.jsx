@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { ITEM_TYPES } from "src/utils/constants";
 
 export default function ProductsInput({ value = [], onChange, error }) {
   const addEntry = () => {
@@ -45,21 +46,34 @@ export default function ProductsInput({ value = [], onChange, error }) {
     <Box sx={{ maxWidth: 800, mx: "auto" }}>
       <Paper variant="outlined" className="p-2">
         <Stack spacing={2} className="mt-2">
-          <Typography variant="h6">Prodotto</Typography>
+          <Typography variant="h6">Prodotti</Typography>
           {value.map((entry) => (
             <Box
               key={entry.id}
               sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}
             >
               <TextField
+                select
+                label="Tipo *"
+                value={entry.type}
+                onChange={(e) => updateEntry(entry.id, "type", e.target.value)}
+                variant="outlined"
+                size="small"
+                sx={{ flex: 1.5 }}
+                error={!!error}
+              >
+                <MenuItem value={ITEM_TYPES.FOOD}>{ITEM_TYPES.FOOD}</MenuItem>
+                <MenuItem value={ITEM_TYPES.CLOTHING}>
+                  {ITEM_TYPES.CLOTHING}
+                </MenuItem>
+              </TextField>
+              <TextField
                 label="Nome *"
                 placeholder="Pane"
-                value={entry.product}
-                onChange={(e) =>
-                  updateEntry(entry.id, "product", e.target.value)
-                }
+                value={entry.name}
+                onChange={(e) => updateEntry(entry.id, "name", e.target.value)}
                 size="small"
-                sx={{ flex: 5 }}
+                sx={{ flex: 2.5 }}
                 error={!!error}
               />
               <TextField

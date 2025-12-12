@@ -12,13 +12,15 @@ import {
 
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
-import CreateDonationDialog from "src/components/ui/CreateDonationDialog";
+import CreateDonationDialog from "src/components/form/CreateDonationDialog";
 import DonationBar from "src/components/ui/DonationBar";
 import ActiveDonationsTile from "src/components/ui/ActiveDonationsTile";
 import { DonationProvider } from "src/context/DonationProvider";
+import DonationHistory from "src/components/ui/DonationHistory";
 
 function DonorDashboard() {
   const [isDonationOpen, setIsDonationOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   return (
     <>
@@ -35,7 +37,15 @@ function DonorDashboard() {
               borderRadius: 2,
             }}
           >
-            <ActiveDonationsTile displayNumber={4} />
+            <ActiveDonationsTile
+              displayNumber={4}
+              onOpenHistory={() => setIsHistoryOpen(true)}
+            />
+            <DonationHistory
+              open={isHistoryOpen}
+              onClose={() => setIsHistoryOpen(false)}
+            />
+
             <Tooltip title="Crea donazione" arrow>
               <Fab
                 color="primary"

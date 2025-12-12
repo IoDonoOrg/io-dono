@@ -1,6 +1,8 @@
 import { MoreVert } from "@mui/icons-material";
 import {
+  Box,
   Chip,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -8,11 +10,15 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { DONATION_STATUS } from "src/utils/constants";
+import { formatStatus } from "src/utils/format";
 
 function DonationBar({
   children,
   status,
   isCompletable = false,
+  isModifieble = true,
+  onVisualize,
   onEdit,
   onDelete,
   onComplete,
@@ -29,7 +35,7 @@ function DonationBar({
   };
 
   const handleAction = (action) => {
-    console.log(`${children}: ${action}`);
+    // console.log(`${children}: ${action}`);
 
     switch (action) {
       case "edit":
@@ -41,13 +47,29 @@ function DonationBar({
       case "complete":
         onComplete();
         break;
+      case "visualize":
+        onVisualize();
+        break;
     }
 
     handleClose();
   };
 
-  const formatStatus = (status) => {
-    if (status === "AVAILABLE") return "Attiva";
+  // Determina il colore del chip in base allo stato della donazione
+  const getChipColor = (status) => {
+    switch (status) {
+      case DONATION_STATUS.AVAILABLE:
+        return "success"; // verde
+      case DONATION_STATUS.ACCEPTED:
+        return "warning"; // arancione
+      case DONATION_STATUS.COMPLETED:
+        return "info"; // blu
+      case DONATION_STATUS.CANCELLED:
+        return "error"; // rosso
+      case DONATION_STATUS.NO_STATUS:
+      default:
+        return "default"; // grigio
+    }
   };
 
   return (
@@ -59,25 +81,32 @@ function DonationBar({
           borderRadius: 50,
         }}
       >
-        <Chip
-          label={formatStatus(status)}
-          color="primary"
-          variant="outlined"
-          size="small"
-        />
+        <Box display="flex" alignItems="center" className="mr-3" gap={1}>
+          <Chip
+            label={formatStatus(status)}
+            color={getChipColor(status)}
+            size="small"
+          />
+          <Divider orientation="vertical" sx={{ height: 30 }} />
+        </Box>
+
         <Typography>{children}</Typography>
 
-        <IconButton
-          edge="end"
-          color="inherit"
-          aria-label="settings"
-          onClick={handleClick}
-          aria-controls={open ? "donation-menu" : undefined}
-          aria-haspopup="true"
-        >
-          <MoreVert />
-        </IconButton>
+        <Box display="flex" alignItems="center" className="ml-3" gap={1}>
+          <Divider orientation="vertical" sx={{ height: 30 }} />
+          <IconButton
+            edge="end"
+            color="inherit"
+            aria-label="settings"
+            onClick={handleClick}
+            aria-controls={open ? "donation-menu" : undefined}
+            aria-haspopup="true"
+          >
+            <MoreVert />
+          </IconButton>
+        </Box>
       </Paper>
+      {/* Menu con 3 puntini */}
       <Menu
         id="donation-menu"
         anchorEl={anchorEl}
@@ -92,12 +121,19 @@ function DonationBar({
           horizontal: "left",
         }}
       >
-        <MenuItem key="edit" onClick={() => handleAction("edit")}>
-          Modifica
+        <MenuItem key="visualize" onClick={() => handleAction("visualize")}>
+          Visualizza
         </MenuItem>
-        <MenuItem key="delete" onClick={() => handleAction("delete")}>
-          Elimina
-        </MenuItem>
+        {isModifieble && (
+          <MenuItem key="edit" onClick={() => handleAction("edit")}>
+            Modifica
+          </MenuItem>
+        )}
+        {isModifieble && (
+          <MenuItem key="delete" onClick={() => handleAction("delete")}>
+            Elimina
+          </MenuItem>
+        )}
         {isCompletable && (
           <MenuItem key="complete" onClick={() => handleAction("complete")}>
             Completa

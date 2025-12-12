@@ -28,7 +28,7 @@ export default function UserProfileDialog({ open, onClose, user }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} maxWidth="sm">
       <DialogTitle>
         <Typography
           className="text-center"
@@ -78,7 +78,7 @@ export default function UserProfileDialog({ open, onClose, user }) {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary">
+        <Button onClick={onClose} variant="contained" color="error">
           Chiudi
         </Button>
       </DialogActions>

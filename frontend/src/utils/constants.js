@@ -14,9 +14,19 @@ export const DONOR_TYPE = {
   NO_TYPE: "",
 };
 
-export const DONATION_TYPES = {
+// l'oggetto che rappresenta tutti possibili tipi di un item donato
+export const ITEM_TYPES = {
   CLOTHING: "Vestiti",
   FOOD: "Cibo",
-  MIXED: "Misto",
   NO_TYPE: "",
 };
+
+// l'oggetto che rappresenta tutti possibili stati di una donazione
+// ATTENZIONE: anche questi valori devono corrsipondere ai quelli del backend
+export const DONATION_STATUS = {
+  AVAILABLE: "AVAILABLE",
+  ACCEPTED: "ACCEPTED",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
+  NO_STATUS: ""
+}

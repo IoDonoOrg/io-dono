@@ -30,20 +30,21 @@ export const createDonation = async (formData) => {
 }
 
 
-// prepara i dati recuperati dalla form convertendoli in un formato aspettato da backend
+// prepara i dati per il backend
 const preparePayload = (formData) => {
-  // converta l'array che contiene oggeti donati in un'unica stringa
-  const itemsString = formData.items
-    .map(item => `${item.product} ${item.quantity} ${item.units}`)
-    .join(", ");
+  // mappa l'array degli items del frontend allo schema del backend
+  const formattedItems = formData.items.map(item => ({
+    type: item.type,
+    name: item.name,
+    // il backend aspetta una stringa unica
+    quantity: `${item.quantity} ${item.units}`
+  }));
 
   return {
-    type: formData.type,
-    quantity: itemsString,
-    // conveta la data in un formato aspettato da backend
+    items: formattedItems,
     pickupTime: formData.pickupTime?.toISOString(),
     notes: formData.notes || "",
-    // TODO: aggiungere l'input della locazzione
+    // TODO: implementare la geolocalizzazione
     pickupLocation: formData.pickupLocation || {
       address: "test",
       geo: {
@@ -54,18 +55,6 @@ const preparePayload = (formData) => {
   };
 };
 
-// GET /api/donations/me/available
-export const activeDonations = async () => {
-  try {
-    const response = await api.get("/donations/me/available");
-
-    return response.data;
-  } catch (e) {
-    console.log("Errore backend: ", e.response?.data.message);
-    return [];
-  }
-
-}
 
 // DELETE /api/donations/:id 
 export const deleteDonation = async (id) => {
@@ -78,3 +67,49 @@ export const deleteDonation = async (id) => {
     return false;
   }
 }
+
+
+/*
+  RECUPERO DEI DIVERSI TIPI DELLE DONAZIONE
+*/
+
+// GET /api/donations/me/available
+export const getActiveDonations = async () => {
+  try {
+    const response = await api.get("/donations/me/available");
+
+    console.log(response.data);
+    return response.data;
+  } catch (e) {
+    console.log("Errore backend: ", e.response?.data.message);
+    return [];
+  }
+}
+
+// GET /api/donations/me/accepted
+export const getAcceptedDonations = async () => {
+  try {
+    const response = await api.get("/donations/me/accepted");
+
+    console.log(response.data);
+    return response.data;
+  } catch (e) {
+    console.log("Errore backend: ", e.response?.data.message);
+    return [];
+  }
+}
+
+// GET /api/donations/me/completed
+export const getCompletedDonations = async () => {
+  try {
+    const response = await api.get("/donations/me/completed");
+
+    console.log(response.data);
+    return response.data;
+  } catch (e) {
+    console.log("Errore backend: ", e.response?.data.message);
+    return [];
+  }
+}
+
+
