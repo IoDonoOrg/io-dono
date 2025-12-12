@@ -116,64 +116,6 @@ exports.login = async (req, res) => {
     }
 };
 
-// vecchia logica Google
-// Logica per: GET /api/auth/google/callback
-exports.handleGoogleCallback = async (req, res) => {
-    // Se arriviamo qui, Passport ha funzionato.
-    // Il profilo Google è in req.user (grazie alla nostra config passport)
-    const googleProfile = req.user;
-
-    try {
-        const googleId = googleProfile.id;
-        const email = googleProfile.emails[0].value;
-        const name = googleProfile.displayName;
-
-        // 1. Controlla se l'utente esiste già (LOGIN)
-        let user = await User.findOne({ googleId });
-
-        if (user) {
-            // Utente trovato! Genera un token e fa il login.
-            const token = generateToken(user);
-
-            // Per le SPA: reindirizziamo a una pagina "ponte" del frontend
-            // che chiuderà il pop-up e salverà il token.
-            // Esempio: http://tuo-frontend.com/auth-success?token=...
-            // Per ora, inviamo il token. Il client dovrà gestirlo.
-            // Una soluzione più pulita è inviare uno script che fa postMessage
-            return res.status(200).send(`
-                <script>
-                    window.opener.postMessage({ token: "${token}", user: ${JSON.stringify(user)} }, 'http://localhost:3000'); // Assumendo che il frontend sia su porta 3000
-                    window.close();
-                </script>
-            `);
-        }
-
-        // 2. Utente NON trovato (INIZIO REGISTRAZIONE)
-        
-        // Creiamo un payload per il token temporaneo.
-        const registrationPayload = {
-            googleId,
-            email,
-            name
-        };
-        
-        // Generiamo il token di registrazione (valido 15 min)
-        const registrationToken = generateRegistrationToken(registrationPayload);
-        
-        // Invia al client questo token temporaneo.
-        // Il client lo userà per completare la registrazione.
-        return res.status(200).send(`
-            <script>
-                window.opener.postMessage({ registrationToken: "${registrationToken}" }, 'http://localhost:3000');
-                window.close();
-            </script>
-        `);
-
-    } catch (error) {
-        res.status(500).json({ message: 'Errore durante l\'autenticazione Google', error: error.message });
-    }
-};
-
 // nuova logica google
 // Logica per: POST /api/auth/google/token
 exports.handleGoogleToken = async (req, res) => {

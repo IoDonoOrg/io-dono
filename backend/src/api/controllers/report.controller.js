@@ -35,8 +35,6 @@ exports.createReport = async (req, res) => {
     }
 };
 
-// PROSSIME 4 FUNZIONI DA MODIFICARE 
-
 // GET /api/reports/me/open
 // Le mie segnalazioni (USER)
 exports.getMyOpenReports = async (req, res) => {
@@ -126,8 +124,6 @@ exports.getAllClosedReports = async (req, res) => {
     }
 };
 
-// DA QUI APPOSTO
-
 // PATCH /api/reports/:id/status
 // Aggiorna stato (ADMIN)
 exports.updateReportStatus = async (req, res) => {
@@ -136,7 +132,7 @@ exports.updateReportStatus = async (req, res) => {
 
         const report = await Report.findByIdAndUpdate(
             req.params.id,
-            { status }, // da capire se tenere IN_PROGRESS in caso basta mettere RESOLVED visto che da resolved non può passare a open 
+            { status }, 
             { new: true, runValidators: true }
         );
 
