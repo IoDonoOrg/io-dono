@@ -31,7 +31,7 @@ router.get('/google/callback',
         failureRedirect: '/login', // Se l'utente annulla
         session: false 
     }),
-    authController.handleGoogleCallback // Se l'autenticazione ha successo, esegui quest'altra funz
+    authController.handleGoogleToken // Se l'autenticazione ha successo, esegui quest'altra funz
 );
 
 // Rotta chiamata da GOOGLE dopo che l'utente ha dato il consenso
