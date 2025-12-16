@@ -21,6 +21,7 @@ import dayjs from "dayjs";
 // AuthProvider salve l'utente nel contesto globale per l'autenticazione
 // ThemeProvider wrapper di materialui, permette di definire una theme unificata (dettagli: src/utils/materialUITheme)
 // GoogleOAuthProvider componente per l'autenticazione google, permette di usare il button "login con google"
+// LocalizationProvider fornisce il formato e la localizzione per la libreria dayjs
 
 const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
 dayjs.locale("it");

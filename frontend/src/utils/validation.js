@@ -1,6 +1,3 @@
-// controlla la validita dell'email
-// restituisce una stringa che rappresenta il messaggio d'errore
-
 import { DONOR_TYPE, USER_ROLE } from "./constants";
 
 // se la stringa e vuota --> non ci sono errori

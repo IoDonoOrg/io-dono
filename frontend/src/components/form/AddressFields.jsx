@@ -1,8 +1,5 @@
 import { TextField, Grid, MenuItem, Typography } from "@mui/material";
-
-// la lista delle provincie supportate
-// nel futuro dovrà diventare una chiamata API
-const PROVINCES = ["TN"];
+import { PROVINCES } from "src/utils/constants";
 
 function AddressFields({ fieldName, value, onChange, errors }) {
   // una funzione helper usata per aggiornare solo un campo dell'oggetto value

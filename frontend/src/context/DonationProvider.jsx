@@ -54,7 +54,7 @@ export function DonationProvider({ children }) {
     }
   }, []);
 
-  // recupera tutti i set di dati in un colpo
+  // recupera tutti tipi di donazioni in un colpo
   const fetchDonations = useCallback(async () => {
     setLoading(true);
     try {

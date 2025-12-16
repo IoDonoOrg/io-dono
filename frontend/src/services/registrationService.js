@@ -3,7 +3,6 @@ import { USER_ROLE, DONOR_TYPE } from "src/utils/constants";
 import api from "./api";
 
 // POST /api/auth/register
-// TODO: handle the token received from the backend
 export const localRegistration = async (formData) => {
   // formatta i dati prima di inviarli
   const payload = preparePayload(formData);

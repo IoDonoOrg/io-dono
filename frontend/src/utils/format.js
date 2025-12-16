@@ -15,6 +15,8 @@ export const formatStatus = (status) => {
   if (status === DONATION_STATUS.NO_STATUS) return "";
 };
 
+// funzione helper che decide in base allo status di una donazione 
+// se un componente sia modificabile o meno
 export const isModifieble = (status) => {
   return !(
     status === DONATION_STATUS.ACCEPTED ||

@@ -30,3 +30,7 @@ export const DONATION_STATUS = {
   CANCELLED: "CANCELLED",
   NO_STATUS: ""
 }
+
+// la lista delle provincie supportate
+// nel futuro dovrà diventare una chiamata API
+export const PROVINCES = ["TN"];
