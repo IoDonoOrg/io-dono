@@ -36,6 +36,16 @@ export default function MenuAppBar() {
     setOpenProfileDialog(false);
   };
 
+  const [anchorElReport, setAnchorElReport] = useState(null);
+
+  const handleReportMenu = (event) => {
+    setAnchorElReport(event.currentTarget);
+  };
+
+  const handleCloseReportMenu = () => {
+    setAnchorElReport(null);
+  };
+
   return (
     <Box>
       <AppBar position="static">
@@ -43,7 +53,7 @@ export default function MenuAppBar() {
           <div className="grow">
             <IconButton
               size="large"
-              aria-label="account of current user"
+              aria-label="menu-profilo"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleMenu}
@@ -72,14 +82,36 @@ export default function MenuAppBar() {
           </div>
           <IconButton
             size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
+            aria-label="menu-segnalazioni"
+            aria-controls="menu-appbar-report"
             aria-haspopup="true"
-            onClick={handleMenu}
+            onClick={handleReportMenu}
             color="inherit"
           >
             <FlagCircleIcon />
           </IconButton>
+          <Menu
+            id="menu-appbar-report"
+            anchorEl={anchorElReport}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right", // Aligns better to the right side of screen
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            open={Boolean(anchorElReport)}
+            onClose={handleCloseReportMenu}
+          >
+            <MenuItem onClick={handleCloseReportMenu}>
+              Crea segnalazione
+            </MenuItem>
+            <MenuItem onClick={handleCloseReportMenu}>
+              Visualizza segnalazioni
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
       <ProfileDialog

@@ -1,22 +1,14 @@
 import HeaderBar from "src/components/ui/HeaderBar";
 import { Link as RouterLink } from "react-router-dom";
-import {
-  Box,
-  Container,
-  Fab,
-  Link,
-  Paper,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, Container, Fab, Paper, Tooltip } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 import CreateDonationDialog from "src/components/form/CreateDonationDialog";
-import DonationBar from "src/components/ui/DonationBar";
 import ActiveDonationsTile from "src/components/ui/ActiveDonationsTile";
 import { DonationProvider } from "src/context/DonationProvider";
 import DonationHistory from "src/components/ui/DonationHistory";
+import TileClickable from "src/components/ui/TileClickable";
 
 function DonorDashboard() {
   const [isDonationOpen, setIsDonationOpen] = useState(false);
@@ -37,10 +29,7 @@ function DonorDashboard() {
               borderRadius: 2,
             }}
           >
-            <ActiveDonationsTile
-              displayNumber={4}
-              onOpenHistory={() => setIsHistoryOpen(true)}
-            />
+            <ActiveDonationsTile displayNumber={4} />
             <DonationHistory
               open={isHistoryOpen}
               onClose={() => setIsHistoryOpen(false)}
@@ -60,6 +49,13 @@ function DonorDashboard() {
               open={isDonationOpen}
               onClose={() => setIsDonationOpen(false)}
             />
+            <Box className="flex flex-row gap-10 my-5">
+              <TileClickable onClick={() => setIsHistoryOpen(true)}>
+                Storico
+              </TileClickable>
+              <TileClickable>Mappa</TileClickable>
+              <TileClickable>Ricompense</TileClickable>
+            </Box>
           </Paper>
         </Container>
       </DonationProvider>

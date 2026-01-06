@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers";
 import ProductsInput from "./ProductsInput";
-import { createDonation } from "src/services/donationService";
+import { createDonation, updateDonation } from "src/services/donationService";
 import { useAlert } from "src/hooks/useAlert";
 import AlertSnack from "../ui/AlertSnack";
 import {
@@ -20,13 +20,19 @@ import {
   validatePickupTime,
 } from "src/utils/validation";
 import { useDonation } from "src/hooks/useDonation";
+import dayjs from "dayjs";
+import { formatBackendQuantity, formatBackendUnits } from "src/utils/format";
 
-export default function CreateDonationDialog({ open, onClose }) {
+export default function CreateDonationDialog({
+  open,
+  onClose,
+  inEditMode = false,
+  donation = null, // utile solo se in modalità edit
+}) {
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
   const { refreshDonations } = useDonation();
 
-  // dati del form
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     type: "",
     items: [
       {
@@ -36,11 +42,14 @@ export default function CreateDonationDialog({ open, onClose }) {
         quantity: "1",
         units: "kg",
       },
-    ], // un array di oggetti
-    pickupTime: null, // un oggetto
+    ],
+    pickupTime: null,
     notes: "",
-    pickupLocation: null, // un oggetto
-  });
+    pickupLocation: null,
+  };
+
+  // dati del form
+  const [formData, setFormData] = useState(initialFormData);
 
   // descrizione degli errori
   const [formErrors, setFormErrors] = useState({
@@ -50,6 +59,28 @@ export default function CreateDonationDialog({ open, onClose }) {
     notes: "",
     pickupLocation: "",
   });
+
+  // Effetto per popolare il form in modalità edit
+  // Prende i dati recuperati dal backend e li prepara nel formato frontend
+  useEffect(() => {
+    if (inEditMode && donation && open) {
+      setFormData({
+        type: donation.type,
+        items: donation.items.map((item) => ({
+          id: item._id,
+          type: item.type,
+          name: item.name,
+          // 2 funzioni helper che aiutano a formattare il campo quantity del backend
+          // splittandolo in 2 sottocampi (quantità e unità)
+          quantity: formatBackendQuantity(item),
+          units: formatBackendUnits(item),
+        })),
+        pickupTime: dayjs(donation.pickupTime),
+        notes: donation.notes,
+        pickupLocation: donation.pickupLocation,
+      });
+    }
+  }, [inEditMode, donation, open]);
 
   // funzione chiamata appena l'utente schiccia il buttone "Crea donazione"
   const handleSubmit = async (e) => {
@@ -75,7 +106,15 @@ export default function CreateDonationDialog({ open, onClose }) {
     }
 
     // no errors
-    const result = await createDonation(formData);
+    let result;
+
+    if (inEditMode && donation) {
+      // Modalità modifica
+      result = await updateDonation(donation._id, formData);
+    } else {
+      // Modalità creazione
+      result = await createDonation(formData);
+    }
 
     if (result.success) {
       alertSuccess(result.message);
@@ -197,7 +236,7 @@ export default function CreateDonationDialog({ open, onClose }) {
               Annulla
             </Button>
             <Button type="submit" variant="contained" color="primary">
-              Crea
+              {inEditMode ? "Aggiorna" : "Crea"}
             </Button>
           </DialogActions>
         </form>

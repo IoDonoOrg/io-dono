@@ -12,15 +12,16 @@ import DonationBar from "./DonationBar";
 import { useDonation } from "src/hooks/useDonation";
 import { deleteDonation } from "src/services/donationService";
 import { formatDate, isModifieble } from "src/utils/format";
-import { acceptedEx, activeEx, completedEx } from "src/utils/exampleData";
 import ViewDonationDialog from "./ViewDonationDialog";
 import { useViewDonation } from "src/hooks/useViewDonation";
+import { useEditDonation } from "src/hooks/useEditDonation";
+import CreateDonationDialog from "../form/CreateDonationDialog";
 
 function DonationHistory({ open, onClose }) {
   const {
-    // activeDonations,
-    // acceptedDonations,
-    // completedDonations,
+    activeDonations,
+    acceptedDonations,
+    completedDonations,
     removeDonationLocally,
     loading,
   } = useDonation();
@@ -32,9 +33,8 @@ function DonationHistory({ open, onClose }) {
     handleCloseViewDialog,
   } = useViewDonation();
 
-  const activeDonations = activeEx;
-  const acceptedDonations = acceptedEx;
-  const completedDonations = completedEx;
+  const { editDialogOpen, editedDonation, handleEdit, handleCloseEditDialog } =
+    useEditDonation();
 
   const handleDelete = async (id) => {
     try {
@@ -45,9 +45,11 @@ function DonationHistory({ open, onClose }) {
     }
   };
 
+  // combina tutti i tipi delle donazioni in un unico array
+  // se almeno una parte non è definita => sarà un array vuoto
   const allDonations =
     activeDonations && acceptedDonations && completedDonations
-      ? [...activeDonations, ...acceptedDonations, ...completedDonations]
+      ? activeDonations.concat(acceptedDonations, completedDonations)
       : [];
 
   return (
@@ -88,6 +90,7 @@ function DonationHistory({ open, onClose }) {
                   onDelete={() => handleDelete(el._id)}
                   onVisualize={() => handleVisualize(el)}
                   isModifieble={isModifieble(el.status)}
+                  onEdit={() => handleEdit(el)}
                 >
                   {`Ritiro: ${formatDate(el.pickupTime)}, ${
                     el.items[0]?.name
@@ -109,6 +112,15 @@ function DonationHistory({ open, onClose }) {
           open={viewDialogOpen}
           onClose={handleCloseViewDialog}
           donation={selectedDonation}
+        />
+      )}
+
+      {editedDonation && (
+        <CreateDonationDialog
+          open={editDialogOpen}
+          onClose={handleCloseEditDialog}
+          inEditMode={true}
+          donation={editedDonation}
         />
       )}
     </>

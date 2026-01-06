@@ -13,8 +13,10 @@ import { MoreHoriz } from "@mui/icons-material";
 import { formatDate } from "src/utils/format";
 import { useViewDonation } from "src/hooks/useViewDonation";
 import ViewDonationDialog from "./ViewDonationDialog";
+import { useEditDonation } from "src/hooks/useEditDonation";
+import CreateDonationDialog from "../form/CreateDonationDialog";
 
-function ActiveDonationsTile({ displayNumber = 3, onOpenHistory }) {
+function ActiveDonationsTile({ displayNumber = 3 }) {
   const { activeDonations, loading, error, removeDonationLocally } =
     useDonation();
 
@@ -24,6 +26,9 @@ function ActiveDonationsTile({ displayNumber = 3, onOpenHistory }) {
     handleVisualize,
     handleCloseViewDialog,
   } = useViewDonation();
+
+  const { editDialogOpen, editedDonation, handleEdit, handleCloseEditDialog } =
+    useEditDonation();
 
   const handleDelete = async (id) => {
     try {
@@ -80,6 +85,7 @@ function ActiveDonationsTile({ displayNumber = 3, onOpenHistory }) {
               status={el.status}
               onDelete={() => handleDelete(el._id)}
               onVisualize={() => handleVisualize(el)}
+              onEdit={() => handleEdit(el)}
             >
               {`Ritiro: ${formatDate(el.pickupTime)} - ${
                 el.items[0]?.name
@@ -87,31 +93,20 @@ function ActiveDonationsTile({ displayNumber = 3, onOpenHistory }) {
             </DonationBar>
           ))
         )}
-        {/* Tre puntini orizzontali */}
-        <Paper
-          variant="outlined"
-          className="flex items-center justify-center px-4 py-1"
-          sx={{
-            borderRadius: 50,
-          }}
-        >
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="settings"
-            onClick={onOpenHistory}
-            aria-controls={open ? "donation-menu" : undefined}
-            aria-haspopup="true"
-          >
-            <MoreHoriz />
-          </IconButton>
-        </Paper>
       </Box>
       {selectedDonation && (
         <ViewDonationDialog
           open={viewDialogOpen}
           onClose={handleCloseViewDialog}
           donation={selectedDonation}
+        />
+      )}
+      {editedDonation && (
+        <CreateDonationDialog
+          open={editDialogOpen}
+          onClose={handleCloseEditDialog}
+          inEditMode={true}
+          donation={editedDonation}
         />
       )}
     </>

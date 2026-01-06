@@ -68,6 +68,31 @@ export const deleteDonation = async (id) => {
   }
 }
 
+// PUT /api/donations/:id
+export const updateDonation = async (id, formData) => {
+  const payload = preparePayload(formData);
+
+  try {
+    await api.put(`/donations/${id}`, payload);
+    return {
+      success: true,
+      message: "Donazione modificata con successo"
+    }
+  } catch (e) {
+    if (e.response) {
+      console.log("Errore backend: ", e.response.data.message);
+      return {
+        success: false,
+        message: e.response.data.message
+      }
+    }
+    return {
+      success: false,
+      message: "Errore server backend"
+    }
+  }
+}
+
 
 /*
   RECUPERO DEI DIVERSI TIPI DELLE DONAZIONE

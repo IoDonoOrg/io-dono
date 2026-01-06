@@ -25,3 +25,19 @@ export const isModifieble = (status) => {
   );
 }
 
+// Estrae la quantità effetive dalla string in formato backend (quantity: 50 kg => 50)
+export const formatBackendQuantity = (item) => {
+  if (!item.quantity) return "1";
+
+  const parts = item.quantity.toString().trim().split(" ");
+  return parts[0];
+};
+
+// Estrae l'unità effetive dalla string in formato backend (quantity: 50 kg => kg)
+export const formatBackendUnits = (item) => {
+  if (!item.quantity) return "kg";
+
+  const parts = item.quantity.toString().trim().split(" ");
+  return parts[1];
+};
+

@@ -5,8 +5,12 @@ import {
   getActiveDonations,
   getCompletedDonations,
 } from "src/services/donationService";
+import { acceptedEx, activeEx, completedEx } from "src/utils/exampleData";
 
 const DonationContext = createContext();
+
+const DEBUG_MODE = import.meta.env.VITE_DEBUG;
+console.log(DEBUG_MODE);
 
 export function DonationProvider({ children }) {
   const [activeDonations, setActiveDonations] = useState(null);
@@ -19,6 +23,13 @@ export function DonationProvider({ children }) {
 
   // recupera le donazione dal backend
   const fetchActiveDonations = useCallback(async () => {
+    // blocco che controlla se è definita la variabile di ambiente debug
+    // se lo è => dati di esempio verranno utilizzati al posto di quelli di backend
+    if (DEBUG_MODE) {
+      setActiveDonations(activeEx);
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await getActiveDonations();
@@ -34,6 +45,11 @@ export function DonationProvider({ children }) {
 
   // recupera le donazioni accettate dal backend
   const fetchAcceptedDonations = useCallback(async () => {
+    if (DEBUG_MODE) {
+      setAcceptedDonations(acceptedEx);
+      return;
+    }
+
     try {
       const result = await getAcceptedDonations();
       setAcceptedDonations(result);
@@ -45,6 +61,11 @@ export function DonationProvider({ children }) {
 
   // recupera le donazioni completate dal backend
   const fetchCompletedDonations = useCallback(async () => {
+    if (DEBUG_MODE) {
+      setCompletedDonations(completedEx);
+      return;
+    }
+
     try {
       const result = await getCompletedDonations();
       setCompletedDonations(result);

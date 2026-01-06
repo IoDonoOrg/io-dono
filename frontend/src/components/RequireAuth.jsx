@@ -5,7 +5,8 @@ import { useAuth } from "src/hooks/useAuth";
 
 // il componente che wrappa le rotte protette e controlla se l'utente sia autenticato o meno
 // controlla anche il token JWT dell'utente
-// se lo è -> gli permette di accedere alle risorse protette
+//
+// se l'utente è già autenticato -> gli permette di accedere alle risorse protette
 // altrimenti lo manda alla pagina login
 function RequireAuth() {
   const { user, logout, loading } = useAuth();

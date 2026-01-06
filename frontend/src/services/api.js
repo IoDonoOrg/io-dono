@@ -1,10 +1,16 @@
 import axios from "axios";
 
+// se l'app non è deployed => usa la variabile dell'ambiente
+// altrimenti usa il percorso /api
+const baseURL = import.meta.env.DEV
+  ? import.meta.env.VITE_BACKEND_API
+  : '/api';
+
 // crea un'istanza di axios
 const api = axios.create({
   // definire VITE_API_URL in un file .env per production build
   // altrimenti usera' url locale
-  baseURL: "/api",
+  baseURL: baseURL,
   // timeout se il server non risponde
   timeout: 10000,
   // header comuni per tutte le chiamate
