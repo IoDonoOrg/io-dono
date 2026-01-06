@@ -1,10 +1,11 @@
 const express = require('express');
-const app = express();
-
+const path = require('path');
 const cors = require('cors');
 const { logger } = require('./middleware/logger.middleware.js');
 
 require('dotenv').config();
+
+const app = express();
 
 // Abilita CORS per tutte le richieste e origini
 // altrimenti server frontend non può fare delle chiamate al backend
@@ -18,6 +19,12 @@ app.use(express.json());
 if (process.env.DEBUG)
   app.use(logger);
 
+// path assoluti
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+
+// fa partire il servizio di frontend
+app.use(express.static(frontendDistPath));
+
 // Importa il "super-router" dalla cartella routes
 const apiRoutes = require('./api/routes/mainRouter.js');
 
@@ -25,4 +32,10 @@ const apiRoutes = require('./api/routes/mainRouter.js');
 // usare use e non get per gestire tutti i tipi di richiesta
 app.use('/api', apiRoutes);
 
+// Gestione delle rotte per il frontend 
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
+});
+
 module.exports = app; // Esporta l'app per usarla in server.js
+
