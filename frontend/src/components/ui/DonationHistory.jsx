@@ -18,13 +18,7 @@ import { useEditDonation } from "src/hooks/useEditDonation";
 import CreateDonationDialog from "../form/CreateDonationDialog";
 
 function DonationHistory({ open, onClose }) {
-  const {
-    activeDonations,
-    acceptedDonations,
-    completedDonations,
-    removeDonationLocally,
-    loading,
-  } = useDonation();
+  const { allDonations, removeDonationLocally, loading } = useDonation();
 
   const {
     viewDialogOpen,
@@ -44,13 +38,6 @@ function DonationHistory({ open, onClose }) {
       console.log(e);
     }
   };
-
-  // combina tutti i tipi delle donazioni in un unico array
-  // se almeno una parte non è definita => sarà un array vuoto
-  const allDonations =
-    activeDonations && acceptedDonations && completedDonations
-      ? activeDonations.concat(acceptedDonations, completedDonations)
-      : [];
 
   return (
     <>
@@ -92,8 +79,10 @@ function DonationHistory({ open, onClose }) {
                   isModifieble={isModifieble(el.status)}
                   onEdit={() => handleEdit(el)}
                 >
-                  {`Ritiro: ${formatDate(el.pickupTime)}, ${
-                    el.items[0]?.name
+                  {`ID: ${el._id.substring(0, 10)}, Data ritiro: ${formatDate(
+                    el.pickupTime
+                  )}, Contenuti: ${el.items[0]?.name} ${
+                    el.items[0]?.quantity
                   }, ...`}
                 </DonationBar>
               ))

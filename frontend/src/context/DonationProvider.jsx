@@ -1,5 +1,11 @@
 // src/context/DonationContext.js
-import { createContext, useState, useEffect, useCallback } from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   getAcceptedDonations,
   getActiveDonations,
@@ -20,6 +26,14 @@ export function DonationProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // combina tutti i tipi delle donazioni in un unico array
+  // se almeno una parte non è definita => sarà un array vuoto
+  const allDonations = useMemo(() => {
+    return activeDonations && acceptedDonations && completedDonations
+      ? activeDonations.concat(acceptedDonations, completedDonations)
+      : [];
+  }, [activeDonations, acceptedDonations, completedDonations]);
 
   // recupera le donazione dal backend
   const fetchActiveDonations = useCallback(async () => {
@@ -115,6 +129,7 @@ export function DonationProvider({ children }) {
         activeDonations,
         acceptedDonations,
         completedDonations,
+        allDonations,
         loading,
         error,
         refreshDonations,

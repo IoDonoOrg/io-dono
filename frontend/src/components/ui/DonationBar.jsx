@@ -90,7 +90,9 @@ function DonationBar({
           <Divider orientation="vertical" sx={{ height: 30 }} />
         </Box>
 
-        <Typography>{children}</Typography>
+        <Typography sx={{ flexGrow: 1, textAlign: "left" }}>
+          {children}
+        </Typography>
 
         <Box display="flex" alignItems="center" className="ml-3" gap={1}>
           <Divider orientation="vertical" sx={{ height: 30 }} />

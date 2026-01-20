@@ -9,10 +9,12 @@ import ActiveDonationsTile from "src/components/ui/ActiveDonationsTile";
 import { DonationProvider } from "src/context/DonationProvider";
 import DonationHistory from "src/components/ui/DonationHistory";
 import TileClickable from "src/components/ui/TileClickable";
+import DonationMapDialog from "src/components/ui/DonationMapDialog";
 
 function DonorDashboard() {
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
 
   return (
     <>
@@ -34,6 +36,12 @@ function DonorDashboard() {
               open={isHistoryOpen}
               onClose={() => setIsHistoryOpen(false)}
             />
+            <DonationMapDialog
+              open={isMapOpen}
+              onClose={() => setIsMapOpen(false)}
+              // We pass empty array for now as requested
+              donations={[]}
+            />
 
             <Tooltip title="Crea donazione" arrow>
               <Fab
@@ -53,7 +61,9 @@ function DonorDashboard() {
               <TileClickable onClick={() => setIsHistoryOpen(true)}>
                 Storico
               </TileClickable>
-              <TileClickable>Mappa</TileClickable>
+              <TileClickable onClick={() => setIsMapOpen(true)}>
+                Mappa
+              </TileClickable>
               <TileClickable>Ricompense</TileClickable>
             </Box>
           </Paper>

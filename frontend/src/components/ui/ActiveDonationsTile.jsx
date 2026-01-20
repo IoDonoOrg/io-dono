@@ -87,8 +87,8 @@ function ActiveDonationsTile({ displayNumber = 3 }) {
               onVisualize={() => handleVisualize(el)}
               onEdit={() => handleEdit(el)}
             >
-              {`Ritiro: ${formatDate(el.pickupTime)} - ${
-                el.items[0]?.name
+              {`Ritiro: ${formatDate(el.pickupTime)} - ${el.items[0]?.name} ${
+                el.items[0]?.quantity
               }, ...`}
             </DonationBar>
           ))
