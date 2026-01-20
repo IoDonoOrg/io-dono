@@ -225,3 +225,13 @@ export const validateNotes = (notes) => {
   }
   return "";
 };
+
+export const validatePickupLocation = (location) => {
+  if (!location) {
+    return "L'indirizzo di ritiro è obbligatorio";
+  }
+  if (!location.hasStreetNumber) {
+    return "Seleziona un indirizzo completo con numero civico";
+  }
+  return "";
+};

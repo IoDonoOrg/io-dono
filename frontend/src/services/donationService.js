@@ -40,16 +40,23 @@ const preparePayload = (formData) => {
     quantity: `${item.quantity} ${item.units}`
   }));
 
+  // Estrai i dati della posizione (gestisce il caso in cui sia null)
+  const location = formData.pickupLocation || {};
+
   return {
     items: formattedItems,
     pickupTime: formData.pickupTime?.toISOString(),
     notes: formData.notes || "",
-    // TODO: implementare la geolocalizzazione
-    pickupLocation: formData.pickupLocation || {
-      address: "test",
+
+    pickupLocation: {
+      address: location.address || "",
       geo: {
         type: "Point",
-        coordinates: [0, 0]
+        // NOTA: GeoJSON richiede l'ordine [Longitudine, Latitudine]
+        coordinates: [
+          location.lng || 0,
+          location.lat || 0
+        ]
       }
     }
   };

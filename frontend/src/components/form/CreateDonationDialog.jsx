@@ -17,11 +17,13 @@ import AlertSnack from "../ui/AlertSnack";
 import {
   validateItems,
   validateNotes,
+  validatePickupLocation,
   validatePickupTime,
 } from "src/utils/validation";
 import { useDonation } from "src/hooks/useDonation";
 import dayjs from "dayjs";
 import { formatBackendQuantity, formatBackendUnits } from "src/utils/format";
+import GoogleAutocomplete from "./GoogleAutocomplete";
 
 export default function CreateDonationDialog({
   open,
@@ -86,13 +88,13 @@ export default function CreateDonationDialog({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
+    // console.log(formData);
 
     const detectedErrors = {
       pickupTime: validatePickupTime(formData.pickupTime),
       items: validateItems(formData.items),
       notes: validateNotes(formData.notes),
-      pickupLocation: "",
+      pickupLocation: validatePickupLocation(formData.pickupLocation),
     };
 
     setFormErrors(detectedErrors);
@@ -107,6 +109,8 @@ export default function CreateDonationDialog({
 
     // no errors
     let result;
+
+    console.log(formData);
 
     if (inEditMode && donation) {
       // Modalità modifica
@@ -158,6 +162,21 @@ export default function CreateDonationDialog({
     setFormErrors({ ...formErrors, [fieldName]: "" });
   };
 
+  const handleAddressChange = (placeDetails) => {
+    setFormData({
+      ...formData,
+      pickupLocation: placeDetails,
+    });
+
+    setFormErrors({
+      ...formErrors,
+      pickupLocation:
+        placeDetails && !placeDetails.hasStreetNumber
+          ? "Seleziona un indirizzo completo con numero civico"
+          : "",
+    });
+  };
+
   return (
     <>
       <AlertSnack
@@ -181,7 +200,7 @@ export default function CreateDonationDialog({
         <form onSubmit={handleSubmit}>
           <DialogContent dividers>
             <Grid container spacing={2}>
-              <Grid item size={12}>
+              <Grid item size={6}>
                 <DateTimePicker
                   label="Data e Ora Ritiro *"
                   value={formData.pickupTime}
@@ -193,6 +212,13 @@ export default function CreateDonationDialog({
                     },
                   }}
                   disablePast
+                />
+              </Grid>
+              <Grid item size={6}>
+                <GoogleAutocomplete
+                  value={formData.pickupLocation}
+                  onChange={handleAddressChange}
+                  error={formErrors.pickupLocation}
                 />
               </Grid>
               <Grid item size={12}>
