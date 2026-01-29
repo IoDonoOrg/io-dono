@@ -11,8 +11,8 @@ function Example() {
         <img src={Cat} className="max-w-xs max-h-xs" />
       </Box>
       <p className="text-gray-800 text-2xl">Pagina non trovata</p>
-      <Link className="" to="/login" component={RouterLink}>
-        Tornare al login
+      <Link className="" to="/" component={RouterLink}>
+        Tornare alla dashboard
       </Link>
     </Container>
   );
