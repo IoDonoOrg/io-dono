@@ -2,7 +2,7 @@ import { Box, Link, Container } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import Cat from "src/assets/cat.svg";
 
-function Example() {
+function NotFound() {
   return (
     <Container className="flex flex-col min-h-screen items-center justify-center gap-5">
       <p className="italic">Ooops!</p>
@@ -18,4 +18,4 @@ function Example() {
   );
 }
 
-export default Example;
+export default NotFound;
