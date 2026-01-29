@@ -83,7 +83,7 @@ const getPlaceDetails = async (placeId) => {
   });
 
   const hasStreetNumber = place.addressComponents?.some((component) =>
-    component.types.includes("street_number")
+    component.types.includes("street_number"),
   );
 
   return {
@@ -100,7 +100,7 @@ const fetch = debounce(async (request, callback) => {
   try {
     const { suggestions } =
       await window.google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(
-        request
+        request,
       );
 
     callback(
@@ -115,18 +115,15 @@ const fetch = debounce(async (request, callback) => {
               (match) => ({
                 offset: match.startOffset,
                 length: match.endOffset - match.startOffset,
-              })
+              }),
             ),
             secondary_text: place.secondaryText?.text,
           },
         };
-      })
+      }),
     );
   } catch (err) {
-    if (err.message.startsWith("Quota exceeded for quota")) {
-      callback(request.input.length === 1 ? fakeAnswer.p : fakeAnswer.paris);
-    }
-    throw err;
+    console.log(err);
   }
 }, 400);
 
@@ -151,7 +148,7 @@ export default function GoogleAutocomplete({ value, onChange, error }) {
 
       const script = loadScript(
         `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async&language=it&callback=${GOOGLE_NAMESPACE}.${callbackId}`,
-        document.querySelector("head")
+        document.querySelector("head"),
       );
       script.id = "google-maps";
     } else if (window.google && !loaded) {
@@ -196,7 +193,8 @@ export default function GoogleAutocomplete({ value, onChange, error }) {
             newOptions = [
               autocompleteValue,
               ...results.filter(
-                (result) => result.description !== autocompleteValue.description
+                (result) =>
+                  result.description !== autocompleteValue.description,
               ),
             ];
           }
@@ -204,7 +202,7 @@ export default function GoogleAutocomplete({ value, onChange, error }) {
           newOptions = [autocompleteValue];
         }
         setOptions(newOptions);
-      }
+      },
     );
 
     return () => {
@@ -216,9 +214,18 @@ export default function GoogleAutocomplete({ value, onChange, error }) {
     <Autocomplete
       size="medium"
       fullWidth
-      getOptionLabel={(option) =>
-        typeof option === "string" ? option : option.description
-      }
+      getOptionLabel={(option) => {
+        if (typeof option === "string") {
+          return option;
+        }
+        if (option.address) {
+          return option.address;
+        }
+        if (option.description) {
+          return option.description;
+        }
+        return "";
+      }}
       filterOptions={(x) => x}
       slots={{
         paper: CustomPaper,
@@ -227,7 +234,7 @@ export default function GoogleAutocomplete({ value, onChange, error }) {
       autoComplete
       includeInputInList
       filterSelectedOptions
-      value={autocompleteValue}
+      value={value}
       noOptionsText="Nessun risultato"
       onChange={async (event, newValue) => {
         setOptions(newValue ? [newValue, ...options] : options);
@@ -259,7 +266,7 @@ export default function GoogleAutocomplete({ value, onChange, error }) {
 
         const parts = parse(
           option.structured_formatting.main_text,
-          matches.map((match) => [match.offset, match.offset + match.length])
+          matches.map((match) => [match.offset, match.offset + match.length]),
         );
         return (
           <li key={key} {...optionProps}>
@@ -299,90 +306,4 @@ GoogleAutocomplete.propTypes = {
   value: PropTypes.object,
   onChange: PropTypes.func.isRequired,
   error: PropTypes.string,
-};
-
-// Fake data in case Google Maps Places API returns a rate limit.
-const fakeAnswer = {
-  p: [
-    {
-      description: "Portugal",
-      structured_formatting: {
-        main_text: "Portugal",
-        main_text_matched_substrings: [{ offset: 0, length: 1 }],
-      },
-    },
-    {
-      description: "Puerto Rico",
-      structured_formatting: {
-        main_text: "Puerto Rico",
-        main_text_matched_substrings: [{ offset: 0, length: 1 }],
-      },
-    },
-    {
-      description: "Pakistan",
-      structured_formatting: {
-        main_text: "Pakistan",
-        main_text_matched_substrings: [{ offset: 0, length: 1 }],
-      },
-    },
-    {
-      description: "Philippines",
-      structured_formatting: {
-        main_text: "Philippines",
-        main_text_matched_substrings: [{ offset: 0, length: 1 }],
-      },
-    },
-    {
-      description: "Paris, France",
-      structured_formatting: {
-        main_text: "Paris",
-        main_text_matched_substrings: [{ offset: 0, length: 1 }],
-        secondary_text: "France",
-      },
-    },
-  ],
-  paris: [
-    {
-      description: "Paris, France",
-      structured_formatting: {
-        main_text: "Paris",
-        main_text_matched_substrings: [{ offset: 0, length: 5 }],
-        secondary_text: "France",
-      },
-    },
-    {
-      description: "Paris, TX, USA",
-      structured_formatting: {
-        main_text: "Paris",
-        main_text_matched_substrings: [{ offset: 0, length: 5 }],
-        secondary_text: "TX, USA",
-      },
-    },
-    {
-      description: "Paris Beauvais Airport, Route de l'Aéroport, Tillé, France",
-      structured_formatting: {
-        main_text: "Paris Beauvais Airport",
-        main_text_matched_substrings: [{ offset: 0, length: 5 }],
-        secondary_text: "Route de l'Aéroport, Tillé, France",
-      },
-    },
-    {
-      description:
-        "Paris Las Vegas, South Las Vegas Boulevard, Las Vegas, NV, USA",
-      structured_formatting: {
-        main_text: "Paris Las Vegas",
-        main_text_matched_substrings: [{ offset: 0, length: 5 }],
-        secondary_text: "South Las Vegas Boulevard, Las Vegas, NV, USA",
-      },
-    },
-    {
-      description:
-        "Paris La Défense Arena, Jardin de l'Arche, Nanterre, France",
-      structured_formatting: {
-        main_text: "Paris La Défense Arena",
-        main_text_matched_substrings: [{ offset: 0, length: 5 }],
-        secondary_text: "Jardin de l'Arche, Nanterre, France",
-      },
-    },
-  ],
 };

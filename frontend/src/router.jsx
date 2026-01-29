@@ -1,11 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
 
-import Example from "./pages/Example/Example";
-import Login from "./pages/Login/Login";
-import NotFound from "./pages/NotFound/NotFound";
-import Registration from "./pages/Registration/Registration";
-import RequireAuth from "./components/RequireAuth";
-import Home from "./pages/Home/Home";
+import Example from "./pages/Example.jsx";
+import Login from "./pages/Login.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import Registration from "./pages/Registration.jsx";
+import Home from "./pages/Home.jsx";
+import RequireAuth from "./context/RequireAuth.jsx";
 
 // Definisce il router principale dell'app
 // Ogni oggetto rappresenta una rotta con il suo percorso (path) e il componente da mostrare (element)

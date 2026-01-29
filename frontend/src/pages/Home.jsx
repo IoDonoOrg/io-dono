@@ -1,8 +1,8 @@
 import { useAuth } from "src/hooks/useAuth";
 
-import AssociationDashboard from "../Dashboard/AssociationDashboard";
-import DonorDashboard from "../Dashboard/DonorDashboard";
-import AdminDashboard from "../Example/Example";
+import AssociationDashboard from "./Dashboard/AssociationDashboard.jsx";
+import DonorDashboard from "./Dashboard/DonorDashboard.jsx";
+import AdminDashboard from "./Example.jsx";
 import { USER_ROLE } from "src/utils/constants";
 
 // un componente "switch"

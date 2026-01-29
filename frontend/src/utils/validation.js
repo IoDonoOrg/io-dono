@@ -230,8 +230,16 @@ export const validatePickupLocation = (location) => {
   if (!location) {
     return "L'indirizzo di ritiro è obbligatorio";
   }
-  if (!location.hasStreetNumber) {
+
+  // gestisce il caso in cui l'utente non ha ancora selezionato l'indirizzo
+  if (location.description && !location.address) {
+    return "Seleziona un indirizzo dalla lista";
+  }
+
+  // controlla se l'oggetto ha un numero civico
+  if (location.address && !location.hasStreetNumber) {
     return "Seleziona un indirizzo completo con numero civico";
   }
+
   return "";
 };

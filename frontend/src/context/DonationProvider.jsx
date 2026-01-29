@@ -16,7 +16,6 @@ import { acceptedEx, activeEx, completedEx } from "src/utils/exampleData";
 const DonationContext = createContext();
 
 const DEBUG_MODE = import.meta.env.VITE_DEBUG;
-console.log(DEBUG_MODE);
 
 export function DonationProvider({ children }) {
   const [activeDonations, setActiveDonations] = useState(null);

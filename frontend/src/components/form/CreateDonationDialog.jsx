@@ -65,6 +65,7 @@ export default function CreateDonationDialog({
   // Effetto per popolare il form in modalità edit
   // Prende i dati recuperati dal backend e li prepara nel formato frontend
   useEffect(() => {
+    console.log(donation);
     if (inEditMode && donation && open) {
       setFormData({
         type: donation.type,
@@ -79,7 +80,10 @@ export default function CreateDonationDialog({
         })),
         pickupTime: dayjs(donation.pickupTime),
         notes: donation.notes,
-        pickupLocation: donation.pickupLocation,
+        pickupLocation: {
+          description: donation.pickupLocation.address,
+          ...donation.pickupLocation,
+        },
       });
     }
   }, [inEditMode, donation, open]);
