@@ -11,7 +11,7 @@ const generateToken = (user) => {
     // Scadrà in 3 ore (puoi cambiarlo)
     const payload = {
         id: user._id,
-        role: user.role, 
+        role: user.role,
         type: 'login'
     };
     return jwt.sign(
@@ -24,8 +24,8 @@ const generateToken = (user) => {
 function generateRegistrationToken(googlePayload) {
     // googlePayload contiene { googleId, email, name, picture } e in più il tipo
     const payload = {
-        ...googlePayload, 
-        type: 'registration' 
+        ...googlePayload,
+        type: 'registration'
     };
     return jwt.sign(
         payload, // Inseriamo tutti i dati di Google
@@ -58,7 +58,7 @@ exports.register = async (req, res) => {
             address,
             profile // Contiene donorType, ecc.
         });
-        
+
         // 3. Salva l'utente 
         await newUser.save();
 
@@ -116,7 +116,6 @@ exports.login = async (req, res) => {
     }
 };
 
-// nuova logica google
 // Logica per: POST /api/auth/google/token
 exports.handleGoogleToken = async (req, res) => {
 
@@ -144,8 +143,8 @@ exports.handleGoogleToken = async (req, res) => {
         if (user) {
             // Utente trovato quindi genera un token di accesso standard.
             const loginToken = generateToken(user); // La tua funzione generateToken(user)
-            
-            user.password = undefined; 
+
+            user.password = undefined;
             return res.status(200).json({ loginToken: loginToken, user });
         }
 
@@ -154,21 +153,21 @@ exports.handleGoogleToken = async (req, res) => {
         // Controllo di sicurezza
         let existingEmail = await User.findOne({ email });
         if (existingEmail) {
-            return res.status(400).json({ 
-                message: `L'email ${email} è già registrata. Accedi con la tua password e collega l'account Google dal tuo profilo.` 
+            return res.status(400).json({
+                message: `L'email ${email} è già registrata. Accedi con la tua password e collega l'account Google dal tuo profilo.`
             });
         }
-        
+
         // Crea il payload per il token di registrazione temporaneo
         const registrationPayload = {
             googleId,
             email,
             name,
         };
-        
+
         // Generiamo il token di registrazione di 15 min
-        const registrationToken = generateRegistrationToken(registrationPayload); 
-        
+        const registrationToken = generateRegistrationToken(registrationPayload);
+
         // Invia al client questo token temporaneo per il completamento della registrazione
         return res.status(201).json({ registrationToken });
 
@@ -197,11 +196,11 @@ exports.registerGoogle = async (req, res) => {
     if (!role || !phoneNumber || !address) {
         return res.status(400).json({ message: 'Dati di registrazione incompleti (ruolo, telefono, indirizzo).' });
     }
-    
+
     try {
         // Verifica il token di registrazione
         const decodedPayload = jwt.verify(registrationToken, process.env.JWT_SECRET);
-        
+
         // verifica che sia un token di "registrazione"
         if (decodedPayload.type !== 'registration') {
             return res.status(401).json({ message: 'Token non valido per questa operazione.' });
@@ -232,15 +231,15 @@ exports.registerGoogle = async (req, res) => {
 
         // Crea un VERO token di login 
         const loginToken = generateToken(newUser);
-        
-        newUser.password = undefined; 
+
+        newUser.password = undefined;
         res.status(201).json({ token: loginToken, user: newUser });
 
     } catch (error) {
-         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-             return res.status(401).json({ message: 'Token di registrazione non valido o scaduto. Riprova il login.' });
-         }
-         if (error.name === 'ValidationError') {
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Token di registrazione non valido o scaduto. Riprova il login.' });
+        }
+        if (error.name === 'ValidationError') {
             return res.status(400).json({ message: error.message });
         }
         res.status(500).json({ message: 'Errore del server', error: error.message });

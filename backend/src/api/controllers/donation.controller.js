@@ -35,8 +35,8 @@ exports.createDonation = async (req, res) => {
         // Crea la nuova donazione
         const newDonation = new Donation({
             donorId,
-            items, 
-            pickupTime: pickupDate, 
+            items,
+            pickupTime: pickupDate,
             notes,
             pickupLocation,
             status: 'AVAILABLE'
@@ -110,7 +110,7 @@ exports.updateMyDonation = async (req, res) => {
         }
 
         // Controllo di validità per la data
-        if(pickupTime){
+        if (pickupTime) {
             const pickupDate = new Date(pickupTime);
             if (isNaN(pickupDate.getTime())) {
                 return res.status(400).json({ message: 'Formato data non valido.' });
@@ -131,7 +131,7 @@ exports.updateMyDonation = async (req, res) => {
         if (donation.status !== 'AVAILABLE') {
             return res.status(400).json({ message: 'Impossibile modificare: donazione già accettata o completata.' });
         }
-        
+
         // Se tutti i controlli passano, aggiorna la donazione
         // Sovrascriviamo i campi che l'utente può modificare
         if (items) {
@@ -140,7 +140,7 @@ exports.updateMyDonation = async (req, res) => {
             }
             donation.items = items;
         }
-    
+
         donation.notes = notes || donation.notes;
 
         // Aggiorniamo l'oggetto nestato 'pickupLocation' in modo sicuro
@@ -193,12 +193,6 @@ exports.cancelMyDonation = async (req, res) => {
             return res.status(403).json({ message: 'Accesso negato: non sei il proprietario di questa donazione.' });
         }
 
-        /* Puoi eliminarla solo se non è ancora stata accettata
-        if (donation.status !== 'AVAILABLE') {
-            return res.status(400).json({ message: 'Impossibile eliminare: questa donazione è già stata accettata o completata.' });
-        }
-        */
-
         await donation.deleteOne();
 
         // 5. Invia la donazione aggiornata
@@ -218,7 +212,7 @@ exports.cancelMyDonation = async (req, res) => {
 // ritorna le donazioni (solo se 'AVAILABLE')
 exports.getAvailableDonations = async (req, res) => {
     try {
-        const donations = await Donation.find({ status: 'AVAILABLE'}).sort({ createdAt: -1 }); // Ordina dalla più recente;
+        const donations = await Donation.find({ status: 'AVAILABLE' }).sort({ createdAt: -1 }); // Ordina dalla più recente;
         return res.status(200).json(donations);
     } catch (error) {
         return res.status(500).json({ message: 'Errore del server', error: error.message });
@@ -231,11 +225,11 @@ exports.getAcceptedeDonations = async (req, res) => {
     try {
         const associationId = req.user._id;
 
-        const donations = await Donation.find({ 
-            status: 'ACCEPTED', 
+        const donations = await Donation.find({
+            status: 'ACCEPTED',
             associationId: associationId
-        }).sort({ createdAt: -1 }); 
-        
+        }).sort({ createdAt: -1 });
+
         return res.status(200).json(donations);
     } catch (error) {
         return res.status(500).json({ message: 'Errore del server', error: error.message });
@@ -248,8 +242,8 @@ exports.getCompletedDonations = async (req, res) => {
     try {
         const associationId = req.user._id;
 
-        const donations = await Donation.find({ 
-            status: 'COMPLETED', 
+        const donations = await Donation.find({
+            status: 'COMPLETED',
             associationId: associationId
         }).sort({ createdAt: -1 });
 
@@ -266,7 +260,7 @@ exports.acceptDonation = async (req, res) => {
         const { id } = req.params; // L'ID della donazione dall'URL
         const associationId = req.user._id; // id della associazione
 
-         // 1. Controlla che l'ID sia un ID MongoDB valido
+        // 1. Controlla che l'ID sia un ID MongoDB valido
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'ID donazione non valido.' });
         }
@@ -311,7 +305,7 @@ exports.completeDonation = async (req, res) => {
         session.startTransaction();
 
         const { id } = req.params;
-        const { evaluation } = req.body; 
+        const { evaluation } = req.body;
         const associationId = req.user._id;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -319,7 +313,7 @@ exports.completeDonation = async (req, res) => {
             session.endSession();
             return res.status(400).json({ message: 'ID donazione non valido.' });
         }
-     
+
         if (!evaluation || !evaluation.rating) {
             await session.abortTransaction();
             session.endSession();
@@ -333,11 +327,11 @@ exports.completeDonation = async (req, res) => {
                 status: 'ACCEPTED',
                 associationId: associationId
             },
-            { 
-                $set: { 
+            {
+                $set: {
                     status: 'COMPLETED',
-                    evaluation: evaluation 
-                } 
+                    evaluation: evaluation
+                }
             },
             { new: true, session: session } // Passa la sessione
         );
@@ -346,24 +340,24 @@ exports.completeDonation = async (req, res) => {
         if (!updatedDonation) {
             await session.abortTransaction();
             session.endSession();
-            const donation = await Donation.findById(id).session(session); 
+            const donation = await Donation.findById(id).session(session);
             if (!donation) {
                 return res.status(404).json({ message: 'Donazione non trovata.' });
             }
             if (donation.associationId.toString() !== associationId.toString()) {
-                 return res.status(403).json({ message: 'Accesso negato: non sei l\'associazione che ha accettato questa donazione.' });
+                return res.status(403).json({ message: 'Accesso negato: non sei l\'associazione che ha accettato questa donazione.' });
             }
             if (donation.status !== 'ACCEPTED') {
-                 return res.status(400).json({ message: 'Errore: questa donazione non è nello stato corretto (deve essere ACCEPTED).' });
+                return res.status(400).json({ message: 'Errore: questa donazione non è nello stato corretto (deve essere ACCEPTED).' });
             }
             return res.status(400).json({ message: 'Impossibile completare la donazione.' });
         }
-        
+
         // Assegna punti al Donatore 
         await User.findByIdAndUpdate(
             updatedDonation.donorId,
             { $inc: { solidarityPoints: 10 } }, // 10 sono un esempio
-            { session: session } 
+            { session: session }
         );
 
         // fai il commit
