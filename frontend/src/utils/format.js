@@ -41,3 +41,16 @@ export const formatBackendUnits = (item) => {
   return parts[1];
 };
 
+// Converta il formato dell'indirizzo recuperato dal backend nel formato aspettato dal frontend
+export const formatBackendLocation = (location) => {
+  if (!location) return null;
+
+  return {
+    name: location.address,
+    address: location.address,
+    lat: location.geo?.coordinates?.[1] || 0,
+    lng: location.geo?.coordinates?.[0] || 0,
+    addressComponents: location.addressComponents || [],
+    hasStreetNumber: true,
+  };
+};

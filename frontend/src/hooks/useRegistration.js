@@ -69,7 +69,7 @@ export const useRegistration = (alertSuccess, alertError) => {
   });
 
   // la funzione che passa su i dati dal componente-figlio UserTypeDialog
-  // al componente Registration 
+  // al componente-padre Registration 
   const handleDialogSubmit = (userType) => {
     setFormData({ ...formData, user: userType });
     console.log(userType);
@@ -88,6 +88,8 @@ export const useRegistration = (alertSuccess, alertError) => {
     // normalizza il nome / cognome prima di validarlo
     const normalizedName = normalizeName(formData.name);
     const normalizedLastName = normalizeName(formData.lastName);
+
+    console.log(formData.user)
 
     const isPrivateDonator =
       formData.user.category === USER_ROLE.DONOR &&

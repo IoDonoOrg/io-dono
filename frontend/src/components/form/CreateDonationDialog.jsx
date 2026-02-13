@@ -22,7 +22,11 @@ import {
 } from "src/utils/validation";
 import { useDonation } from "src/hooks/useDonation";
 import dayjs from "dayjs";
-import { formatBackendQuantity, formatBackendUnits } from "src/utils/format";
+import {
+  formatBackendLocation,
+  formatBackendQuantity,
+  formatBackendUnits,
+} from "src/utils/format";
 import GoogleAutocomplete from "./GoogleAutocomplete";
 
 export default function CreateDonationDialog({
@@ -65,7 +69,7 @@ export default function CreateDonationDialog({
   // Effetto per popolare il form in modalità edit
   // Prende i dati recuperati dal backend e li prepara nel formato frontend
   useEffect(() => {
-    console.log(donation);
+    // console.log(donation);
     if (inEditMode && donation && open) {
       setFormData({
         type: donation.type,
@@ -80,19 +84,16 @@ export default function CreateDonationDialog({
         })),
         pickupTime: dayjs(donation.pickupTime),
         notes: donation.notes,
-        pickupLocation: {
-          description: donation.pickupLocation.address,
-          ...donation.pickupLocation,
-        },
+        pickupLocation: formatBackendLocation(donation.pickupLocation),
       });
+      console.log(donation.pickupLocation);
+      console.log(formatBackendLocation(donation.pickupLocation));
     }
   }, [inEditMode, donation, open]);
 
   // funzione chiamata appena l'utente schiccia il buttone "Crea donazione"
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // console.log(formData);
 
     const detectedErrors = {
       pickupTime: validatePickupTime(formData.pickupTime),
@@ -113,8 +114,6 @@ export default function CreateDonationDialog({
 
     // no errors
     let result;
-
-    console.log(formData);
 
     if (inEditMode && donation) {
       // Modalità modifica

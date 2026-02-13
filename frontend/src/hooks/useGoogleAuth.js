@@ -8,15 +8,15 @@ export const useGoogleAuth = (alertError, alertSuccess, alertInfo) => {
   const { login } = useAuth();
 
   const handleGoogleSuccess = async (googleResponse) => {
-    console.log(googleResponse);
+    // console.log(googleResponse);
     try {
       const response = await googleLogin(googleResponse.credential);
 
-      console.log(response);
+      // console.log(response);
 
       // l'utente registrato con google cerca di accedere
       if (response.loginToken) {
-        console.log("login token: ", response.loginToken);
+        // console.log("login token: ", response.loginToken);
         // salva il token e lo user in localStorage
         login(response.loginToken, response.user);
 
@@ -32,14 +32,14 @@ export const useGoogleAuth = (alertError, alertSuccess, alertInfo) => {
 
       // l'utente non ancora registrato cerca di accedere con google
       if (response.registrationToken) {
-        alertInfo("Bisogna completare la registrazione. Reindirizzamento in corso.")
-        console.log("registration token: ", response.registrationToken);
+        alertInfo("Bisogna completare la registrazione.")
+        // console.log("registration token: ", response.registrationToken);
 
         // sessionStorage perché registrationToken non deve persistere oltre una sessione
         sessionStorage.setItem("registrationToken", response.registrationToken);
         setTimeout(() => {
           navigate("/registration", { replace: true });
-        }, 3000);
+        }, 2000);
 
         return;
       }

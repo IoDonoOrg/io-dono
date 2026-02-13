@@ -38,7 +38,7 @@ export function DonationProvider({ children }) {
   const fetchActiveDonations = useCallback(async () => {
     // blocco che controlla se è definita la variabile di ambiente debug
     // se lo è => dati di esempio verranno utilizzati al posto di quelli di backend
-    if (DEBUG_MODE) {
+    if (DEBUG_MODE == true) {
       setActiveDonations(activeEx);
       return;
     }
@@ -58,7 +58,7 @@ export function DonationProvider({ children }) {
 
   // recupera le donazioni accettate dal backend
   const fetchAcceptedDonations = useCallback(async () => {
-    if (DEBUG_MODE) {
+    if (DEBUG_MODE == true) {
       setAcceptedDonations(acceptedEx);
       return;
     }
@@ -74,7 +74,7 @@ export function DonationProvider({ children }) {
 
   // recupera le donazioni completate dal backend
   const fetchCompletedDonations = useCallback(async () => {
-    if (DEBUG_MODE) {
+    if (DEBUG_MODE == true) {
       setCompletedDonations(completedEx);
       return;
     }

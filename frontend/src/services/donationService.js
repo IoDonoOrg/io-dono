@@ -110,7 +110,7 @@ export const getActiveDonations = async () => {
   try {
     const response = await api.get("/donations/me/available");
 
-    console.log(response.data);
+    // console.log(response.data);
     return response.data;
   } catch (e) {
     console.log("Errore backend: ", e.response?.data.message);

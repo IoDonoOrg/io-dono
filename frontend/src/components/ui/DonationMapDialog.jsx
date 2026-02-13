@@ -14,6 +14,21 @@ import { formatDate } from "src/utils/format";
 
 import "leaflet/dist/leaflet.css";
 
+// fix per icon dei marker mancanti in production (leaflet non funziona out-of-the box con bundler tipo Vite)
+// vedi https://github.com/Leaflet/Leaflet/issues/4968
+import L from "leaflet";
+
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
+
 // TODO: idealmente dovrebbero essere le coordinate di indirizzo dell'utente
 // Per ora sono coordinate di Trento
 const DEFAULT_START_COORDS = [46.06787, 11.12108];
