@@ -193,6 +193,11 @@ exports.cancelMyDonation = async (req, res) => {
             return res.status(403).json({ message: 'Accesso negato: non sei il proprietario di questa donazione.' });
         }
 
+        // controllo che la donazione non sia stata completata, in quel caso non si può eliminarla
+        if (donation.status === 'COMPLETED') {
+            return res.status(400).json({ message: 'Impossibile eliminare: questa donazione è già stata completata.' });
+        }
+
         await donation.deleteOne();
 
         // 5. Invia la donazione aggiornata
