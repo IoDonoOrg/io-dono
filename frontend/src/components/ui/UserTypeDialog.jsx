@@ -132,7 +132,7 @@ function UserTypeDialog({ onSubmit }) {
                       Privato (Un individuo)
                     </MenuItem>
                     <MenuItem value={DONOR_TYPE.COMMERCIAL}>
-                      Commerciale (Un attività commericiale)
+                      Commerciale (Una attività commericiale)
                     </MenuItem>
                   </TextField>
                 )}

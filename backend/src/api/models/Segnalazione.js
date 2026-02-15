@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// per migliroare le query ho unificato le segnalazioni rispetto allo schema sotto consiglio del grande capo
+// per migliorare le query ho unificato le segnalazioni rispetto allo schema sotto consiglio del grande capo
 const reportSchema = new mongoose.Schema({
     reporterId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,7 +33,7 @@ const reportSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['OPEN', 'IN_PROGRESS', 'CLOSED'], // da capire se tenere IN_PROGRESS(molto probabilmente sparirà)
+        enum: ['OPEN', 'CLOSED'], 
         default: 'OPEN'
     }
 }, {
