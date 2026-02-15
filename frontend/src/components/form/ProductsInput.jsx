@@ -30,8 +30,8 @@ export default function ProductsInput({ value = [], onChange, error }) {
   const updateEntry = (id, field, newValue) => {
     onChange(
       value.map((entry) =>
-        entry.id === id ? { ...entry, [field]: newValue } : entry
-      )
+        entry.id === id ? { ...entry, [field]: newValue } : entry,
+      ),
     );
   };
 
@@ -62,10 +62,14 @@ export default function ProductsInput({ value = [], onChange, error }) {
                 sx={{ flex: 1.5 }}
                 error={!!error}
               >
-                <MenuItem value={ITEM_TYPES.FOOD}>{ITEM_TYPES.FOOD}</MenuItem>
-                <MenuItem value={ITEM_TYPES.CLOTHING}>
-                  {ITEM_TYPES.CLOTHING}
-                </MenuItem>
+                {Object.values(ITEM_TYPES)
+                  // Filtra l'opzione vuota
+                  .filter((type) => type !== ITEM_TYPES.NO_TYPE)
+                  .map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
               </TextField>
               <TextField
                 label="Nome *"

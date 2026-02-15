@@ -18,6 +18,8 @@ export const DONOR_TYPE = {
 export const ITEM_TYPES = {
   CLOTHING: "Vestiti",
   FOOD: "Cibo",
+  FURNITURE: "Mobili",
+  ALTRO: "Altro",
   NO_TYPE: "",
 };
 
