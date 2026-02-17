@@ -1,0 +1,502 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: ioDono API
+  description: >
+    API per la gestione di donazioni, autenticazione utenti e segnalazioni.
+    Il sistema prevede tre ruoli: DONOR, ASSOCIATION, ADMIN.
+
+servers:
+  - url: http://localhost:3000/api
+
+tags:
+  - name: Auth
+  - name: Donations
+  - name: Reports
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Registrazione utente
+      description: Crea un nuovo utente con ruolo donor o association.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - email
+                - password
+                - name
+                - role
+                - phoneNumber
+                - address
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                  minLength: 6
+                name:
+                  type: string
+                role:
+                  type: string
+                  enum: [DONOR, ASSOCIATION, ADMIN]
+                phoneNumber:
+                  type: string
+                address:
+                  type: string
+                profile:
+                  type: object
+                  properties:
+                    donorType:
+                      type: string
+                      enum: [PRIVATE, COMMERCIAL]
+                    commercialHours:
+                      type: string
+      responses:
+        '201':
+          description: Utente creato con successo
+        '400':
+          description: Email già in uso o errore validazione
+
+   /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login utente
+      description: Autentica un utente e restituisce un token JWT.
+      requestBody:
+        content:
+          application/json:
+            schema:
+               type: object
+              required: 
+                - email 
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login riuscito
+        '401':
+          description: Credenziali non valide
+
+  /auth/google/token:
+    post:
+      summary: Login tramite token Google
+      tags: [Auth]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - token
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Login riuscito
+        '201':
+          description: Invia token di registrazione temporaneo
+        '401':
+          description: Token Google non valido
+
+  /auth/register-google:
+    post:
+      summary: Completa registrazione con Google
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - role
+                - phoneNumber
+                - address
+              properties:
+                role:
+                  type: string
+                phoneNumber:
+                  type: string
+                address:
+                  type: string
+                profile:
+                  type: object
+                  properties:
+                    donorType:
+                      type: string
+                      enum: [PRIVATE, COMMERCIAL]
+                    commercialHours:
+                      type: string
+      responses:
+        '201':
+          description: Registrazione completata
+        '401':
+          description: Token non valido o scaduto
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Utente autenticato
+      description: Restituisce i dati dell'utente autenticato.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Utente autenticato
+        '401':
+          description: Non autorizzato
+
+  /donations:
+    post:
+      summary: Crea una nuova donazione
+      description: Restituisce la nuova donazione
+      tags: [Donations]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+               - items
+               - pickupTime
+               - pickupLocation
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      quantity:
+                        type: integer
+                pickupTime:
+                  type: string
+                  format: date-time
+                notes:
+                  type: string
+                pickupLocation:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                    geo:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [Point]
+                        coordinates:
+                          type: array
+                          items:
+                            type: number
+      responses:
+        '201':
+          description: Donazione creata
+        '400':
+          description: Dati non validi
+
+  /donations/me/available:
+    get:
+      summary: Donazioni del donatore con stato AVAILABLE
+      tags: [Donations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista donazioni available del donatore che le richiede
+  
+  /donations/me/accepted:
+    get:
+      summary: Donazioni del donatore con stato ACCEPTED
+      tags: [Donations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista donazioni accepted del donatore che le richiede
+    
+  /donations/me/completed:
+    get:
+      summary: Donazioni del donatore con stato COMPLETED
+      tags: [Donations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista donazioni completed del donatore che le richiede
+
+  /donations/{id}:
+    put:
+      summary: Modifica una donazione
+      tags: [Donations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+               - items
+               - pickupTime
+               - pickupLocation
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      quantity:
+                        type: integer
+                pickupTime:
+                  type: string
+                  format: date-time
+                notes:
+                  type: string
+                pickupLocation:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                    geo:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [Point]
+                        coordinates:
+                          type: array
+                          items:
+                            type: number
+      responses:
+        '200':
+          description: Donazione modificata
+        '400':
+          description: Stato non valido
+        '403':
+          description: Accesso negato, non proprietario
+        '404':
+          description: Donazione non trovata
+
+    delete:
+      summary: Cancella una donazione
+      tags: [Donations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Donazione eliminata
+        '400':
+          description: Stato non valido
+        '403':
+          decription: Accesso negato, non proprietario
+        '404':
+          description: Donazione non trovata
+  
+  /donations/available:
+    get:
+      tags: [Donations]
+      summary: Donazioni disponibili
+      description: Restituisce le donazioni available visibili alle association.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista donazioni available
+  
+  /donations/accepted:
+    get:
+      tags: [Donations]
+      summary: Donazioni accettate dall'associazione
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista donazioni accepted dall'associazione
+
+  /donations/completed:
+    get:
+      tags: [Donations]
+      summary: Donazioni completate dall'associazione
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista donazioni completed dall'associazione
+
+  /donations/{id}/accept:
+    post:
+      tags: [Donations]
+      summary: Accetta donazione
+      description: Permette a un'associazione di accettare una donazione available.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Donazione accettata
+        '400':
+          description: Donazione non disponibile
+        '404':
+          description: Donazione non trovata
+  
+  /donations/{id}/complete:
+    post:
+      tags: [Donations]
+      summary: Completa donazione
+      description: Permette a un'associazione di segnare una donazione come completed.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Donazione completata
+        '400':
+          description: Operazione non valida
+        '403':
+          description: Accesso Negato
+        '404':
+          description: Donazione non trovata
+  
+  /report:
+    post:
+      summary: Crea una nuova segnalazione
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - type
+                - description
+              properties:
+                reportedUserId:
+                  type: string
+                donationId:
+                  type: string
+                type:
+                  type: string
+                  enum: [MALFUNCTION, USER_BEHAVIOR]
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Segnalazione creata
+        '400':
+          description: Parametri non validi
+
+  /report/me/open:
+    get:
+      summary: Segnalazioni open dell'utente 
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista segnalazioni aperte dell'utente
+  
+  /report/me/closed:
+    get:
+      tags: [Reports]
+      summary: Segnalazioni closed dell'utente
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista segnalazioni chiuse dell'utente
+
+  /report/admin/open:
+    get:
+      tags: [Reports]
+      summary: Tutte le segnalazioni aperte (per l'Admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista segnalazioni aperte
+
+  /report/admin/closed:
+    get:
+      tags: [Reports]
+      summary: Tutte le segnalazioni chiuse (per l'Admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista segnalazioni chiuse
+  
+  /report/{id}/status:
+    patch:
+      tags: [Reports]
+      summary: Modifica stato segnalazione
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stato modificato
+        '404':
+          description: Segnalazione non trovata
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+
+
+
+
+
+
+
+
+  
+    
+
+
+
+
+
