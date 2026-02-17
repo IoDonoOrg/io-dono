@@ -12,7 +12,7 @@ servers:
 tags:
   - name: Auth
   - name: Donations
-  - name: Reports
+  - name: Report
 
 paths:
   /auth/register:
@@ -394,7 +394,7 @@ paths:
   /report:
     post:
       summary: Crea una nuova segnalazione
-      tags: [Reports]
+      tags: [Report]
       security:
         - bearerAuth: []
       requestBody:
@@ -424,7 +424,7 @@ paths:
   /report/me/open:
     get:
       summary: Segnalazioni open dell'utente 
-      tags: [Reports]
+      tags: [Report]
       security:
         - bearerAuth: []
       responses:
@@ -433,7 +433,7 @@ paths:
   
   /report/me/closed:
     get:
-      tags: [Reports]
+      tags: [Report]
       summary: Segnalazioni closed dell'utente
       security:
         - bearerAuth: []
@@ -443,7 +443,7 @@ paths:
 
   /report/admin/open:
     get:
-      tags: [Reports]
+      tags: [Report]
       summary: Tutte le segnalazioni aperte (per l'Admin)
       security:
         - bearerAuth: []
@@ -453,7 +453,7 @@ paths:
 
   /report/admin/closed:
     get:
-      tags: [Reports]
+      tags: [Report]
       summary: Tutte le segnalazioni chiuse (per l'Admin)
       security:
         - bearerAuth: []
@@ -463,7 +463,7 @@ paths:
   
   /report/{id}/status:
     patch:
-      tags: [Reports]
+      tags: [Report]
       summary: Modifica stato segnalazione
       security:
         - bearerAuth: []

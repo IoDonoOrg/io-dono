@@ -16,7 +16,7 @@ export default function UserProfileDialog({ open, onClose, user }) {
     // console.log(user);
     if (
       user.role === USER_ROLE.DONOR &&
-      user.donatorType === DONOR_TYPE.PRIVATE
+      user.donorType === DONOR_TYPE.PRIVATE
     )
       return "Nome";
     else if (
