@@ -224,10 +224,10 @@ exports.registerGoogleUser = async (req, res) => {
             googleId,
             email,
             name,
-            role,          // Campo applicativo proveniente dal body.
-            phoneNumber,   // Campo applicativo proveniente dal body.
-            address,       // Campo applicativo proveniente dal body.
-            profile        // Campo applicativo proveniente dal body.
+            role,
+            phoneNumber,
+            address,
+            profile
         });
 
         // Salva il nuovo utente.
@@ -249,9 +249,3 @@ exports.registerGoogleUser = async (req, res) => {
         res.status(500).json({ message: 'Errore del server', error: error.message });
     }
 };
-
-// Mantiene alias retrocompatibili per eventuali riferimenti legacy.
-exports.register = exports.registerUser;
-exports.login = exports.createSession;
-exports.handleGoogleToken = exports.exchangeGoogleToken;
-exports.registerGoogle = exports.registerGoogleUser;
