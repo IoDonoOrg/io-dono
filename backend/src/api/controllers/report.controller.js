@@ -89,7 +89,11 @@ exports.getReportById = async (req, res) => {
             return res.status(404).json({ message: 'Segnalazione non trovata.' });
         }
 
-        if (!isAdmin(req.user) && report.reporterId.toString() !== req.user._id.toString()) {
+        const reporterIdValue = report.reporterId && report.reporterId._id
+            ? report.reporterId._id.toString()
+            : report.reporterId.toString();
+
+        if (!isAdmin(req.user) && reporterIdValue !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Accesso negato.' });
         }
 
