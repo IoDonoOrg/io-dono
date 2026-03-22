@@ -1,23 +1,24 @@
 const Report = require('../models/Segnalazione');
+const mongoose = require('mongoose');
 
-// POST /api/reports 
-// Crea una nuova segnalazione
+const isAdmin = (user) => user && user.role === 'ADMIN';
+
+// Crea una nuova segnalazione.
 exports.createReport = async (req, res) => {
     try {
-        // Estrai i dati dal body.
-        // type deve essere 'MALFUNCTION' o 'USER_BEHAVIOR'
+        // Estrae i campi dal body con validazione semantica del tipo.
         const { reportedUserId, donationId, type, description } = req.body;
 
-        // Validazione: Deve esserci o un utente o una donazione, non entrambi vuoti
+        // Richiede almeno un target tra utente segnalato o donazione segnalata.
         if (!reportedUserId && !donationId) {
-            return res.status(400).json({ 
-                message: 'Devi specificare un reportedUserId oppure un donationId.' 
+            return res.status(400).json({
+                message: 'Devi specificare un reportedUserId oppure un donationId.'
             });
         }
 
-        // Creazione oggetto
+        // Persistenza della segnalazione in stato OPEN.
         const newReport = await Report.create({
-            reporterId: req.user._id, 
+            reporterId: req.user._id,
             reportedUserId: reportedUserId || null,
             donationId: donationId || null,
             type,
@@ -25,127 +26,112 @@ exports.createReport = async (req, res) => {
             status: 'OPEN'
         });
 
-        res.status(201).json({
+        return res.status(201).json({
             status: 'success',
             data: { report: newReport }
         });
 
     } catch (error) {
-        res.status(500).json({ message: 'Errore nella creazione della segnalazione', error: error.message });
+        return res.status(500).json({ message: 'Errore nella creazione della segnalazione', error: error.message });
     }
 };
 
-// GET /api/reports/me/open
-// Le mie segnalazioni (USER)
-exports.getMyOpenReports = async (req, res) => {
+// Elenca le segnalazioni visibili all'utente corrente.
+exports.listReports = async (req, res) => {
     try {
-        const reports = await Report.find({ reporterId: req.user._id, status: 'OPEN' })
-            .populate('reportedUserId', 'name') // dei join per evitare di avere id
-            .populate('donationId', 'title')
-            .sort({ createdAt: -1 });
-
-        res.status(200).json({
-            status: 'success',
-            data: { reports }
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Errore nel recupero delle tue segnalazioni', error: error.message });
-    }
-};
-
-// GET /api/reports/me/closed
-// Le mie segnalazioni (USER)
-exports.getMyClosedReports = async (req, res) => {
-    try {
-        const reports = await Report.find({ reporterId: req.user._id, status: 'CLOSED' })
-            .populate('reportedUserId', 'name') // dei join per evitare di avere id
-            .populate('donationId', 'title')
-            .sort({ createdAt: -1 });
-
-        res.status(200).json({
-            status: 'success',
-            data: { reports }
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Errore nel recupero delle tue segnalazioni', error: error.message });
-    }
-};
-
-// GET /api/reports/admin/open
-// Ottieni tutte le segnalazioni (ADMIN)
-exports.getAllOpenReports = async (req, res) => {
-    try {
-
+        const { status, type, scope = 'me' } = req.query;
         const filter = {};
-        filter.status = 'OPEN';
-        // da capire se separare la logica o tenerla tramite l'utilizzo di un parametro 
-        if (req.query.type) filter.type = req.query.type;
+
+        if (status) {
+            filter.status = status.toUpperCase();
+        }
+        if (type) {
+            filter.type = type;
+        }
+
+        // Mantiene la visibilità: utente standard solo proprie, admin con scope=all tutte.
+        const requestingAll = scope === 'all';
+        if (!isAdmin(req.user) || !requestingAll) {
+            filter.reporterId = req.user._id;
+        }
 
         const reports = await Report.find(filter)
-            .populate('reporterId', 'name email')      
-            .populate('reportedUserId', 'name email')   // dei join per evitare di avere id 
-            .populate('donationId', 'title')           
+            .populate('reporterId', 'name email')
+            .populate('reportedUserId', 'name email')
+            .populate('donationId')
             .sort({ createdAt: -1 });
 
-        res.status(200).json({
+        return res.status(200).json({
             status: 'success',
             results: reports.length,
             data: { reports }
         });
 
     } catch (error) {
-        res.status(500).json({ message: 'Errore nel recupero delle segnalazioni', error: error.message });
+        return res.status(500).json({ message: 'Errore nel recupero delle segnalazioni', error: error.message });
     }
 };
 
-// GET /api/reports/admin/closed
-// Ottieni tutte le segnalazioni (ADMIN)
-exports.getAllClosedReports = async (req, res) => {
+// Recupera una segnalazione per ID.
+exports.getReportById = async (req, res) => {
     try {
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID segnalazione non valido.' });
+        }
 
-        const filter = {};
-        filter.status = 'CLOSED';
-        if (req.query.type) filter.type = req.query.type;
+        const report = await Report.findById(id)
+            .populate('reporterId', 'name email')
+            .populate('reportedUserId', 'name email')
+            .populate('donationId');
 
-        const reports = await Report.find(filter)
-            .populate('reporterId', 'name email')      
-            .populate('reportedUserId', 'name email')   // dei join per evitare di avere id 
-            .populate('donationId', 'title')           
-            .sort({ createdAt: -1 });
+        if (!report) {
+            return res.status(404).json({ message: 'Segnalazione non trovata.' });
+        }
 
-        res.status(200).json({
+        if (!isAdmin(req.user) && report.reporterId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Accesso negato.' });
+        }
+
+        return res.status(200).json({
             status: 'success',
-            results: reports.length,
-            data: { reports }
+            data: { report }
         });
-
     } catch (error) {
-        res.status(500).json({ message: 'Errore nel recupero delle segnalazioni', error: error.message });
+        return res.status(500).json({ message: 'Errore nel recupero della segnalazione', error: error.message });
     }
 };
 
-// PATCH /api/reports/:id/status
-// Aggiorna stato (ADMIN)
-exports.updateReportStatus = async (req, res) => {
+// Aggiorna parzialmente una segnalazione (solo ADMIN).
+exports.patchReport = async (req, res) => {
     try {
-        const { status } = req.body; 
+        if (!isAdmin(req.user)) {
+            return res.status(403).json({ message: 'Accesso negato. Richiesto ruolo Admin.' });
+        }
 
-        const report = await Report.findByIdAndUpdate(
-            req.params.id,
-            { status }, 
-            { new: true, runValidators: true }
-        );
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID segnalazione non valido.' });
+        }
+
+        const patch = {};
+        if (req.body.status) patch.status = req.body.status;
+
+        if (Object.keys(patch).length === 0) {
+            return res.status(400).json({ message: 'Nessun campo valido da aggiornare.' });
+        }
+
+        const report = await Report.findByIdAndUpdate(id, patch, { new: true, runValidators: true });
 
         if (!report) {
             return res.status(404).json({ message: 'Segnalazione non trovata' });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             status: 'success',
             data: { report }
         });
-
     } catch (error) {
-        res.status(500).json({ message: 'Errore aggiornamento stato', error: error.message });
+        return res.status(500).json({ message: 'Errore aggiornamento stato', error: error.message });
     }
 };

@@ -1,18 +1,18 @@
 const mongoose = require('mongoose');
-require('dotenv').config(); // Assicura che .env sia caricato
+require('dotenv').config(); // Carica le variabili d'ambiente da .env.
 
 const connectDB = async () => {
     try {
-        // prende la stringa di connessione dal file .env
+        // Legge la stringa di connessione MongoDB dalle variabili d'ambiente.
         const dbUri = process.env.MONGODB_URI;
 
         if (!dbUri) {
             console.error('ERRORE: MONGODB_URI non è definita nel file .env');
-            process.exit(1); // fallisce e mostra l'errore
+            process.exit(1); // Termina il processo in assenza di configurazione valida.
         }
 
         await mongoose.connect(dbUri);
-        
+
         console.log('Connessione a MongoDB riuscita');
     } catch (err) {
         console.error('Errore durante la connessione a MongoDB:', err.message);

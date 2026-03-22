@@ -113,3 +113,38 @@ Segui sempre questi passaggi. Esempio:  **"Creare la Registrazione Utente" (`POS
 Ora, se avvii il server (`npm start`) e invii una richiesta `POST` a `http://localhost:3000/api/auth/register` con i dati giusti, il tuo utente verrà creato nel database.
 
 ## struttura DB (Tipo ER)
+
+## API RESTful (Refactor Marzo 2026)
+
+### Donations (`/api/donations`)
+
+* `POST /api/donations` — crea donazione (solo `DONOR`)
+* `GET /api/donations` — lista con filtri via query:
+  * `DONOR`: solo proprie donazioni (`status` opzionale)
+  * `ASSOCIATION`: `AVAILABLE` globali, `ACCEPTED`/`COMPLETED` solo proprie
+  * `ADMIN`: visione completa con filtri `status`, `donorId`, `associationId`
+* `GET /api/donations/:id` — dettaglio singolo con controllo accessi
+* `PATCH /api/donations/:id` — update parziale:
+  * donatore proprietario: modifica campi se `AVAILABLE`
+  * associazione: transizioni stato (`ACCEPTED`, `COMPLETED` con `evaluation`)
+* `DELETE /api/donations/:id` — elimina (solo proprietario `DONOR` e solo `AVAILABLE`)
+
+### Reports (`/api/reports`)
+
+* `POST /api/reports` — crea segnalazione
+* `GET /api/reports` — lista con query:
+  * `scope=me|all` (`all` effettivo solo `ADMIN`)
+  * `status=OPEN|IN_PROGRESS|CLOSED`
+  * `type=MALFUNCTION|USER_BEHAVIOR`
+* `GET /api/reports/:id` — dettaglio segnalazione (`ADMIN` o autore)
+* `PATCH /api/reports/:id` — update parziale (stato, solo `ADMIN`)
+
+### Auth (`/api/auth`)
+
+* `POST /api/auth/users` — registrazione locale (crea utente)
+* `POST /api/auth/sessions` — login locale (crea sessione JWT)
+* `GET /api/auth/sessions/me` — utente corrente autenticato
+* `GET /api/auth/google/authorize` — avvio OAuth Google
+* `GET /api/auth/google/callback` — callback OAuth Google
+* `POST /api/auth/google/sessions` — exchange token Google → login token o registration token
+* `POST /api/auth/google/users` — completa registrazione Google

@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const pickupPointSchema = new mongoose.Schema({
     associationId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
+        ref: 'User',
         required: true
     },
     name: {
@@ -26,8 +26,8 @@ const pickupPointSchema = new mongoose.Schema({
             required: true
         }
     },
-    openingHours: { // potrebe servire
-        type: String 
+    openingHours: { // Definisce gli orari di apertura del punto di ritiro.
+        type: String
     }
 }, {
     timestamps: true

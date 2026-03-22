@@ -1,39 +1,38 @@
-// carica subito le variabili d'ambiente da .env
+// Carica le variabili d'ambiente da file .env.
 require('dotenv').config();
 
-// importa l'app definita in app.js
+// Importa l'app Express.
 const app = require('./app');
 
-// per il db
+// Importa la funzione di connessione al database.
 const connectDB = require('./config/database');
 
-// legge la porta dal file .env, o usa 3000 di default
+// Legge la porta dal file .env con fallback a 3000.
 const PORT = process.env.PORT || 3000;
 
-// avvia effettivamente il server e scrive a console il link
+// Avvia la connessione al DB e successivamente il server HTTP.
 const startServer = async () => {
     try {
-        // connessione al db
+        // Stabilisce la connessione al database.
         await connectDB();
-        
+
         console.log('Database connesso con successo.');
 
-        // avvia il server
+        // Avvia il listener HTTP.
         app.listen(PORT, () => {
             console.log(`🚀 Server in ascolto su http://localhost:${PORT}`);
             console.log('Premi CTRL+C per terminare.');
         });
 
     } catch (error) {
-        // Se 'connectDB()' fallisce 
+        // Gestisce il fallimento della connessione al database.
         console.error('Impossibile connettersi al database.');
-        console.error(error.message); 
-        
-        // Esce dal processo con un codice di errore.
-        // Non ha senso avviare un server che non può parlare col suo database.
-        process.exit(1); 
+        console.error(error.message);
+
+        // Termina il processo con codice di errore.
+        process.exit(1);
     }
 };
 
-// 6. Esegui la funzione di avvio
+// Esegue la procedura di avvio.
 startServer();

@@ -7,36 +7,33 @@ require('dotenv').config();
 
 const app = express();
 
-// Abilita CORS per tutte le richieste e origini
-// altrimenti server frontend non può fare delle chiamate al backend
+// Abilita CORS per consentire richieste cross-origin dal frontend.
 app.use(cors());
 
-// Middleware per leggere il JSON nei body delle richieste
+// Abilita il parsing automatico del body JSON.
 app.use(express.json());
 
-// Middleware per loggare ogni richiesta che arriva al server 
-// abilitato tramite la variabile d'ambiente DEBUG nel file .env
+// Attiva il logger HTTP solo quando DEBUG è valorizzata.
 if (process.env.DEBUG)
   app.use(logger);
 
-// Importa il "super-router" dalla cartella routes
+// Importa il router principale delle API.
 const apiRoutes = require('./api/routes/mainRouter.js');
 
-// Rotta api standard che usa apiRoutes che non è altro che il mainRouter 
-// usare use e non get per gestire tutti i tipi di richiesta
+// Monta tutte le API sotto il prefisso /api.
 app.use('/api', apiRoutes);
 
-// path assoluti
+// Calcola il path assoluto della build frontend.
 const frontendDistPath = path.join(__dirname, '../../frontend/dist');
 
-// fa partire il servizio di frontend
+// Espone i file statici del frontend.
 app.use(express.static(frontendDistPath));
 
 
-// Gestione delle rotte per il frontend 
+// Reindirizza le rotte non API all'entrypoint della SPA.
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
-module.exports = app; // Esporta l'app per usarla in server.js
+module.exports = app; // Esporta l'istanza Express per l'avvio del server.
 
