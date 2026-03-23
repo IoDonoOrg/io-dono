@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const donationSchema = new mongoose.Schema({
     donorId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // FK ad un User 
+        ref: 'User', // Riferimento all'utente donatore.
         required: true
     },
     associationId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // FK ad un user associazione  
+        ref: 'User', // Riferimento all'utente associazione.
         default: null
     },
     status: {
@@ -17,28 +17,28 @@ const donationSchema = new mongoose.Schema({
         default: 'AVAILABLE'
     },
     items: [{
-        type: { 
-            type: String, 
-            required: [true, 'Il tipo di oggetto è obbligatorio'] 
-        }, 
-        name: { 
-            type: String, 
-            required: [true, 'Il nome/descrizione dell\'oggetto è obbligatorio'] 
+        type: {
+            type: String,
+            required: [true, 'Il tipo di oggetto è obbligatorio']
         },
-        quantity: { 
-            type: String, 
-            required: [true, 'La quantità è obbligatoria'] 
+        name: {
+            type: String,
+            required: [true, 'Il nome/descrizione dell\'oggetto è obbligatorio']
+        },
+        quantity: {
+            type: String,
+            required: [true, 'La quantità è obbligatoria']
         }
     }],
-    pickupTime: { 
+    pickupTime: {
         type: Date,
         required: true
     },
     notes: {
         type: String
     },
-    
-    // sotto-documento per la localizzazione, da capire sopratutto per quanto riguarano le api google
+
+    // Sotto-documento per indirizzo e coordinate del ritiro.
     pickupLocation: {
         address: {
             type: String,
@@ -50,14 +50,14 @@ const donationSchema = new mongoose.Schema({
                 enum: ['Point'],
                 default: 'Point'
             },
-            coordinates: { // Formato [longitudine, latitudine]
+            coordinates: { // Formato coordinate [longitudine, latitudine].
                 type: [Number],
                 required: true
             }
         }
     },
 
-    // sotto-documento per la valutazione 
+    // Sotto-documento per la valutazione della donazione.
     evaluation: {
         rating: { type: Number, min: 1, max: 10 },
         comment: { type: String }
@@ -66,8 +66,7 @@ const donationSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Indice per le query geospaziali, sostanzialmente permette di fare query super veloci perchè mongodb già sa gestire le coordinate spaziali
-// tipo senza fare calcoli matematici si possono chiedere tutti i punti entro 5km da me 
+// Definisce indice geospaziale per ricerche efficienti su coordinate.
 donationSchema.index({ 'pickupLocation.geo': '2dsphere' });
 
 const Donation = mongoose.model('Donation', donationSchema);

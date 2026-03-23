@@ -1,28 +1,28 @@
 const mongoose = require('mongoose');
 
-// per migliorare le query ho unificato le segnalazioni rispetto allo schema sotto consiglio del grande capo
+// Definisce uno schema unico per la gestione delle segnalazioni.
 const reportSchema = new mongoose.Schema({
     reporterId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
+        ref: 'User',
         required: true
     },
-    
-    // se è una segnalazione su un utente
+
+    // Identifica l'utente segnalato, se presente.
     reportedUserId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: null
     },
-    
-    // se è una segnalazione su una donazione
+
+    // Identifica la donazione segnalata, se presente.
     donationId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Donation',
         default: null
     },
 
-    type: { // enum per definire il tipo di problema
+    type: { // Classifica la tipologia della segnalazione.
         type: String,
         enum: ['MALFUNCTION', 'USER_BEHAVIOR'],
         required: true
@@ -33,7 +33,7 @@ const reportSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['OPEN', 'CLOSED'], 
+        enum: ['OPEN', 'CLOSED'],
         default: 'OPEN'
     }
 }, {

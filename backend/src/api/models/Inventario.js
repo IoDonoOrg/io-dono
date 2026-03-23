@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
-// ho midificato l'inventario in modo che su ogni riga ci sia una articolo storato dall'associazione in modo da poter già inserire tutti gli articoli
+// Modella l'inventario come righe articolo legate all'associazione proprietaria.
 const inventoryItemSchema = new mongoose.Schema({
     associationId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
+        ref: 'User',
         required: true
     },
-    itemType: { 
+    itemType: {
         type: String,
         required: true
     },
@@ -16,11 +16,11 @@ const inventoryItemSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
-    unit: { 
+    unit: {
         type: String,
         required: true
     },
-    storageLocation: { 
+    storageLocation: {
         type: String
     }
 }, {

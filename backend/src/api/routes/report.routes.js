@@ -1,59 +1,20 @@
 const express = require('express');
 const reportController = require('../controllers/report.controller');
-const { isAuth, isAdmin } = require('../../middleware/auth.middleware.js');
+const { isAuth } = require('../../middleware/auth.middleware.js');
 
 const router = express.Router();
 
-// POST /api/reports 
-// Crea una nuova segnalazione
-router.post(
-  '/',
-  isAuth,
-  reportController.createReport
-);
+// Crea una nuova segnalazione.
+router.post('/', isAuth, reportController.createReport);
 
-// GET /api/reports/me/open
-//  Vedi le tue segnalazioni inviate
-router.get(
-  '/me/open',
-  isAuth,
-  reportController.getMyOpenReports
-);
+// Elenca le segnalazioni con filtri opzionali.
+// Query supportate: status, scope, type.
+router.get('/', isAuth, reportController.listReports);
 
-// GET /api/reports/me/closed
-//  Vedi le tue segnalazioni inviate
-router.get(
-  '/me/closed',
-  isAuth,
-  reportController.getMyClosedReports
-);
+// Recupera una segnalazione specifica.
+router.get('/:id', isAuth, reportController.getReportById);
 
-
-// GET /api/reports/admin/open
-// Vedi tutte le segnalazioni (Dashboard Admin)
-router.get(
-    '/admin/open', 
-    isAuth, 
-    isAdmin, 
-    reportController.getAllOpenReports
-);
-
-// GET /api/reports/admin/closed
-// Vedi tutte le segnalazioni (Dashboard Admin)
-router.get(
-  '/admin/closed',
-  isAuth,
-  isAdmin,
-  reportController.getAllClosedReports
-);
-
-// PATCH /api/reports/:id/status
-// Cambia stato 
-router.patch(
-  '/:id/status',
-  isAuth,
-  isAdmin,
-  reportController.updateReportStatus
-);
+// Aggiorna parzialmente la segnalazione (solo ADMIN).
+router.patch('/:id', isAuth, reportController.patchReport);
 
 module.exports = router;

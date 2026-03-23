@@ -11,12 +11,12 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [function() { return !this.googleId; }, 'La password è obbligatoria se non si usa Google'],
+        required: [function () { return !this.googleId; }, 'La password è obbligatoria se non si usa Google'],
         minLength: 6
     },
     googleId: {
         type: String,
-        sparse: true // Per permettere 'unique' ma anche valori nulli
+        sparse: true // Consente unicità con valori null.
     },
     role: {
         type: String,
@@ -36,43 +36,43 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'L\'indirizzo è obbligatorio']
     },
-    
-    // Sotto-documento per dati specifici del ruolo
+
+    // Sotto-documento con attributi specifici per ruolo.
     profile: {
-        // Se role === 'DONOR'
+        // Campo applicabile al ruolo DONOR.
         donorType: {
             type: String,
             enum: ['PRIVATE', 'COMMERCIAL']
         },
-        commercialHours: { // Orari per donatori 'COMMERCIAL' tipo bar o ristoranti
+        commercialHours: { // Indica gli orari operativi del donatore commerciale.
             type: String
         }
     },
-    
+
     solidarityPoints: {
         type: Number,
         default: 0
     },
-    
-    // FK alle ricompense 
+
+    // Riferimenti alle ricompense riscattate.
     redeemedRewards: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Reward'
     }]
 }, {
-    // Aggiunge createdAt e updatedAt automaticamente
+    // Abilita i timestamp createdAt e updatedAt.
     timestamps: true
 });
 
-// Hook di Mongoose, sostanzialmente prima di salvare fa questo codice ovvero l'hashing della password
-userSchema.pre('save', async function(next) {
-    // Esegui l'hashing solo se la password è stata modificata (o è nuova)
+// Effettua hashing password prima del salvataggio quando necessario.
+userSchema.pre('save', async function (next) {
+    // Esegue hashing solo su password nuova o modificata.
     if (!this.isModified('password') || !this.password) {
         return next();
     }
 
     try {
-        // Hasha la password con Argon2
+        // Applica hashing Argon2.
         const hash = await argon2.hash(this.password);
         this.password = hash;
         next();
@@ -81,8 +81,8 @@ userSchema.pre('save', async function(next) {
     }
 });
 
-// Metodo per confrontare la password (inutile se non implementiamo questo tipo di login)
-userSchema.methods.comparePassword = async function(candidatePassword) {
+// Confronta la password in chiaro con l'hash persistito.
+userSchema.methods.comparePassword = async function (candidatePassword) {
     try {
         return await argon2.verify(this.password, candidatePassword);
     } catch (err) {

@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
 
-// bisogna importare tutti i file delle singole rotte per poi dirottare il traffico su quelle giuste
+// Importa i router di dominio.
 const authRoutes = require('./auth.routes.js');
 const donationsRoutes = require('./donation.routes.js');
 const reportRoutes = require('./report.routes.js');
 
-// per esempio le rotte in auth.routes.js avranno il prefisso /api/auth chiaramente
+// Monta i router sotto i prefissi API.
 router.use('/auth', authRoutes);
 router.use('/donations', donationsRoutes);
-router.use('/report', reportRoutes);
+router.use('/reports', reportRoutes);
 
 
-// Rotta di default, possiamo anche toglierla
+// Espone una risposta base per il root API.
 router.get('/', (req, res) => {
     res.json({ message: 'api default' });
 });
