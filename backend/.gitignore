@@ -26,3 +26,12 @@ dist-ssr
 
 #cartella docs
 /docs/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Cache and temp directories
+.cache/
+tmp/
+node_modules/.cache/jest/
