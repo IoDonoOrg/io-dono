@@ -8,9 +8,21 @@ async function registerAndLogin({ role, emailPrefix }) {
     const email = `${emailPrefix}_${Date.now()}_${Math.floor(Math.random() * 10000)}@test.it`;
     const password = 'Password123!';
 
-    const registerRes = await request(app)
-        .post('/api/auth/users')
-        .send({
+    if (role === 'DONOR') {
+        const registerRes = await request(app)
+            .post('/api/auth/users')
+            .send({
+                email,
+                password,
+                name: `${role} Test`,
+                role,
+                phoneNumber: '123456789',
+                address: 'Via Test 1, Trento'
+            });
+
+        expect([200, 201]).toContain(registerRes.statusCode);
+    } else {
+        await User.create({
             email,
             password,
             name: `${role} Test`,
@@ -18,8 +30,7 @@ async function registerAndLogin({ role, emailPrefix }) {
             phoneNumber: '123456789',
             address: 'Via Test 1, Trento'
         });
-
-    expect([200, 201]).toContain(registerRes.statusCode);
+    }
 
     const loginRes = await request(app)
         .post('/api/auth/sessions')

@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const PUBLIC_ALLOWED_ROLES = ['DONOR'];
-const isTestEnvironment = process.env.NODE_ENV === 'test';
 
 const normalizeRole = (value) => String(value || '').toUpperCase();
 
@@ -42,7 +41,7 @@ exports.registerUser = async (req, res) => {
         const { email, password, name, role, phoneNumber, address, profile } = req.body;
         const normalizedRole = normalizeRole(role || 'DONOR');
 
-        if (!isTestEnvironment && !PUBLIC_ALLOWED_ROLES.includes(normalizedRole)) {
+        if (!PUBLIC_ALLOWED_ROLES.includes(normalizedRole)) {
             return res.status(403).json({ message: 'Ruolo non consentito per registrazione pubblica.' });
         }
 
@@ -212,7 +211,7 @@ exports.registerGoogleUser = async (req, res) => {
         return res.status(400).json({ message: 'Dati di registrazione incompleti (ruolo, telefono, indirizzo).' });
     }
 
-    if (!isTestEnvironment && !PUBLIC_ALLOWED_ROLES.includes(normalizedRole)) {
+    if (!PUBLIC_ALLOWED_ROLES.includes(normalizedRole)) {
         return res.status(403).json({ message: 'Ruolo non consentito per registrazione pubblica.' });
     }
 
