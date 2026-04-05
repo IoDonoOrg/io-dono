@@ -7,6 +7,15 @@ const { getDateRange, parseQuantityNumber, validateObjectId } = require('../../u
 
 const getDefaultPeriod = () => getDateRange({ defaultDays: 30, allowFutureEnd: true });
 
+const parseBooleanInput = (value) => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+        if (value.toLowerCase() === 'true') return true;
+        if (value.toLowerCase() === 'false') return false;
+    }
+    return null;
+};
+
 const buildDonationsSummary = async (match = {}) => {
     const donations = await Donation.find(match).lean();
 
@@ -73,7 +82,11 @@ exports.patchUserAdminState = async (req, res) => {
 
         const patch = {};
         if (typeof req.body.isBanned !== 'undefined') {
-            patch.isBanned = Boolean(req.body.isBanned);
+            const parsed = parseBooleanInput(req.body.isBanned);
+            if (parsed === null) {
+                return res.status(400).json({ message: 'isBanned deve essere booleano.' });
+            }
+            patch.isBanned = parsed;
             patch.bannedAt = patch.isBanned ? new Date() : null;
             patch.bannedBy = patch.isBanned ? req.user._id : null;
             patch.bannedReason = patch.isBanned ? (req.body.bannedReason || 'Non specificata') : null;
@@ -162,7 +175,7 @@ exports.getStatisticsTrend = async (req, res) => {
 };
 
 // Statistiche filtrate con default richiesti.
-exports.getStatisticsFilter = async (req, res) => {
+exports.getStatistics = async (req, res) => {
     try {
         const { area, itemType, fromDate, toDate, associationId } = req.query;
         const range = getDateRange({ fromDate, toDate, defaultDays: 30, allowFutureEnd: true });
@@ -235,3 +248,6 @@ exports.getStatisticsFilter = async (req, res) => {
         return res.status(500).json({ message: 'Errore statistiche filtrate.', error: error.message });
     }
 };
+
+// Alias temporaneo per compatibilità interna.
+exports.getStatisticsFilter = exports.getStatistics;

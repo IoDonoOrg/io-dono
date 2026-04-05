@@ -9,6 +9,6 @@ router.patch('/users/:id', isAuth, isAdmin, adminController.patchUserAdminState)
 
 router.get('/statistics/overview', isAuth, isAdmin, adminController.getStatisticsOverview);
 router.get('/statistics/trend', isAuth, isAdmin, adminController.getStatisticsTrend);
-router.get('/statistics/filter', isAuth, isAdmin, adminController.getStatisticsFilter);
+router.get('/statistics', isAuth, isAdmin, adminController.getStatistics);
 
 module.exports = router;

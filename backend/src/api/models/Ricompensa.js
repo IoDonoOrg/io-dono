@@ -11,8 +11,9 @@ const rewardSchema = new mongoose.Schema({
     },
     pointsCost: {
         type: Number,
-        required: true,
-        min: 0
+        required: false,
+        default: null,
+        min: 1
     },
     isActive: {
         type: Boolean,

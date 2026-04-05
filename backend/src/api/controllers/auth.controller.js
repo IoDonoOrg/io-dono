@@ -3,6 +3,11 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const PUBLIC_ALLOWED_ROLES = ['DONOR'];
+const isTestEnvironment = process.env.NODE_ENV === 'test';
+
+const normalizeRole = (value) => String(value || '').toUpperCase();
+
 // Utility per la generazione dei token JWT.
 const generateToken = (user) => {
     // Definisce payload di login con identificativo e ruolo utente.
@@ -35,6 +40,11 @@ function generateRegistrationToken(googlePayload) {
 exports.registerUser = async (req, res) => {
     try {
         const { email, password, name, role, phoneNumber, address, profile } = req.body;
+        const normalizedRole = normalizeRole(role || 'DONOR');
+
+        if (!isTestEnvironment && !PUBLIC_ALLOWED_ROLES.includes(normalizedRole)) {
+            return res.status(403).json({ message: 'Ruolo non consentito per registrazione pubblica.' });
+        }
 
         // Verifica unicità email.
         const existingUser = await User.findOne({ email });
@@ -47,7 +57,7 @@ exports.registerUser = async (req, res) => {
             email,
             password,
             name,
-            role,
+            role: normalizedRole,
             phoneNumber,
             address,
             profile // Include attributi specifici del profilo.
@@ -195,10 +205,15 @@ exports.registerGoogleUser = async (req, res) => {
 
     // Estrae i dati aggiuntivi dal body.
     const { role, phoneNumber, address, profile } = req.body;
+    const normalizedRole = normalizeRole(role || 'DONOR');
 
     // Verifica la presenza dei campi obbligatori.
     if (!role || !phoneNumber || !address) {
         return res.status(400).json({ message: 'Dati di registrazione incompleti (ruolo, telefono, indirizzo).' });
+    }
+
+    if (!isTestEnvironment && !PUBLIC_ALLOWED_ROLES.includes(normalizedRole)) {
+        return res.status(403).json({ message: 'Ruolo non consentito per registrazione pubblica.' });
     }
 
     try {
@@ -224,7 +239,7 @@ exports.registerGoogleUser = async (req, res) => {
             googleId,
             email,
             name,
-            role,
+            role: normalizedRole,
             phoneNumber,
             address,
             profile

@@ -1,6 +1,15 @@
 const Notification = require('../models/Notification');
 const mongoose = require('mongoose');
 
+const parseBooleanInput = (value) => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+        if (value.toLowerCase() === 'true') return true;
+        if (value.toLowerCase() === 'false') return false;
+    }
+    return null;
+};
+
 // Elenca le notifiche dell'utente autenticato.
 exports.listMyNotifications = async (req, res) => {
     try {
@@ -47,7 +56,11 @@ exports.patchMyNotification = async (req, res) => {
 
         const patch = {};
         if (typeof req.body.isRead !== 'undefined') {
-            patch.isRead = Boolean(req.body.isRead);
+            const parsed = parseBooleanInput(req.body.isRead);
+            if (parsed === null) {
+                return res.status(400).json({ message: 'isRead deve essere booleano.' });
+            }
+            patch.isRead = parsed;
         }
 
         if (Object.keys(patch).length === 0) {
@@ -77,9 +90,14 @@ exports.patchMyNotifications = async (req, res) => {
             return res.status(400).json({ message: 'Campo isRead richiesto.' });
         }
 
+        const parsed = parseBooleanInput(req.body.isRead);
+        if (parsed === null) {
+            return res.status(400).json({ message: 'isRead deve essere booleano.' });
+        }
+
         const result = await Notification.updateMany(
             { recipientId: req.user._id },
-            { $set: { isRead: Boolean(req.body.isRead) } }
+            { $set: { isRead: parsed } }
         );
 
         return res.status(200).json({
