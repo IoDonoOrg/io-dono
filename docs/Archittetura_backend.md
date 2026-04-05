@@ -72,7 +72,7 @@ Ecco il ruolo di ogni cartella in `src/`:
 
 ### 2. Workflow: Come Aggiungere una Nuova Funzionalità
 
-Segui sempre questi passaggi. Esempio:  **"Creare la Registrazione Utente" (`POST /api/auth/register`)** .
+Segui sempre questi passaggi. Esempio:  **"Creare la Registrazione Utente" (`POST /api/auth/users`)** .
 
 #### Passo 0: Connessione al Database (Si fa una sola volta)
 
@@ -148,7 +148,7 @@ Segui sempre questi passaggi. Esempio:  **"Creare la Registrazione Utente" (`POS
    app.use('/api', mainRouter);
    ```
 
-Ora, se avvii il server (`npm start`) e invii una richiesta `POST` a `http://localhost:3000/api/auth/register` con i dati giusti, il tuo utente verrà creato nel database.
+Ora, se avvii il server (`npm start`) e invii una richiesta `POST` a `http://localhost:3000/api/auth/users` con i dati giusti, il tuo utente verrà creato nel database.
 
 ## struttura DB (Tipo ER)
 

@@ -19,99 +19,71 @@ npm test
 npm run test:coverage
 ```
 
-## Cosa coprono i test
+## Status attuale
 
-- `auth.api.test.js` (4 test)
-  - registrazione utente (`POST /api/auth/users`)
-    - ✅ registrazione donor valida
-    - ✅ errore email duplicata
-  - login (`POST /api/auth/sessions`)
-    - ✅ login con credenziali valide
-    - ✅ errore credenziali errate
-  - **Nota:** Role hardening testato implicitamente:
-    - registrazione limitata a DONOR in produzione
-    - ASSOCIATION/ADMIN creati solo da admin via `/api/admin/users`
+- **Test Suites:** 5/5 passate
+- **Test totali:** 61/61 passati
+- **Coverage complessiva:**
+  - Statements: `54.87%`
+  - Branches: `36.12%`
+  - Functions: `60.6%`
+  - Lines: `57.55%`
+- **Execution time:** ~18s (runInBand)
+
+## Suite e copertura funzionale
+
+- `auth.api.test.js` (9 test)
+  - Registrazione pubblica `POST /api/auth/users`
+  - Login `POST /api/auth/sessions`
+  - **Role hardening esplicito:**
+    - `DONOR` consentito
+    - `ASSOCIATION` e `ADMIN` negati sul signup pubblico (`403`)
 
 - `donations.api.test.js` (4 test)
-  - creazione donazione valida (`POST /api/donations`)
-    - ✅ payload corretto: items[], pickupTime (futuro), pickupLocation
-  - lettura lista donazioni autenticata (`GET /api/donations`)
-  - accesso senza token (`401`)
-  - caso frontiera: `pickupTime` nel passato (`400`)
-  - **Nota:** Transazioni ACID non direttamente testabili in unit test, testate manualmente
+  - Creazione donazione valida
+  - Lista donazioni autenticata
+  - Accesso senza token (`401`)
+  - Validazione data pickup nel passato (`400`)
 
 - `reports.api.test.js` (9 test)
-  - creazione segnalazione valida (`POST /api/reports`)
-  - errore creazione senza target (`400`)
-    - Richiede `reportedUserId` XOR `donationId`
-  - visibilità report per utente non admin (`GET /api/reports`)
-    - User vede solo propri report
-    - ADMIN vede tutti
-  - blocco patch per non admin (`403`)
-  - patch stato per admin (`PATCH /api/reports/:id`)
-    - ✅ Aggiorna `status`, `resolution`, `closedAt`, `closedBy`
-  - payload vuoto ritorna `400`
+  - Creazione report valida
+  - Vincolo target (`reportedUserId` o `donationId`)
+  - Regole visibilità (`me` vs `admin`)
+  - Patch admin-only e validazione payload
 
-## Status Attuale
+- `rewards.api.test.js` (11 test)
+  - Listing reward disponibili
+  - Claim reward (`POST /api/me/rewards/claims`)
+  - Listing claim personali con meta
+  - Patch stato claim (`USED`/error path)
+  - Casi errore: token mancante, id non valido, punti insufficienti
 
-- **Total Test Suites:** 3 (auth, donations, reports)
-- **Total Tests:** 17
-- **Status:** ✅ **ALL PASSING**
-- **Coverage:** 37.42% statements, 17% branches
-- **Execution Time:** ~4.7 seconds
+- `admin.api.test.js` (28 test)
+  - Creazione associazione admin-only (`POST /api/admin/users`)
+  - Ban/unban con audit fields
+  - Protezione self-ban (`409`)
+  - Enforcement utente bannato (`403` su endpoint autenticati)
+  - Statistiche admin: overview, trend, filtrate
 
-## Note tecniche su Test Infrastructure
+## Infrastruttura test
 
-- I test usano MongoDB in-memory (`mongodb-memory-server`) per evitare dipendenze da DB locale.
-- L'ambiente di test viene inizializzato in `tests/setupEnv.js`:
-  - `NODE_ENV === 'test'` abilita bypass role hardening per permettere creazione utenti privilegiati nei test
-  - Questo è **intenzionale** e necessario per il test suite
-- Connessione/pulizia DB in `tests/helpers/testDb.js`:
-  - `connectTestDb()` - Avvia MongoDB in-memory
-  - `disconnectTestDb()` - Disconnette e pulisce
-  - `clearTestDb()` - Trunca tutte le collections tra i test
+- I test usano MongoDB in-memory con **replica set** (`MongoMemoryReplSet`).
+- Motivo: i flussi transazionali (`session.startTransaction`) richiedono replica set anche in ambiente test.
+- Gestione DB in `tests/helpers/testDb.js`:
+  - `connectTestDb()` avvia replica set in-memory e connette Mongoose
+  - `clearTestDb()` pulisce le collection tra i test
+  - `disconnectTestDb()` chiude connessione e arresta il replica set
 
-## Feature Coperte (Implicitamente o Esplicitamente)
+## Nota sicurezza
 
-| Feature | Coverage | Note |
-|---------|----------|------|
-| Auth registration + hardening | ✅ Unit test | Test mode bypass non visibile |
-| Auth login | ✅ Unit test | Argon2 password verify |
-| Donation CRUD | ✅ Unit test (create, list, read) | PATCH transactional non unit-testato |
-| Donation state transitions | ✅ Manual verifica | ACCEPTED/COMPLETED transazioni ACID |
-| Notification triggers | 🟡 Implicit | Testate via donation ACCEPTED/COMPLETED |
-| Reward claims | ❌ Not covered | Nuova feature (phase 1) |
-| Admin ban/unban | ❌ Not covered | Nuova feature (phase 1) |
-| Statistics | ❌ Not covered | Nuova feature (phase 1)  |
-| Association Reports | ❌ Not covered | Nuova feature (phase 1) |
+- Non esiste bypass del role hardening in ambiente test.
+- La registrazione pubblica resta limitata a `DONOR` in ogni ambiente.
+- Gli utenti privilegiati (`ASSOCIATION`, `ADMIN`) vengono creati nei test tramite setup controllato (seed DB o endpoint admin).
 
-## Come Aggiungere Nuovi Test
+## Strategia adottata
 
-Per una nuova feature (es. reward claims):
+I test sono di integrazione end-to-end API:
 
-1. Crea file `tests/rewards.api.test.js`
-2. Importa utilities:
-   ```javascript
-   const request = require('supertest');
-   const app = require('../src/app');
-   const { connectTestDb, disconnectTestDb } = require('./helpers/testDb');
-   ```
-3. Setup con `beforeAll()` e `afterAll()`
-4. Scrivi test suite con `describe()` e `it()`
-5. Esegui: `npm test tests/rewards.api.test.js`
-6. Coverage: `npm run test:coverage`
-
-## Strategia Testing Integrazione
-
-I test attuali sono **integrazione API** (non unit):
-- Completano il workflow end-to-end (signup → login → operations)
-- Usano in-memory DB reale (non mock)
-- Testano HTTP layer + controller logic + model validation
-
-Vantaggi:
-- ✅ Catturano errori reali di integrazione
-- ✅ Non dipendono da Mocks fragili
-
-Trade-off:
-- ⚠️ Più lenti di unit test
-- ⚠️ Difficili da debuggare (multi-layer stack trace)
+- coprono HTTP layer + middleware + controller + model validation
+- usano DB reale in-memory (no mock del persistence layer)
+- verificano sia happy path sia failure path principali

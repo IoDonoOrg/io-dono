@@ -29,10 +29,10 @@ export ADMIN_PW="Pass1234"
 Utility: login e ricavo token (con `jq`)
 
 ```bash
-# Registrazione (solo se necessario) - crea utente locale
+# Registrazione pubblica (solo ruolo DONOR)
 curl -s -X POST "$BASE_URL/auth/users" \
   -H "Content-Type: application/json" \
-  -d '{"email":"'$DONOR_EMAIL'","password":"'$DONOR_PW'","role":"DONOR","name":"Donor Test"}' | jq
+  -d '{"email":"'$DONOR_EMAIL'","password":"'$DONOR_PW'","role":"DONOR","name":"Donor Test","phoneNumber":"+39 02 1234567","address":"Via Roma 123, Milano"}' | jq
 
 # Login e salvataggio token (risposta attesa: { token: "..." })
 TOKEN=$(curl -s -X POST "$BASE_URL/auth/sessions" \
@@ -42,6 +42,9 @@ TOKEN=$(curl -s -X POST "$BASE_URL/auth/sessions" \
 # Verifica token
 curl -s "$BASE_URL/auth/sessions/me" -H "Authorization: Bearer $TOKEN" | jq
 ```
+
+Nota sicurezza: `POST /api/auth/users` consente solo `DONOR`.
+Per creare utenti `ASSOCIATION` usare `POST /api/admin/users` con `ADMIN_TOKEN`.
 
 Se non hai `jq`, stampa la risposta intera:
 
@@ -351,16 +354,4 @@ curl -X POST "$BASE_URL/auth/google/users" \
 
 (Se l'app utilizza la callback OAuth via browser, usare la rotta `/api/auth/google/authorize` e la callback `/api/auth/google/callback`.)
 
-Verifiche Admin utili
-
-- Elencare tutti gli utenti (se esiste endpoint admin):
-
-```bash
-curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/users"
-```
-
-- Leggere log/metriche (dipende dall'app):
-
-```bash
-curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/stats"
-```
+Nota: in questa codebase non sono esposti endpoint `GET /api/admin/users` o `GET /api/admin/stats`.
