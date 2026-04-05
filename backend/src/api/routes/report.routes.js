@@ -1,6 +1,6 @@
 const express = require('express');
 const reportController = require('../controllers/report.controller');
-const { isAuth } = require('../../middleware/auth.middleware.js');
+const { isAuth, isAdmin } = require('../../middleware/auth.middleware.js');
 
 const router = express.Router();
 
@@ -15,6 +15,6 @@ router.get('/', isAuth, reportController.listReports);
 router.get('/:id', isAuth, reportController.getReportById);
 
 // Aggiorna parzialmente la segnalazione (solo ADMIN).
-router.patch('/:id', isAuth, reportController.patchReport);
+router.patch('/:id', isAuth, isAdmin, reportController.patchReport);
 
 module.exports = router;

@@ -35,6 +35,19 @@ const reportSchema = new mongoose.Schema({
         type: String,
         enum: ['OPEN', 'CLOSED'],
         default: 'OPEN'
+    },
+    resolution: {
+        type: String,
+        default: null
+    },
+    closedAt: {
+        type: Date,
+        default: null
+    },
+    closedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
     }
 }, {
     timestamps: true

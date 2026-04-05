@@ -1,5 +1,6 @@
 const Donation = require('../models/Donazione');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const mongoose = require('mongoose');
 
 const isDonor = (user) => user && user.role === 'DONOR';
@@ -141,6 +142,15 @@ exports.patchDonation = async (req, res) => {
 
                 const updated = await Donation.findOneAndUpdate({ _id: id, status: 'AVAILABLE' }, { $set: { status: 'ACCEPTED', associationId: req.user._id } }, { new: true });
                 if (!updated) return res.status(400).json({ message: 'Impossibile accettare la donazione.' });
+
+                await Notification.create({
+                    recipientId: updated.donorId,
+                    type: 'DONATION_ACCEPTED',
+                    title: 'Donazione accettata',
+                    message: 'Una tua donazione e stata accettata da un\'associazione.',
+                    metadata: { donationId: updated._id }
+                });
+
                 return res.status(200).json(updated);
             }
 
@@ -165,6 +175,13 @@ exports.patchDonation = async (req, res) => {
                 }
 
                 await User.findByIdAndUpdate(updatedDonation.donorId, { $inc: { solidarityPoints: 10 } }, { session });
+                await Notification.create([{
+                    recipientId: updatedDonation.donorId,
+                    type: 'DONATION_COMPLETED',
+                    title: 'Ritiro completato',
+                    message: 'Il ritiro della tua donazione e stato completato.',
+                    metadata: { donationId: updatedDonation._id }
+                }], { session });
                 await session.commitTransaction();
                 session.endSession();
                 return res.status(200).json(updatedDonation);
