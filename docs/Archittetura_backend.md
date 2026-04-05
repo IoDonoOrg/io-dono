@@ -23,22 +23,48 @@ Ecco il ruolo di ogni cartella in `src/`:
   * **Esempio:** `database.js` (per connettersi a MongoDB), `passport.js` (per configurare la strategia di login con Google e JWT).
 * `/src/api/models/`
   * **Cosa fa:** Definisce gli **Schemi** del nostro database. È la "forma" dei nostri dati su MongoDB.
-  * **Esempio:** `user.model.js` (definisce i campi `email`, `password`, `role`, `solidarityPoints`, ecc.), `donation.model.js`, `reward.model.js`.
+  * **Modelli implementati:**
+    - `User.js` - Schema utenti (DONOR, ASSOCIATION, ADMIN) con campi ban audit trail (isBanned, bannedAt, bannedReason, bannedBy)
+    - `Donazione.js` - Schema donazioni con items array, pickup location geo, stato transizionale
+    - `Segnalazione.js` - Schema segnalazioni con audit trail (resolution, closedAt, closedBy)
+    - `Ricompensa.js` - Schema ricompense con lifecycle management (isActive, expiresAt, maxRedemptions, pointsCost opzionale)
+    - `Notification.js` - Schema notifiche in-app con tipi predefiniti (DONATION_ACCEPTED, DONATION_COMPLETED, REWARD_ACTIVATED, SYSTEM)
+    - `RewardClaim.js` - Schema attivazioni reward con codice univoco e status transizionale
+    - `Inventario.js` - (stub) Per futuri inventari associazioni
+    - `PuntoDiRitiro.js` - (stub) Per futuri punti di ritiro
 * `/src/api/controllers/`
   * **Cosa fa:** È il **cervello** dell'applicazione. Contiene la logica di business. Prende una richiesta (request), usa i "Modelli" per interagire con il DB e invia una risposta (response).
-  * **Esempio:** `auth.controller.js` (con funzioni `register`, `login`), `donation.controller.js` (con funzioni `createDonation`, `acceptDonation`).
+  * **Controller implementati:**
+    - `auth.controller.js` - Registrazione (con role hardening: solo DONOR pubblico), login, Google OAuth flow
+    - `donation.controller.js` - CRUD completo + transizioni stato (ACCEPTED, COMPLETED) con trigger notifiche e transazioni ACID
+    - `report.controller.js` - CRUD segnalazioni + chiusura con audit trail
+    - `notification.controller.js` - Listaggio con filtri (page, limit, isRead, type), PATCH singola e bulk
+    - `reward.controller.js` - Listaggio ricompense disponibili, claim activation transazionale, state transitions
+    - `admin.controller.js` - Creazione utenti associazione, ban/unban con audit, statistiche overview/trend/filtrate
+    - `associationReport.controller.js` - Report settimanale (ultimi 7 giorni) e itemizzato per range date
 * `/src/api/routes/`
   * **Cosa fa:** Definisce gli **endpoint** (gli URL) della nostra API e li collega ai "Controller".
-  * **Esempio:** `auth.routes.js` dice: "Quando arriva una richiesta `POST` a `/api/auth/register`, esegui la funzione `register` dal `auth.controller.js`".
+  * **Route file disponibili:**
+    - `auth.routes.js` - `/auth/users` (POST reg), `/auth/sessions` (POST login), `/auth/google/*` (OAuth)
+    - `donation.routes.js` - `/donations` (POST create, GET list, GET/:id detail, PATCH/:id update, DELETE/:id)
+    - `report.routes.js` - `/reports` (POST create, GET list, GET/:id, PATCH/:id solo admin con isAdmin middleware)
+    - `notification.routes.js` - `/me/notifications` (GET list+filter, PATCH bulk, PATCH/:id single)
+    - `reward.routes.js` - `/rewards` (GET list available rewards)
+    - `rewardClaim.routes.js` - `/me/rewards/claims` (GET list, POST activate transazionale, PATCH/:claimId state)
+    - `admin.routes.js` - `/admin/users` (POST create assoc, PATCH/:id ban/unban), `/admin/statistics/*` (overview/trend/filtrate)
+    - `association.routes.js` - `/associations/reports/*` (GET weekly, GET items range-based)
+    - `mainRouter.js` - Compose tutti i route file e monta su `/api` prefix
 * `/src/middleware/`
   * **Cosa fa:** È il **"buttafuori"** (security) della nostra API. Sono funzioni che vengono eseguite *prima* del controller per verificare i permessi.
-  * **Esempio:** `auth.js` (con funzioni `isAuth` per verificare il JWT, `isAdmin` per verificare se `user.role === 'ADMIN'`).
-* `/src/api/services/`
-  * **Cosa fa:** Contiene logica complessa e riutilizzabile che non appartiene a un controller.
-  * **Esempio:** `email.service.js` (una funzione per inviare email di notifica), `maps.service.js` (per interagire con Google Maps e geolocalizzare un indirizzo).
+  * **Middleware implementati:**
+    - `auth.middleware.js` - `isAuth` (verifica JWT + check isBanned), `isDonor`, `isAssociation`, `isAdmin`
+    - `logger.middleware.js` - Logging richieste HTTP basic (in development)
 * `/src/utils/`
-  * **Cosa fa:** Contiene piccole funzioni "utility" e classi di errore.
-  * **Esempio:** `ApiError.js` (una classe per standardizzare i messaggi di errore), `logger.js` (per loggare eventi).
+  * **Cosa fa:** Contiene funzioni "utility" condivise tra controller per evitare duplicazione.
+  * **Utility disponibili:**
+    - `statistics.utils.js` - `parseQuantityNumber()`, `parseDateInput()`, `validateObjectId()`, `getDateRange()` con default logic (30 giorni)
+    - (Future) `ApiError.js` per standardizzare errori
+    - (Future) `logger.js` per logging strutturato
 * `/src/app.js`
   * **Cosa fa:** È il **cuore** di Express. Carica i middleware principali (come `express.json()`) e "collega" tutti i file delle rotte da `/src/api/routes/`.
 * `/src/server.js`
@@ -57,7 +83,7 @@ Segui sempre questi passaggi. Esempio:  **"Creare la Registrazione Utente" (`POS
 
 #### Passo 1: Definire i Dati (Model)
 
-1. **File:** `src/api/models/user.model.js`
+1. **File:** `src/api/models/User.js` (naming convention: PascalCase per i modelli)
 2. **Azione:** Usa Mongoose per creare uno `userSchema` con tutti i campi che abbiamo definito (email, password, role, name, ecc.). Ricorda di usare `argon2` per "hashare" la password *prima* di salvarla (usando un `pre-save hook` di Mongoose).
 3. **Azione:** `module.exports = mongoose.model('User', userSchema);`
 
@@ -77,37 +103,49 @@ Segui sempre questi passaggi. Esempio:  **"Creare la Registrazione Utente" (`POS
 
 1. **File:** `src/api/routes/auth.routes.js`
 2. **Azione:** Importa il controller e definisci la rotta.
-   ```
+   ```javascript
    const express = require('express');
    const router = express.Router();
    const authController = require('../controllers/auth.controller');
 
-   // POST /api/auth/register
-   router.post('/register', authController.register);
+   // POST /api/auth/users (registrazione)
+   router.post('/users', authController.registerUser);
 
-   // Aggiungeremo qui /login, /google, ecc.
+   // POST /api/auth/sessions (login)
+   router.post('/sessions', authController.createSession);
+
+   // Aggiungeremo qui /google/*, ecc.
 
    module.exports = router;
-
    ```
 
-#### Passo 4: Collegare le Rotte (App.js)
+#### Passo 4: Collegare le Rotte (App.js e mainRouter.js)
 
-1. **File:** `src/app.js`
-2. **Azione:** "Collega" il file delle rotte all'app principale. Aggiungi queste righe:
+1. **File:** `src/api/routes/mainRouter.js`
+2. **Azione:** "Collega" il file delle rotte all'app principale combinando tutte le rotte. Aggiungi queste righe:
+   ```javascript
+   const express = require('express');
+   const router = express.Router();
+
+   const authRoutes = require('./auth.routes');
+   const donationRoutes = require('./donation.routes');
+   const reportRoutes = require('./report.routes');
+   // ... altri route file
+
+   // Monta le rotte sotto i prefissi semantici
+   router.use('/auth', authRoutes);
+   router.use('/donations', donationRoutes);
+   router.use('/reports', reportRoutes);
+   // ... etc
+
+   module.exports = router;
    ```
-   // ... (dopo app.use(express.json()))
 
-   // Carica le rotte dell'autenticazione
-   const authRoutes = require('./api/routes/auth.routes');
-   app.use('/api/auth', authRoutes); //
-
-   // Quando avremo le donazioni, aggiungeremo:
-   // const donationRoutes = require('./api/routes/donation.routes');
-   // app.use('/api/donations', donationRoutes);
-
-   // ... (alla fine, module.exports = app)
-
+3. **File:** `src/app.js`
+4. **Azione:** Monta il mainRouter:
+   ```javascript
+   const mainRouter = require('./api/routes/mainRouter');
+   app.use('/api', mainRouter);
    ```
 
 Ora, se avvii il server (`npm start`) e invii una richiesta `POST` a `http://localhost:3000/api/auth/register` con i dati giusti, il tuo utente verrà creato nel database.
