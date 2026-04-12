@@ -39,7 +39,17 @@ exports.createReport = async (req, res) => {
 // Elenca le segnalazioni visibili all'utente corrente.
 exports.listReports = async (req, res) => {
     try {
-        const { status, type, scope = 'me' } = req.query;
+        const {
+            status,
+            type,
+            scope = 'me',
+            fromDate,
+            toDate,
+            reporterId,
+            reportedUserId,
+            page = 1,
+            limit = 20
+        } = req.query;
         const filter = {};
 
         if (status) {
@@ -49,22 +59,62 @@ exports.listReports = async (req, res) => {
             filter.type = type;
         }
 
+        if (fromDate || toDate) {
+            const from = new Date(fromDate);
+            const to = new Date(toDate);
+            if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+                return res.status(400).json({ message: 'Formato data non valido.' });
+            }
+            if (from > to) {
+                return res.status(400).json({ message: 'Intervallo date non valido.' });
+            }
+            filter.createdAt = { $gte: from, $lte: to };
+        }
+
+        if (reporterId) {
+            if (!mongoose.Types.ObjectId.isValid(reporterId)) {
+                return res.status(400).json({ message: 'reporterId non valido.' });
+            }
+            filter.reporterId = reporterId;
+        }
+
+        if (reportedUserId) {
+            if (!mongoose.Types.ObjectId.isValid(reportedUserId)) {
+                return res.status(400).json({ message: 'reportedUserId non valido.' });
+            }
+            filter.reportedUserId = reportedUserId;
+        }
+
         // Mantiene la visibilità: utente standard solo proprie, admin con scope=all tutte.
         const requestingAll = scope === 'all';
         if (!isAdmin(req.user) || !requestingAll) {
             filter.reporterId = req.user._id;
         }
 
-        const reports = await Report.find(filter)
-            .populate('reporterId', 'name email')
-            .populate('reportedUserId', 'name email')
-            .populate('donationId')
-            .sort({ createdAt: -1 });
+        const safePage = Math.max(1, parseInt(page, 10) || 1);
+        const safeLimit = Math.max(1, parseInt(limit, 10) || 20);
+        const skip = (safePage - 1) * safeLimit;
+
+        const [reports, total] = await Promise.all([
+            Report.find(filter)
+                .populate('reporterId', 'name email')
+                .populate('reportedUserId', 'name email')
+                .populate('donationId')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(safeLimit),
+            Report.countDocuments(filter)
+        ]);
 
         return res.status(200).json({
             status: 'success',
             results: reports.length,
-            data: { reports }
+            data: { reports },
+            meta: {
+                page: safePage,
+                limit: safeLimit,
+                total
+            }
         });
 
     } catch (error) {
@@ -109,17 +159,28 @@ exports.getReportById = async (req, res) => {
 // Aggiorna parzialmente una segnalazione (solo ADMIN).
 exports.patchReport = async (req, res) => {
     try {
-        if (!isAdmin(req.user)) {
-            return res.status(403).json({ message: 'Accesso negato. Richiesto ruolo Admin.' });
-        }
-
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'ID segnalazione non valido.' });
         }
 
         const patch = {};
-        if (req.body.status) patch.status = req.body.status;
+        if (req.body.status) {
+            patch.status = String(req.body.status).toUpperCase();
+            if (patch.status === 'CLOSED') {
+                patch.closedAt = new Date();
+                patch.closedBy = req.user._id;
+                patch.resolution = req.body.resolution || null;
+            }
+            if (patch.status === 'OPEN') {
+                patch.closedAt = null;
+                patch.closedBy = null;
+                patch.resolution = null;
+            }
+        }
+        if (req.body.resolution && !patch.status) {
+            patch.resolution = req.body.resolution;
+        }
 
         if (Object.keys(patch).length === 0) {
             return res.status(400).json({ message: 'Nessun campo valido da aggiornare.' });

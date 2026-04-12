@@ -58,7 +58,26 @@ const userSchema = new mongoose.Schema({
     redeemedRewards: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Reward'
-    }]
+    }],
+
+    isBanned: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
+    bannedAt: {
+        type: Date,
+        default: null
+    },
+    bannedReason: {
+        type: String,
+        default: null
+    },
+    bannedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    }
 }, {
     // Abilita i timestamp createdAt e updatedAt.
     timestamps: true

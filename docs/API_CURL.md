@@ -29,10 +29,10 @@ export ADMIN_PW="Pass1234"
 Utility: login e ricavo token (con `jq`)
 
 ```bash
-# Registrazione (solo se necessario) - crea utente locale
+# Registrazione pubblica (solo ruolo DONOR)
 curl -s -X POST "$BASE_URL/auth/users" \
   -H "Content-Type: application/json" \
-  -d '{"email":"'$DONOR_EMAIL'","password":"'$DONOR_PW'","role":"DONOR","name":"Donor Test"}' | jq
+  -d '{"email":"'$DONOR_EMAIL'","password":"'$DONOR_PW'","role":"DONOR","name":"Donor Test","phoneNumber":"+39 02 1234567","address":"Via Roma 123, Milano"}' | jq
 
 # Login e salvataggio token (risposta attesa: { token: "..." })
 TOKEN=$(curl -s -X POST "$BASE_URL/auth/sessions" \
@@ -42,6 +42,9 @@ TOKEN=$(curl -s -X POST "$BASE_URL/auth/sessions" \
 # Verifica token
 curl -s "$BASE_URL/auth/sessions/me" -H "Authorization: Bearer $TOKEN" | jq
 ```
+
+Nota sicurezza: `POST /api/auth/users` consente solo `DONOR`.
+Per creare utenti `ASSOCIATION` usare `POST /api/admin/users` con `ADMIN_TOKEN`.
 
 Se non hai `jq`, stampa la risposta intera:
 
@@ -57,7 +60,18 @@ Flusso Donazioni (Donor)
 curl -i -X POST "$BASE_URL/donations" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"title":"Pane fresco","description":"Pane per famiglie","quantity":10,"pickupPointId":"<PICKUP_POINT_ID>"}'
+  -d '{
+    "items": [
+      {"type": "FOOD", "name": "Pane fresco", "quantity": "10 pani"},
+      {"type": "CLOTHING", "name": "Magliette", "quantity": "5 pezzi"}
+    ],
+    "pickupTime": "2026-04-15T14:00:00Z",
+    "pickupLocation": {
+      "address": "Via Roma 123, Milano",
+      "geo": {"type": "Point", "coordinates": [9.19, 45.46]}
+    },
+    "notes": "Ritiro solo al mattino"
+  }'
 ```
 
 Risposta: `201 Created` con body contenente la donazione creata (salvare l `_id` come DONATION_ID).
@@ -68,6 +82,8 @@ Risposta: `201 Created` con body contenente la donazione creata (salvare l `_id`
 curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/donations"
 # oppure
 curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/donations?status=AVAILABLE"
+# ASSOCIATION vede AVAILABLE globali + proprie ACCEPTED/COMPLETED
+# ADMIN vede tutte con filtri avanzati
 ```
 
 3) Recuperare una donazione per id
@@ -82,10 +98,10 @@ curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/donations/<DONATION_ID>"
 curl -X PATCH "$BASE_URL/donations/<DONATION_ID>" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"title":"Pane integrale","quantity":8}'
+  -d '{"items": [{"type": "FOOD", "name": "Pane integrale", "quantity": "8 pani"}]}'
 ```
 
-5) Eliminare una donazione (proprietario)
+5) Eliminare una donazione (proprietario DONOR, solo se status=AVAILABLE)
 
 ```bash
 curl -i -X DELETE "$BASE_URL/donations/<DONATION_ID>" -H "Authorization: Bearer $TOKEN"
@@ -104,6 +120,8 @@ curl -X PATCH "$BASE_URL/donations/<DONATION_ID>" \
   -d '{"status":"ACCEPTED"}'
 ```
 
+Nota: trigger automatico crea `Notification` di tipo `DONATION_ACCEPTED` al donor.
+
 7) Completare la donazione (ASSOCIATION set `status` a `COMPLETED`, opzionalmente invia `evaluation`)
 
 ```bash
@@ -113,7 +131,7 @@ curl -X PATCH "$BASE_URL/donations/<DONATION_ID>" \
   -d '{"status":"COMPLETED","evaluation":5}'
 ```
 
-Nota: il completamento può scatenare transazioni che aggiornano punti solidarietà per il donor.
+Nota: Il completamento è transazionale (ACID). Aggiorna stato + crea notifica + incrementa `solidarityPoints` del donor atomicamente.
 
 Flusso Segnalazioni (Reports)
 
@@ -123,13 +141,29 @@ Flusso Segnalazioni (Reports)
 curl -X POST "$BASE_URL/reports" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"targetId":"<DONATION_OR_RESOURCE_ID>","reason":"Ritiro non avvenuto","message":"Il punto di ritiro non rispondeva."}'
+  -d '{"reportedUserId":"<USER_ID>","type":"USER_BEHAVIOR","description":"Comportamento scorretto durante il ritiro."}'
+```
+
+Oppure per segnalare una donazione:
+
+```bash
+curl -X POST "$BASE_URL/reports" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"donationId":"<DONATION_ID>","type":"MALFUNCTION","description":"La donazione non è ancora arrivata."}'
 ```
 
 2) Elencare segnalazioni (ADMIN vede tutte, utente vede le proprie)
 
 ```bash
-curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/reports"
+# Utente normale
+curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/reports"
+
+# ADMIN vede tutte
+curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/reports?scope=all"
+
+# Con filtri
+curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/reports?scope=all&status=OPEN&type=USER_BEHAVIOR"
 ```
 
 3) Recuperare segnalazione per id
@@ -138,16 +172,169 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/reports"
 curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/reports/<REPORT_ID>"
 ```
 
-4) Aggiornare lo status della segnalazione (ADMIN)
+4) Aggiornare segnalazione - chiudi e risolvi (ADMIN ONLY)
 
 ```bash
 curl -X PATCH "$BASE_URL/reports/<REPORT_ID>" \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"status":"RESOLVED","note":"Verificato con utente."}'
+  -d '{"status":"CLOSED","resolution":"Verificato con utente. Problema risolto contattando l'\''associazione."}'
 ```
 
-Autenticazione Google (flusso token-frontend)
+Nota: Il sistema registra automaticamente `closedAt` (timestamp) e `closedBy` (admin ID) per audit trail.
+
+## Flusso Notifiche (Donor)
+
+1) Elencare notifiche personali
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/me/notifications"
+
+# Con filtri
+curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/me/notifications?isRead=false&type=DONATION_ACCEPTED&page=1&limit=20"
+```
+
+Tipi disponibili: `DONATION_ACCEPTED`, `DONATION_COMPLETED`, `REWARD_ACTIVATED`, `SYSTEM`.
+
+2) Marcare una notifica come letta
+
+```bash
+curl -X PATCH "$BASE_URL/me/notifications/<NOTIFICATION_ID>" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"isRead":true}'
+```
+
+3) Marcare multiple notifiche come lette (bulk)
+
+```bash
+curl -X PATCH "$BASE_URL/me/notifications" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"isRead":true,"type":"DONATION_ACCEPTED"}'
+```
+
+## Flusso Ricompense (Donor)
+
+1) Elencare ricompense disponibili
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/rewards"
+```
+
+Risposta include `defaultPointsThreshold` (50 punti) e punti attuali dell'utente.
+
+2) Attivare una ricompensa (TRANSAZIONALE - atomico con punti)
+
+```bash
+curl -X POST "$BASE_URL/me/rewards/claims" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"rewardId":"<REWARD_ID>"}'
+```
+
+Risposta: `201 Created` con `activationCode` (codice univoco per riscattare la ricompensa).
+La transazione è ACID: punti detratti + claim creato + notifica inviata oppure rollback totale.
+
+3) Elencare i miei reward activati
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/me/rewards/claims"
+
+# Con filtri
+curl -H "Authorization: Bearer $TOKEN" "$BASE_URL/me/rewards/claims?status=ACTIVATED&page=1&limit=20"
+```
+
+4) Aggiornare stato di un claim (es. marcare come USED)
+
+```bash
+curl -X PATCH "$BASE_URL/me/rewards/claims/<CLAIM_ID>" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"USED"}'
+```
+
+## Flusso Amministrazione (Admin)
+
+1) Creare account associazione (ADMIN ONLY)
+
+```bash
+curl -X POST "$BASE_URL/admin/users" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"nuova-associazione@example.com",
+    "password":"SecurePass123",
+    "name":"Associazione SOS",
+    "phoneNumber":"+39 02 1234567",
+    "address":"Via Garibaldi 45, Milano"
+  }'
+```
+
+Nota: Il ruolo è forzatamente impostato a `ASSOCIATION`. Risposta: `201 Created`.
+
+2) Bannare un utente (ADMIN ONLY, non può bannare se stesso)
+
+```bash
+curl -X PATCH "$BASE_URL/admin/users/<USER_ID>" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"isBanned":true,"bannedReason":"Violazione termini di servizio"}'
+```
+
+Risposta registra automaticamente `bannedAt` (timestamp) e `bannedBy` (admin ID).
+
+Errore `409 Conflict` se provi a bannare te stesso.
+
+3) Sbannare un utente
+
+```bash
+curl -X PATCH "$BASE_URL/admin/users/<USER_ID>" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"isBanned":false}'
+```
+
+4) Statistiche dashboard - overview KPI (ultimi 30 giorni)
+
+```bash
+curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/statistics/overview"
+```
+
+Ritorna: donazioni totali per categoria, segnalazioni per stato, utenti per ruolo.
+
+5) Statistiche trend - donazioni giorno per giorno
+
+```bash
+curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/statistics/trend"
+
+# Con range personalizzato
+curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/statistics/trend?fromDate=2026-03-01&toDate=2026-04-05"
+```
+
+6) Statistiche filtrate con query params
+
+```bash
+curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/statistics?area=Milano&itemType=FOOD&fromDate=2026-03-01&toDate=2026-04-05"
+```
+
+## Flusso Associazioni (Association Reports)
+
+1) Report settimanale (ultimi 7 giorni)
+
+```bash
+curl -H "Authorization: Bearer $ASSOC_TOKEN" "$BASE_URL/associations/reports/weekly"
+```
+
+Ritorna: donazioni completate, top 5 donatori, stima peso rifiuti evitati.
+
+2) Report itemizzato per range date
+
+```bash
+curl -H "Authorization: Bearer $ASSOC_TOKEN" "$BASE_URL/associations/reports/items?fromDate=2026-03-01&toDate=2026-04-05"
+```
+
+Ritorna: aggregazione giornaliera per tipo di bene + totali.
 
 - Scambiare un Google ID token per un token applicativo:
 
@@ -167,16 +354,4 @@ curl -X POST "$BASE_URL/auth/google/users" \
 
 (Se l'app utilizza la callback OAuth via browser, usare la rotta `/api/auth/google/authorize` e la callback `/api/auth/google/callback`.)
 
-Verifiche Admin utili
-
-- Elencare tutti gli utenti (se esiste endpoint admin):
-
-```bash
-curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/users"
-```
-
-- Leggere log/metriche (dipende dall'app):
-
-```bash
-curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/stats"
-```
+Nota: in questa codebase non sono esposti endpoint `GET /api/admin/users` o `GET /api/admin/stats`.

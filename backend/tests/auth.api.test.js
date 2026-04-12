@@ -105,4 +105,92 @@ describe('Auth API (registrazione e login)', () => {
             expect(res.body.message).toBe('Credenziali non valide.');
         });
     });
+    describe('POST /api/auth/users - Role Hardening (Security)', () => {
+        test('consente registrazione con role=DONOR', async () => {
+            const res = await request(app)
+                .post('/api/auth/users')
+                .send({
+                    email: 'donor@hardened.it',
+                    password: 'Password123!',
+                    name: 'Donor Hardened',
+                    role: 'DONOR',
+                    phoneNumber: '333',
+                    address: 'Via Hardened'
+                });
+
+            expect(res.statusCode).toBe(201);
+            expect(res.body.user.role).toBe('DONOR');
+        });
+
+        test('nega registrazione con role=ASSOCIATION (403)', async () => {
+            const res = await request(app)
+                .post('/api/auth/users')
+                .send({
+                    email: 'assoc@hardened.it',
+                    password: 'Password123!',
+                    name: 'Association Attempt',
+                    role: 'ASSOCIATION',
+                    phoneNumber: '444',
+                    address: 'Via Hacked'
+                });
+
+            expect(res.statusCode).toBe(403);
+            expect(res.body.message).toBe('Ruolo non consentito per registrazione pubblica.');
+        });
+
+        test('nega registrazione con role=ADMIN (403)', async () => {
+            const res = await request(app)
+                .post('/api/auth/users')
+                .send({
+                    email: 'admin@hardened.it',
+                    password: 'Password123!',
+                    name: 'Admin Attempt',
+                    role: 'ADMIN',
+                    phoneNumber: '555',
+                    address: 'Via BadActor'
+                });
+
+            expect(res.statusCode).toBe(403);
+            expect(res.body.message).toBe('Ruolo non consentito per registrazione pubblica.');
+        });
+
+        test('default a DONOR se role non specified', async () => {
+            const res = await request(app)
+                .post('/api/auth/users')
+                .send({
+                    email: 'default@hardened.it',
+                    password: 'Password123!',
+                    name: 'Default Role User',
+                    phoneNumber: '666',
+                    address: 'Via Default'
+                    // Nessun 'role' specificato
+                });
+
+            expect(res.statusCode).toBe(201);
+            expect(res.body.user.role).toBe('DONOR');
+        });
+
+        test('ASSOCIATION e ADMIN creabili solo da /api/admin/users (admin-only endpoint)', async () => {
+            // Questo test verifica che ASSOCIATION non possa essere creata via public endpoint
+            // Conferma che /api/admin/users è l'unico modo per creare ASSOCIATION/ADMIN
+            // (il test per /api/admin/users è in admin.api.test.js)
+
+            const res = await request(app)
+                .post('/api/auth/users')
+                .send({
+                    email: 'attempt.assoc@hardened.it',
+                    password: 'Password123!',
+                    name: 'Association Try Again',
+                    role: 'ASSOCIATION',
+                    phoneNumber: '777',
+                    address: 'Via Persistence'
+                });
+
+            expect(res.statusCode).toBe(403);
+
+            // Verifica che nessun utente con email sia stato creato
+            const user = await User.findOne({ email: 'attempt.assoc@hardened.it' });
+            expect(user).toBeNull();
+        });
+    });
 });

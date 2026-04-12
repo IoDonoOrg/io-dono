@@ -9,9 +9,29 @@ const rewardSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    pointsCost: { 
+    pointsCost: {
         type: Number,
-        required: true,
+        required: false,
+        default: null,
+        min: 1
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
+        index: true
+    },
+    expiresAt: {
+        type: Date,
+        default: null
+    },
+    maxRedemptions: {
+        type: Number,
+        default: null,
+        min: 1
+    },
+    currentRedemptions: {
+        type: Number,
+        default: 0,
         min: 0
     }
 }, {

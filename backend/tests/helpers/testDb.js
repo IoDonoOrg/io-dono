@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const { MongoMemoryReplSet } = require('mongodb-memory-server');
 
-let mongoServer;
+let mongoReplSet;
 
 async function connectTestDb() {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
+    mongoReplSet = await MongoMemoryReplSet.create({
+        replSet: { count: 1, storageEngine: 'wiredTiger' }
+    });
+    const uri = mongoReplSet.getUri();
     await mongoose.connect(uri, { dbName: 'io_dono_test' });
 }
 
@@ -21,8 +23,8 @@ async function disconnectTestDb() {
         await mongoose.connection.dropDatabase();
         await mongoose.connection.close();
     }
-    if (mongoServer) {
-        await mongoServer.stop();
+    if (mongoReplSet) {
+        await mongoReplSet.stop();
     }
 }
 

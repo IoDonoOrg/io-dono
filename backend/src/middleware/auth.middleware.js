@@ -20,6 +20,10 @@ exports.isAuth = async (req, res, next) => {
             return res.status(401).json({ message: 'Utente non trovato.' });
         }
 
+        if (user.isBanned) {
+            return res.status(403).json({ message: 'Account bloccato. Contatta l\'amministratore.' });
+        }
+
         req.user = user;
         next();
     } catch (error) {
