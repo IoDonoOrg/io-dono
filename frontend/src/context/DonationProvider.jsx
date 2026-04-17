@@ -7,10 +7,9 @@ import {
   useMemo,
 } from "react";
 import {
-  getAcceptedDonations,
-  getActiveDonations,
-  getCompletedDonations,
+  getDonationsByStatus
 } from "src/services/donationService";
+import { DONATION_STATUS } from "src/utils/constants";
 import { acceptedEx, activeEx, completedEx } from "src/utils/exampleData";
 
 const DonationContext = createContext();
@@ -45,7 +44,7 @@ export function DonationProvider({ children }) {
 
     setLoading(true);
     try {
-      const result = await getActiveDonations();
+      const result = await getDonationsByStatus(DONATION_STATUS.AVAILABLE);
       setActiveDonations(result);
       setError(null);
     } catch (err) {
@@ -64,7 +63,7 @@ export function DonationProvider({ children }) {
     }
 
     try {
-      const result = await getAcceptedDonations();
+      const result = await getDonationsByStatus(DONATION_STATUS.ACCEPTED);
       setAcceptedDonations(result);
     } catch (err) {
       console.error(err);
@@ -80,7 +79,7 @@ export function DonationProvider({ children }) {
     }
 
     try {
-      const result = await getCompletedDonations();
+      const result = await getDonationsByStatus(DONATION_STATUS.COMPLETED);
       setCompletedDonations(result);
     } catch (err) {
       console.error(err);

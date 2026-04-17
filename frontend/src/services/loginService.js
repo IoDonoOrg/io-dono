@@ -1,5 +1,11 @@
 import api from "./api";
 
+/*
+  Questo file contiene i servizi per il login, sia locale che con Google
+- localLogin: invia email e password al backend per ottenere un token di autenticazione
+- googleLogin: invia il token di Google al backend.
+*/
+
 
 // formato della richiesta aspettato:
 // {
@@ -7,7 +13,10 @@ import api from "./api";
 // "password": "Test123$"
 // }
 
-// rotta: POST /auth/login
+// POST /auth/sessions
+// Questa funzione gestisce il login locale, inviando email e password al backend per ottenere un token di autenticazione
+// Se il login ha successo, restituisce il token e i dati dell'utente
+// In caso di errore, restituisce un messaggio di errore appropriato
 const localLogin = async (email, password) => {
   const loginData = {
     email: email,
@@ -15,7 +24,7 @@ const localLogin = async (email, password) => {
   };
 
   try {
-    const response = await api.post('/auth/login', loginData);
+    const response = await api.post('/auth/sessions', loginData);
 
     console.log('Login effettuato con successo:', response.data);
 
@@ -36,15 +45,17 @@ const localLogin = async (email, password) => {
   }
 }
 
-
-// rotta: POST /api/auth/google/token
-// formato della richiesta aspettato:
+// Formato della richiesta aspettato:
 // {
 //   token: 'stringalungacredenzialegoogle'
 // }
+// POST /auth/google/sessions/token
+// Questa funzione gestisce il login con Google, inviando il token di Google al backend
+// Se l'utente è già registrato con Google, restituisce un token di login e i dati dell'utente
+// Se l'utente non è ancora registrato con Google, restituisce un token di registrazione per completare la registrazione
 const googleLogin = async (googleCredential) => {
   try {
-    const response = await api.post("/auth/google/token", {
+    const response = await api.post("/auth/google/sessions", {
       token: googleCredential,
     });
 

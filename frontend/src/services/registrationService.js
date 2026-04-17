@@ -2,7 +2,13 @@ import { unformatPhoneNumber } from "src/utils/validation";
 import { USER_ROLE, DONOR_TYPE } from "src/utils/constants";
 import api from "./api";
 
-// POST /api/auth/register
+/*
+  Questo file contiene tutte le funzioni che riguardano la registrazione degli utenti, sia tramite email/password che tramite Google
+*/
+
+// POST /auth/users
+// Funzione responsabile della registrazione locale (email/password)
+// Ritorna una stringa vuota se la registrazione è andata a buon fine, altrimenti ritorna una stringa d'errore ricevuta dal backend
 export const localRegistration = async (formData) => {
   // formatta i dati prima di inviarli
   const payload = preparePayload(formData);
@@ -10,7 +16,7 @@ export const localRegistration = async (formData) => {
   console.log(payload);
 
   try {
-    const response = await api.post('/auth/register', payload);
+    const response = await api.post('/auth/users', payload);
 
     console.log('Registrazione effettuata con successo:', response.data);
     // una stringa vuota indica successo
@@ -54,8 +60,7 @@ export const localRegistration = async (formData) => {
 //     }
 // }
 
-// una funzione helper che trasforma i dati del form
-// nel formato aspettato dal backend 
+// Funzione helper che prepara i dati del form per essere inviati al backend, sia per la registrazione locale che per quella tramite Google
 const preparePayload = (data) => {
   const { user, address, openingHours } = data;
 
@@ -102,6 +107,9 @@ const preparePayload = (data) => {
   };
 };
 
+// POST /auth/google/users
+// Funzione responsabile della registrazione tramite Google
+// Ritorna un oggetto con due campi: success (boolean) e message (stringa d'errore o token di successo)
 export const googleRegistration = async (formData) => {
   const registrationToken = sessionStorage.getItem("registrationToken");
 
@@ -121,7 +129,7 @@ export const googleRegistration = async (formData) => {
     // È FONDAMENTALE aggiungere l'header Authorization manualmente qui
     // perché l'interceptor standard (definitio in api.js) cerca il token di login,
     // mentre qui serve quello di registrazione
-    const response = await api.post('/auth/register-google', payload, {
+    const response = await api.post('/auth/google/users', payload, {
       headers: {
         Authorization: `Bearer ${registrationToken}`
       }
