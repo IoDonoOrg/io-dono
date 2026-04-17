@@ -1,6 +1,15 @@
 import api from "./api";
 
-// POST api/donations
+/* 
+  Questo file contiene tutte le funzioni che interagiscono con il backend per gestire le donazioni
+  Ogni funzione corrisponde a una specifica chiamata API (es. GET /donations, POST /donations, etc.)
+  e si occupa di formattare i dati nel formato richiesto dal backend, gestire gli errori e restituire i risultati in un formato opportuno
+*/
+
+// POST /donations
+// Crea una nuova donazione usando i dati forniti dal frontend
+// Utilizza la funzione helper preparePayload per formattare i dati nel formato richiesto dal backend
+// Ritorna un oggetto con due campi: success (booleano) e message (stringa) che indica il risultato dell'operazione
 export const createDonation = async (formData) => {
   const payload = preparePayload(formData);
 
@@ -12,6 +21,7 @@ export const createDonation = async (formData) => {
       message: "Donazione creata"
     }
 
+    // se il backend restituisce un errore, viene restituito il messaggio d'errore
   } catch (e) {
     if (e.response) {
       console.log("Errore backend: ", e.response.data.message);
@@ -21,7 +31,7 @@ export const createDonation = async (formData) => {
         message: e.response.data.message
       }
     }
-
+    // altrimenti si tratta di un errore di rete o altro
     return {
       success: false,
       message: "Errore server backend"
@@ -29,8 +39,8 @@ export const createDonation = async (formData) => {
   }
 }
 
-
-// prepara i dati per il backend
+// Funzione helper che trasforma i dati del form di creazione/modifica donazione nel formato richiesto dal backend
+// Il backend si aspetta un array di items con proprietà type, name e quantity (stringa unica che combina quantità e unità)
 const preparePayload = (formData) => {
   // mappa l'array degli items del frontend allo schema del backend
   const formattedItems = formData.items.map(item => ({
@@ -63,7 +73,9 @@ const preparePayload = (formData) => {
 };
 
 
-// DELETE /api/donations/:id 
+// DELETE /donations/:id 
+// Elimina una donazione specifica identificata dal suo ID
+// Ritorna true se l'eliminazione è avvenuta con successo, altrimenti false
 export const deleteDonation = async (id) => {
   try {
     await api.delete(`donations/${id}`);
@@ -75,12 +87,15 @@ export const deleteDonation = async (id) => {
   }
 }
 
-// PUT /api/donations/:id
+// PATCH /donations/:id
+// Aggiorna i dati di una donazione specifica identificata dal suo ID
+// Utilizza la funzione helper preparePayload per formattare i dati nel formato richiesto dal backend
+// Ritorna un oggetto con due campi: success (booleano) e message (stringa) che indica il risultato dell'operazione
 export const updateDonation = async (id, formData) => {
   const payload = preparePayload(formData);
 
   try {
-    await api.put(`/donations/${id}`, payload);
+    await api.patch(`/donations/${id}`, payload);
     return {
       success: true,
       message: "Donazione modificata con successo"
@@ -100,48 +115,17 @@ export const updateDonation = async (id, formData) => {
   }
 }
 
-
-/*
-  RECUPERO DEI DIVERSI TIPI DELLE DONAZIONE
-*/
-
-// GET /api/donations/me/available
-export const getActiveDonations = async () => {
+// GET /donations?status={AVAILABLE|ACCEPTED|COMPLETED}
+// Recupera le donazioni filtrate per stato (AVAILABLE, ACCEPTED, COMPLETED)
+// Gli statis possibili sono definiti nell'oggetto DONATION_STATUS in src/utils/constants.js
+export const getDonationsByStatus = async (type) => {
   try {
-    const response = await api.get("/donations/me/available");
-
-    // console.log(response.data);
-    return response.data;
+    const response = await api.get(`/donations?status=${type}`);
+    // ritorna solo l'array di donazioni, senza altri metadati
+    return response.data.items;
   } catch (e) {
-    console.log("Errore backend: ", e.response?.data.message);
+    console.log("Errore backend: ", e.response?.data?.message);
     return [];
   }
-}
-
-// GET /api/donations/me/accepted
-export const getAcceptedDonations = async () => {
-  try {
-    const response = await api.get("/donations/me/accepted");
-
-    console.log(response.data);
-    return response.data;
-  } catch (e) {
-    console.log("Errore backend: ", e.response?.data.message);
-    return [];
-  }
-}
-
-// GET /api/donations/me/completed
-export const getCompletedDonations = async () => {
-  try {
-    const response = await api.get("/donations/me/completed");
-
-    console.log(response.data);
-    return response.data;
-  } catch (e) {
-    console.log("Errore backend: ", e.response?.data.message);
-    return [];
-  }
-}
-
+};
 
