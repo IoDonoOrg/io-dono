@@ -129,3 +129,29 @@ export const getDonationsByStatus = async (type) => {
   }
 };
 
+// PATCH /donations/:id
+// Accetta una donazione (cambia lo stato da AVAILABLE ad ACCEPTED)
+// Solo le associazioni possono accettare donazioni
+// Ritorna un oggetto con due campi: success (booleano) e message (stringa) che indica il risultato dell'operazione
+export const acceptDonation = async (id) => {
+  try {
+    await api.patch(`/donations/${id}`, { status: 'ACCEPTED' });
+    return {
+      success: true,
+      message: "Donazione accettata con successo"
+    }
+  } catch (e) {
+    if (e.response) {
+      console.log("Errore backend: ", e.response.data.message);
+      return {
+        success: false,
+        message: e.response.data.message
+      }
+    }
+    return {
+      success: false,
+      message: "Errore server backend"
+    }
+  }
+};
+

@@ -10,18 +10,19 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { DONATION_STATUS } from "src/utils/constants";
+import { DONATION_MENU_ACTIONS, DONATION_STATUS } from "src/utils/constants";
 import { formatStatus } from "src/utils/format";
 
 function DonationBar({
   children,
   status,
+  role,
   isCompletable = false,
   isModifieble = true,
   onVisualize,
   onEdit,
   onDelete,
-  onComplete,
+  onAccept,
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -44,8 +45,8 @@ function DonationBar({
       case "delete":
         onDelete();
         break;
-      case "complete":
-        onComplete();
+      case "accept":
+        onAccept();
         break;
       case "visualize":
         onVisualize();
@@ -71,6 +72,12 @@ function DonationBar({
         return "default"; // grigio
     }
   };
+
+  const menuContext = { isCompletable, isModifieble, role, status };
+
+  const visibleActions = DONATION_MENU_ACTIONS.filter(({ condition }) =>
+    condition(menuContext),
+  );
 
   return (
     <>
@@ -123,24 +130,11 @@ function DonationBar({
           horizontal: "left",
         }}
       >
-        <MenuItem key="visualize" onClick={() => handleAction("visualize")}>
-          Visualizza
-        </MenuItem>
-        {isModifieble && (
-          <MenuItem key="edit" onClick={() => handleAction("edit")}>
-            Modifica
+        {visibleActions.map(({ key, label }) => (
+          <MenuItem key={key} onClick={() => handleAction(key)}>
+            {label}
           </MenuItem>
-        )}
-        {isModifieble && (
-          <MenuItem key="delete" onClick={() => handleAction("delete")}>
-            Elimina
-          </MenuItem>
-        )}
-        {isCompletable && (
-          <MenuItem key="complete" onClick={() => handleAction("complete")}>
-            Completa
-          </MenuItem>
-        )}
+        ))}
       </Menu>
     </>
   );
