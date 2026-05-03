@@ -36,3 +36,31 @@ export const DONATION_STATUS = {
 // la lista delle provincie supportate
 // nel futuro dovrà diventare una chiamata API
 export const PROVINCES = ["TN"];
+
+// Configurazione delle azioni del menu per le donazioni
+// La funzione condition determina se visualizzare una voce o meno
+export const DONATION_MENU_ACTIONS = [
+  {
+    key: "visualize",
+    label: "Visualizza",
+    // sempre visualizzata
+    condition: () => true,
+  },
+  {
+    key: "accept",
+    label: "Accetta",
+    // solo se il ruolo dell'utente è admin o associazione e se la donazione può essere accetta
+    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION || role === USER_ROLE.ADMIN) && status === DONATION_STATUS.AVAILABLE
+  },
+  {
+    key: "edit",
+    label: "Modifica",
+    // solo se la donazione è modificabile
+    condition: ({ isModifieble }) => isModifieble,
+  },
+  {
+    key: "delete",
+    label: "Elimina",
+    condition: ({ isModifieble }) => isModifieble,
+  },
+];

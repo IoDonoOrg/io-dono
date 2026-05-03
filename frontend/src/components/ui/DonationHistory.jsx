@@ -10,37 +10,40 @@ import {
 } from "@mui/material";
 import DonationBar from "./DonationBar";
 import { useDonation } from "src/hooks/useDonation";
-import { deleteDonation } from "src/services/donationService";
 import { formatDate, isModifieble } from "src/utils/format";
 import ViewDonationDialog from "./ViewDonationDialog";
-import { useViewDonation } from "src/hooks/useViewDonation";
-import { useEditDonation } from "src/hooks/useEditDonation";
 import CreateDonationDialog from "../form/CreateDonationDialog";
+import { useAlert } from "src/hooks/useAlert";
+import { useAuth } from "src/hooks/useAuth";
+import AlertSnack from "./AlertSnack";
+import { useDonationActions } from "src/hooks/useDonationActions";
 
 function DonationHistory({ open, onClose }) {
-  const { allDonations, removeDonationLocally, loading } = useDonation();
-
+  const { user } = useAuth();
+  const { alertData, hideAlert } = useAlert();
+  const { allDonations, loading } = useDonation();
   const {
+    handleDelete,
+    handleAccept,
+    editDialogOpen,
+    editedDonation,
+    handleEdit,
+    handleCloseEditDialog,
     viewDialogOpen,
     selectedDonation,
     handleVisualize,
     handleCloseViewDialog,
-  } = useViewDonation();
-
-  const { editDialogOpen, editedDonation, handleEdit, handleCloseEditDialog } =
-    useEditDonation();
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteDonation(id);
-      removeDonationLocally(id);
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  } = useDonationActions();
 
   return (
     <>
+      <AlertSnack
+        severity={alertData.severity}
+        open={alertData.open}
+        onClose={hideAlert}
+      >
+        {alertData.message}
+      </AlertSnack>
       <Dialog
         open={open}
         onClose={onClose}
@@ -74,13 +77,15 @@ function DonationHistory({ open, onClose }) {
                 <DonationBar
                   key={el._id}
                   status={el.status}
+                  role={user?.role}
                   onDelete={() => handleDelete(el._id)}
                   onVisualize={() => handleVisualize(el)}
                   isModifieble={isModifieble(el.status)}
                   onEdit={() => handleEdit(el)}
+                  onAccept={() => handleAccept(el._id)}
                 >
                   {`ID: ${el._id.substring(0, 10)}, Data ritiro: ${formatDate(
-                    el.pickupTime
+                    el.pickupTime,
                   )}, Contenuti: ${el.items[0]?.name} ${
                     el.items[0]?.quantity
                   }, ...`}

@@ -1,44 +1,30 @@
-import {
-  Alert,
-  Box,
-  CircularProgress,
-  IconButton,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import DonationBar from "./DonationBar";
 import { useDonation } from "src/hooks/useDonation";
-import { deleteDonation } from "src/services/donationService";
-import { MoreHoriz } from "@mui/icons-material";
 import { formatDate } from "src/utils/format";
-import { useViewDonation } from "src/hooks/useViewDonation";
 import ViewDonationDialog from "./ViewDonationDialog";
-import { useEditDonation } from "src/hooks/useEditDonation";
 import CreateDonationDialog from "../form/CreateDonationDialog";
-
+import { useAuth } from "src/hooks/useAuth";
+import { useAlert } from "src/hooks/useAlert";
+import AlertSnack from "./AlertSnack";
+import { useDonationActions } from "src/hooks/useDonationActions";
 function ActiveDonationsTile({ displayNumber = 3 }) {
-  const { activeDonations, loading, error, removeDonationLocally } =
-    useDonation();
+  const { activeDonations, loading, error } = useDonation();
+  const { user } = useAuth();
+  const { alertData, hideAlert } = useAlert();
 
   const {
+    handleDelete,
+    handleAccept,
+    editDialogOpen,
+    editedDonation,
+    handleEdit,
+    handleCloseEditDialog,
     viewDialogOpen,
     selectedDonation,
     handleVisualize,
     handleCloseViewDialog,
-  } = useViewDonation();
-
-  const { editDialogOpen, editedDonation, handleEdit, handleCloseEditDialog } =
-    useEditDonation();
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteDonation(id);
-      // Chiamata alla funzione dell'hook useDonation che aggiorna il context
-      removeDonationLocally(id);
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  } = useDonationActions();
 
   if (loading) {
     return (
@@ -64,6 +50,13 @@ function ActiveDonationsTile({ displayNumber = 3 }) {
 
   return (
     <>
+      <AlertSnack
+        severity={alertData.severity}
+        open={alertData.open}
+        onClose={hideAlert}
+      >
+        {alertData.message}
+      </AlertSnack>
       <Typography
         className="text-center"
         variant="h6"
@@ -83,9 +76,11 @@ function ActiveDonationsTile({ displayNumber = 3 }) {
             <DonationBar
               key={el._id}
               status={el.status}
+              role={user?.role}
               onDelete={() => handleDelete(el._id)}
               onVisualize={() => handleVisualize(el)}
               onEdit={() => handleEdit(el)}
+              onAccept={() => handleAccept(el._id)}
             >
               {`Ritiro: ${formatDate(el.pickupTime)} - ${el.items[0]?.name} ${
                 el.items[0]?.quantity
