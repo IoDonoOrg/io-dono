@@ -13,7 +13,6 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import PasswordField from "src/components/form/PasswordField";
 
 import { GoogleLogin } from "@react-oauth/google";
-import { validateEmail, validatePassword } from "src/utils/validation";
 import { localLogin } from "src/services/loginService";
 import AlertSnack from "src/components/ui/AlertSnack";
 import { useGoogleAuth } from "src/hooks/useGoogleAuth";
@@ -23,9 +22,6 @@ import { useAuth } from "src/hooks/useAuth";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,7 +33,7 @@ function Login() {
   const { handleGoogleSuccess, handleGoogleError } = useGoogleAuth(
     alertError,
     alertSuccess,
-    alertInfo
+    alertInfo,
   );
 
   // determina se c'è un percorso "from"
@@ -49,24 +45,6 @@ function Login() {
     // non ricarica la pagina appena accade un evento (il comportamento di default)
     // così sfruttiamo il client side loading di React
     event.preventDefault();
-
-    // chiama una funzione helper validateEmail
-    // ritorna una stringa vuota se la mail è corretta
-    // altrimenti ritorna il rispettivo messaggio d'errore (guardare la definizione per dettagli)
-    const emailResult = validateEmail(email);
-    setEmailError(emailResult);
-
-    // chiama una funzione helper validatePassword
-    // ritorna una stringa vuota se la password è corretta (guardare la definizione per dettagli)
-    // altrimenti ritorna il rispettivo messaggio d'errore
-    const passwordResult = validatePassword(password);
-    setPasswordError(passwordResult);
-
-    // una stringa vuota dentro una if è considerata "false"
-    // controlla se almeno uno dei due non è vuoto altrimenti ritorna
-    if (emailResult || passwordResult) return;
-
-    // console.log("La form è valida:", { email, password });
 
     // fa una chiamata al backend
     const response = await localLogin(email, password);
@@ -127,15 +105,10 @@ function Login() {
                 label="Email *"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                // !! converta la stringa in un booleano
-                error={!!emailError}
-                helperText={emailError}
               />
               <PasswordField
                 passwordValue={password}
                 onPasswordChange={setPassword}
-                error={!!passwordError}
-                errorText={passwordError}
                 label="Password *"
               />
               <Button
