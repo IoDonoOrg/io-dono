@@ -45,22 +45,32 @@ export const DONATION_MENU_ACTIONS = [
     label: "Visualizza",
     // sempre visualizzata
     condition: () => true,
+    onAction: ({ onVisualize }) => onVisualize(),
   },
   {
     key: "accept",
     label: "Accetta",
     // solo se il ruolo dell'utente è admin o associazione e se la donazione può essere accetta
-    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION || role === USER_ROLE.ADMIN) && status === DONATION_STATUS.AVAILABLE
+    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION || role === USER_ROLE.ADMIN) && status === DONATION_STATUS.AVAILABLE,
+    onAction: ({ onAccept }) => onAccept(),
+  },
+  {
+    key: "complete",
+    label: "Completa",
+    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION || role === USER_ROLE.ADMIN) && status === DONATION_STATUS.ACCEPTED,
+    onAction: ({ onComplete }) => onComplete(),
   },
   {
     key: "edit",
     label: "Modifica",
     // solo se la donazione è modificabile
     condition: ({ isModifieble }) => isModifieble,
+    onAction: ({ onEdit }) => onEdit()
   },
   {
     key: "delete",
     label: "Elimina",
     condition: ({ isModifieble }) => isModifieble,
+    onAction: ({ onDelete }) => onDelete(),
   },
 ];

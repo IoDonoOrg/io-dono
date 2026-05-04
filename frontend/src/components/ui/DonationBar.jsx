@@ -10,22 +10,28 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useAuth } from "src/hooks/useAuth";
+import { useDonationActions } from "src/hooks/useDonationActions";
 import { DONATION_MENU_ACTIONS, DONATION_STATUS } from "src/utils/constants";
-import { formatStatus } from "src/utils/format";
+import { formatDate, formatStatus, getChipColor } from "src/utils/format";
+import ViewDonationDialog from "./ViewDonationDialog";
+import CreateDonationDialog from "../form/CreateDonationDialog";
 
-function DonationBar({
-  children,
-  status,
-  role,
-  isCompletable = false,
-  isModifieble = true,
-  onVisualize,
-  onEdit,
-  onDelete,
-  onAccept,
-}) {
+function DonationBar({ donation, isCompletable = false, isModifieble = true }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const { user } = useAuth();
+  const {
+    handleDelete,
+    handleAccept,
+    handleEdit,
+    handleVisualize,
+    viewDialogOpen,
+    handleCloseViewDialog,
+    editDialogOpen,
+    handleCloseEditDialog,
+  } = useDonationActions();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -35,45 +41,19 @@ function DonationBar({
     setAnchorEl(null);
   };
 
-  const handleAction = (action) => {
-    // console.log(`${children}: ${action}`);
-
-    switch (action) {
-      case "edit":
-        onEdit();
-        break;
-      case "delete":
-        onDelete();
-        break;
-      case "accept":
-        onAccept();
-        break;
-      case "visualize":
-        onVisualize();
-        break;
-    }
-
-    handleClose();
+  const handlers = {
+    onVisualize: () => handleVisualize(donation),
+    onEdit: () => handleEdit(donation),
+    onDelete: () => handleDelete(donation._id),
+    onAccept: () => handleAccept(donation._id),
   };
 
-  // Determina il colore del chip in base allo stato della donazione
-  const getChipColor = (status) => {
-    switch (status) {
-      case DONATION_STATUS.AVAILABLE:
-        return "success"; // verde
-      case DONATION_STATUS.ACCEPTED:
-        return "warning"; // arancione
-      case DONATION_STATUS.COMPLETED:
-        return "info"; // blu
-      case DONATION_STATUS.CANCELLED:
-        return "error"; // rosso
-      case DONATION_STATUS.NO_STATUS:
-      default:
-        return "default"; // grigio
-    }
+  const menuContext = {
+    isCompletable,
+    isModifieble,
+    role: user.role,
+    status: donation.status,
   };
-
-  const menuContext = { isCompletable, isModifieble, role, status };
 
   const visibleActions = DONATION_MENU_ACTIONS.filter(({ condition }) =>
     condition(menuContext),
@@ -90,15 +70,17 @@ function DonationBar({
       >
         <Box display="flex" alignItems="center" className="mr-3" gap={1}>
           <Chip
-            label={formatStatus(status)}
-            color={getChipColor(status)}
+            label={formatStatus(donation.status)}
+            color={getChipColor(donation.status)}
             size="small"
           />
           <Divider orientation="vertical" sx={{ height: 30 }} />
         </Box>
 
         <Typography sx={{ flexGrow: 1, textAlign: "left" }}>
-          {children}
+          {`Ritiro: ${formatDate(donation.pickupTime)} - ${donation.items[0]?.name} ${
+            donation.items[0]?.quantity
+          }, ...`}
         </Typography>
 
         <Box display="flex" alignItems="center" className="ml-3" gap={1}>
@@ -130,12 +112,33 @@ function DonationBar({
           horizontal: "left",
         }}
       >
-        {visibleActions.map(({ key, label }) => (
-          <MenuItem key={key} onClick={() => handleAction(key)}>
+        {visibleActions.map(({ key, label, onAction }) => (
+          <MenuItem
+            key={key}
+            onClick={() => {
+              onAction(handlers);
+              handleClose();
+            }}
+          >
             {label}
           </MenuItem>
         ))}
       </Menu>
+      {
+        <ViewDonationDialog
+          open={viewDialogOpen}
+          onClose={handleCloseViewDialog}
+          donation={donation}
+        />
+      }
+      {
+        <CreateDonationDialog
+          open={editDialogOpen}
+          onClose={handleCloseEditDialog}
+          inEditMode={true}
+          donation={donation}
+        />
+      }
     </>
   );
 }

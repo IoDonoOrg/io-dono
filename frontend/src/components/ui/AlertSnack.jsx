@@ -14,7 +14,7 @@ function AlertSnack({ children, severity, open, onClose }) {
   return (
     <Snackbar
       open={open}
-      autoHideDuration={10000}
+      autoHideDuration={3000}
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
       sx={{ top: "10% !important" }}
       onClose={handleClose}
@@ -23,7 +23,9 @@ function AlertSnack({ children, severity, open, onClose }) {
         severity={severity}
         onClose={handleClose}
         variant="filled"
-        sx={{ width: "100%" }}
+        sx={{
+          width: "100%",
+        }}
       >
         {children}
       </Alert>
