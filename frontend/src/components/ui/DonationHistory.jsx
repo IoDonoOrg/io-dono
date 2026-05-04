@@ -10,30 +10,12 @@ import {
 } from "@mui/material";
 import DonationBar from "./DonationBar";
 import { useDonation } from "src/hooks/useDonation";
-import { formatDate, isModifieble } from "src/utils/format";
-import ViewDonationDialog from "./ViewDonationDialog";
-import CreateDonationDialog from "../form/CreateDonationDialog";
 import { useAlert } from "src/hooks/useAlert";
-import { useAuth } from "src/hooks/useAuth";
 import AlertSnack from "./AlertSnack";
-import { useDonationActions } from "src/hooks/useDonationActions";
 
 function DonationHistory({ open, onClose }) {
-  const { user } = useAuth();
   const { alertData, hideAlert } = useAlert();
   const { allDonations, loading } = useDonation();
-  const {
-    handleDelete,
-    handleAccept,
-    editDialogOpen,
-    editedDonation,
-    handleEdit,
-    handleCloseEditDialog,
-    viewDialogOpen,
-    selectedDonation,
-    handleVisualize,
-    handleCloseViewDialog,
-  } = useDonationActions();
 
   return (
     <>
@@ -73,24 +55,7 @@ function DonationHistory({ open, onClose }) {
                 Non hai ancora effettuato donazioni.
               </Typography>
             ) : (
-              allDonations.map((el) => (
-                <DonationBar
-                  key={el._id}
-                  status={el.status}
-                  role={user?.role}
-                  onDelete={() => handleDelete(el._id)}
-                  onVisualize={() => handleVisualize(el)}
-                  isModifieble={isModifieble(el.status)}
-                  onEdit={() => handleEdit(el)}
-                  onAccept={() => handleAccept(el._id)}
-                >
-                  {`ID: ${el._id.substring(0, 10)}, Data ritiro: ${formatDate(
-                    el.pickupTime,
-                  )}, Contenuti: ${el.items[0]?.name} ${
-                    el.items[0]?.quantity
-                  }, ...`}
-                </DonationBar>
-              ))
+              allDonations.map((el) => <DonationBar donation={el} />)
             )}
           </Box>
         </DialogContent>
@@ -101,22 +66,6 @@ function DonationHistory({ open, onClose }) {
           </Button>
         </DialogActions>
       </Dialog>
-      {selectedDonation && (
-        <ViewDonationDialog
-          open={viewDialogOpen}
-          onClose={handleCloseViewDialog}
-          donation={selectedDonation}
-        />
-      )}
-
-      {editedDonation && (
-        <CreateDonationDialog
-          open={editDialogOpen}
-          onClose={handleCloseEditDialog}
-          inEditMode={true}
-          donation={editedDonation}
-        />
-      )}
     </>
   );
 }

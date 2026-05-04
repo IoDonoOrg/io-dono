@@ -110,6 +110,8 @@ export default function DonationMapDialog({ open, onClose }) {
                 >
                   <Popup>
                     <div>
+                      <strong>Status:</strong> {donation.status}
+                      <br />
                       {/* TODO: cambiare l'id donatore a qualcosa più leggibile */}
                       <strong>ID donatore:</strong> {donation.donorId}
                       <br />

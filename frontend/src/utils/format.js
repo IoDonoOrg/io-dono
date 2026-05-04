@@ -54,3 +54,21 @@ export const formatBackendLocation = (location) => {
     hasStreetNumber: true,
   };
 };
+
+
+// Determina il colore del chip in base allo stato della donazione
+export const getChipColor = (status) => {
+  switch (status) {
+    case DONATION_STATUS.AVAILABLE:
+      return "success"; // verde
+    case DONATION_STATUS.ACCEPTED:
+      return "warning"; // arancione
+    case DONATION_STATUS.COMPLETED:
+      return "info"; // blu
+    case DONATION_STATUS.CANCELLED:
+      return "error"; // rosso
+    case DONATION_STATUS.NO_STATUS:
+    default:
+      return "default"; // grigio
+  }
+};
