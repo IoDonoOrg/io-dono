@@ -36,8 +36,6 @@ function AssociationDashboard() {
             <DonationMapDialog
               open={isMapOpen}
               onClose={() => setIsMapOpen(false)}
-              // We pass empty array for now as requested
-              donations={[]}
             />
             <Box className="flex flex-row gap-10 my-5">
               <TileClickable onClick={() => setIsHistoryOpen(true)}>

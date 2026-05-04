@@ -21,6 +21,7 @@ import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { DONATION_STATUS } from "src/utils/constants";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -32,6 +33,27 @@ L.Icon.Default.mergeOptions({
 // TODO: idealmente dovrebbero essere le coordinate di indirizzo dell'utente
 // Per ora sono coordinate di Trento
 const DEFAULT_START_COORDS = [46.06787, 11.12108];
+
+const createColoredIcon = (color) =>
+  L.divIcon({
+    className: "",
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41">
+      <path d="M12.5 0C5.596 0 0 5.596 0 12.5c0 8.5 12.5 28.5 12.5 28.5S25 21 25 12.5C25 5.596 19.404 0 12.5 0z" fill="${color}" stroke="white" stroke-width="1.5"/>
+      <circle cx="12.5" cy="12.5" r="5" fill="white"/>
+    </svg>`,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [0, -41],
+  });
+
+const MARKER_ICONS = {
+  [DONATION_STATUS.AVAILABLE]: createColoredIcon("#4caf50"), // verde
+  [DONATION_STATUS.ACCEPTED]: createColoredIcon("#ff9800"), // arancione
+  [DONATION_STATUS.COMPLETED]: createColoredIcon("#2196f3"), // blu
+  [DONATION_STATUS.CANCELLED]: createColoredIcon("#f44336"), // rosso
+};
+
+const DEFAULT_ICON = createColoredIcon("#9e9e9e");
 
 export default function DonationMapDialog({ open, onClose }) {
   const { allDonations } = useDonation();
@@ -84,11 +106,14 @@ export default function DonationMapDialog({ open, onClose }) {
                     donation.pickupLocation.geo.coordinates[1],
                     donation.pickupLocation.geo.coordinates[0],
                   ]}
+                  icon={MARKER_ICONS[donation.status] ?? DEFAULT_ICON}
                 >
                   <Popup>
                     <div>
-                      <strong>ID:</strong> {donation._id.substring(0, 10)}{" "}
+                      {/* TODO: cambiare l'id donatore a qualcosa più leggibile */}
+                      <strong>ID donatore:</strong> {donation.donorId}
                       <br />
+                      <strong>ID donazione:</strong> {donation._id} <br />
                       <strong>Data ritiro:</strong>{" "}
                       {formatDate(donation.pickupTime)} <br />
                       <strong>Indirizzo:</strong> <br />
