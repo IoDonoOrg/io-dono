@@ -63,14 +63,13 @@ export const DONATION_MENU_ACTIONS = [
   {
     key: "edit",
     label: "Modifica",
-    // solo se la donazione è modificabile
-    condition: ({ isModifieble }) => isModifieble,
+    condition: ({ role, status }) => role === USER_ROLE.DONOR && status === DONATION_STATUS.AVAILABLE,
     onAction: ({ onEdit }) => onEdit()
   },
   {
     key: "delete",
     label: "Elimina",
-    condition: ({ isModifieble }) => isModifieble,
+    condition: ({ role, status }) => role === USER_ROLE.DONOR && status === DONATION_STATUS.AVAILABLE,
     onAction: ({ onDelete }) => onDelete(),
   },
 ];

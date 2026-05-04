@@ -1,3 +1,4 @@
+import { DONATION_STATUS } from "src/utils/constants";
 import api from "./api";
 
 /* 
@@ -135,10 +136,11 @@ export const getDonationsByStatus = async (type) => {
 // Ritorna un oggetto con due campi: success (booleano) e message (stringa) che indica il risultato dell'operazione
 export const acceptDonation = async (id) => {
   try {
-    await api.patch(`/donations/${id}`, { status: 'ACCEPTED' });
+    const result = await api.patch(`/donations/${id}`, { status: 'ACCEPTED' });
     return {
       success: true,
-      message: "Donazione accettata con successo"
+      message: "Donazione accettata con successo",
+      donation: result.data
     }
   } catch (e) {
     if (e.response) {
@@ -152,6 +154,38 @@ export const acceptDonation = async (id) => {
       success: false,
       message: "Errore server backend"
     }
+  }
+};
+
+// PATCH /donations/:id
+// Completa una donazione (cambia lo stato da ACCEPTED a COMPLETED)
+// Solo le associazioni possono completare donazioni
+// Richiede un oggetto evaluation con almeno un rating
+// Ritorna un oggetto con tre campi: success (booleano), message (stringa) e donation che contiene la donazione aggiornata
+export const completeDonation = async (id, evaluation) => {
+  try {
+    const result = await api.patch(`/donations/${id}`, {
+      status: DONATION_STATUS.COMPLETED,
+      evaluation
+    });
+
+    return {
+      success: true,
+      message: "Donazione completata con successo",
+      donation: result.data
+    };
+  } catch (e) {
+    if (e.response) {
+      console.log("Errore backend: ", e.response.data.message);
+      return {
+        success: false,
+        message: e.response.data.message
+      };
+    }
+    return {
+      success: false,
+      message: "Errore server backend"
+    };
   }
 };
 

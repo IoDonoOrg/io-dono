@@ -11,7 +11,6 @@ import {
 import { formatDate, formatStatus } from "src/utils/format";
 
 export default function ViewDonationDialog({ open, onClose, donation }) {
-  console.log(donation);
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>

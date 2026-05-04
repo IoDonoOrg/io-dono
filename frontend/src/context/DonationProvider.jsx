@@ -6,9 +6,7 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import {
-  getDonationsByStatus
-} from "src/services/donationService";
+import { getDonationsByStatus } from "src/services/donationService";
 import { DONATION_STATUS } from "src/utils/constants";
 import { acceptedEx, activeEx, completedEx } from "src/utils/exampleData";
 
@@ -121,6 +119,17 @@ export function DonationProvider({ children }) {
     setCompletedDonations((prev) => prev?.filter((d) => d._id !== id) || null);
   };
 
+  // aggiorna l'array locale per risparmiare delle chiamate sulla rete
+  const updateDonationLocally = (updatedDonation) => {
+    const update = (prev) =>
+      prev?.map((d) => (d._id === updatedDonation._id ? updatedDonation : d)) ??
+      null;
+
+    setActiveDonations(update);
+    setAcceptedDonations(update);
+    setCompletedDonations(update);
+  };
+
   return (
     <DonationContext.Provider
       value={{
@@ -132,6 +141,7 @@ export function DonationProvider({ children }) {
         error,
         refreshDonations,
         removeDonationLocally,
+        updateDonationLocally,
       }}
     >
       {children}

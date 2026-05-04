@@ -12,12 +12,13 @@ import {
 import { useState } from "react";
 import { useAuth } from "src/hooks/useAuth";
 import { useDonationActions } from "src/hooks/useDonationActions";
-import { DONATION_MENU_ACTIONS, DONATION_STATUS } from "src/utils/constants";
+import { DONATION_MENU_ACTIONS } from "src/utils/constants";
 import { formatDate, formatStatus, getChipColor } from "src/utils/format";
 import ViewDonationDialog from "./ViewDonationDialog";
 import CreateDonationDialog from "../form/CreateDonationDialog";
+import CompleteDonationDialog from "../form/CompleteDonationDialog";
 
-function DonationBar({ donation, isCompletable = false, isModifieble = true }) {
+function DonationBar({ donation }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -31,6 +32,9 @@ function DonationBar({ donation, isCompletable = false, isModifieble = true }) {
     handleCloseViewDialog,
     editDialogOpen,
     handleCloseEditDialog,
+    handleComplete,
+    completeDialogOpen,
+    handleCloseCompleteDialog,
   } = useDonationActions();
 
   const handleClick = (event) => {
@@ -46,11 +50,10 @@ function DonationBar({ donation, isCompletable = false, isModifieble = true }) {
     onEdit: () => handleEdit(donation),
     onDelete: () => handleDelete(donation._id),
     onAccept: () => handleAccept(donation._id),
+    onComplete: () => handleComplete(donation._id),
   };
 
   const menuContext = {
-    isCompletable,
-    isModifieble,
     role: user.role,
     status: donation.status,
   };
@@ -136,6 +139,13 @@ function DonationBar({ donation, isCompletable = false, isModifieble = true }) {
           open={editDialogOpen}
           onClose={handleCloseEditDialog}
           inEditMode={true}
+          donation={donation}
+        />
+      }
+      {
+        <CompleteDonationDialog
+          open={completeDialogOpen}
+          onClose={handleCloseCompleteDialog}
           donation={donation}
         />
       }
