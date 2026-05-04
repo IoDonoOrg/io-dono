@@ -39,8 +39,6 @@ function DonorDashboard() {
             <DonationMapDialog
               open={isMapOpen}
               onClose={() => setIsMapOpen(false)}
-              // We pass empty array for now as requested
-              donations={[]}
             />
 
             <Tooltip title="Crea donazione" arrow>
