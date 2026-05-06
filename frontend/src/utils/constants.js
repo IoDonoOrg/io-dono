@@ -73,3 +73,9 @@ export const DONATION_MENU_ACTIONS = [
     onAction: ({ onDelete }) => onDelete(),
   },
 ];
+
+export const DIALOGS = {
+  HISTORY: 'history',
+  MAP: 'map',
+  STATISTICS: 'statistics',
+};
