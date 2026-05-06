@@ -8,10 +8,11 @@ import { DonationProvider } from "src/context/DonationProvider";
 import DonationHistory from "src/components/ui/DonationHistory";
 import TileClickable from "src/components/ui/TileClickable";
 import DonationMapDialog from "src/components/ui/DonationMapDialog";
+import { DIALOGS } from "src/utils/constants";
+import AssociationStatistics from "src/components/ui/AssociationStatistics";
 
 function AssociationDashboard() {
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(null);
 
   return (
     <>
@@ -30,19 +31,26 @@ function AssociationDashboard() {
           >
             <ActiveDonationsTile displayNumber={4} />
             <DonationHistory
-              open={isHistoryOpen}
-              onClose={() => setIsHistoryOpen(false)}
+              open={openDialog === DIALOGS.HISTORY}
+              onClose={() => setOpenDialog(null)}
             />
             <DonationMapDialog
-              open={isMapOpen}
-              onClose={() => setIsMapOpen(false)}
+              open={openDialog === DIALOGS.MAP}
+              onClose={() => setOpenDialog(null)}
+            />
+            <AssociationStatistics
+              open={openDialog === DIALOGS.STATISTICS}
+              onClose={() => setOpenDialog(null)}
             />
             <Box className="flex flex-row gap-10 my-5">
-              <TileClickable onClick={() => setIsHistoryOpen(true)}>
+              <TileClickable onClick={() => setOpenDialog(DIALOGS.HISTORY)}>
                 Donazioni
               </TileClickable>
-              <TileClickable onClick={() => setIsMapOpen(true)}>
+              <TileClickable onClick={() => setOpenDialog(DIALOGS.MAP)}>
                 Mappa
+              </TileClickable>
+              <TileClickable onClick={() => setOpenDialog(DIALOGS.STATISTICS)}>
+                Statistiche
               </TileClickable>
             </Box>
           </Paper>
