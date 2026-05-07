@@ -4,7 +4,7 @@ const { isAuth, isAssociation } = require('../../middleware/auth.middleware');
 
 const router = express.Router();
 
-router.get('/reports/weekly', isAuth, isAssociation, associationReportController.getWeeklyReport);
-router.get('/reports/items', isAuth, isAssociation, associationReportController.getItemsReport);
+router.get('/weekly', isAuth, isAssociation, associationReportController.getWeeklyReport);
+router.get('/items', isAuth, isAssociation, associationReportController.getItemsReport);
 
 module.exports = router;
