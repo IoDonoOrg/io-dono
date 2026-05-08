@@ -8,88 +8,61 @@ import {
   Box,
   CircularProgress,
   Divider,
+  Alert,
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 
 import StatCard from "./StatCard";
-const COLORS = ["#1976d2", "#2e7d32", "#9c27b0", "#ed6c02", "#d32f2f"];
-const TYPES = ["Frutta", "Verdura", "Pane", "Latticini", "Altro"];
-
-const weeklyReport = {
-  period: { from: "2025-04-29", to: "2025-05-06" },
-  donationsReceived: 24,
-  estimatedWasteReduced: 312,
-  topDonors: [
-    {
-      donorId: "1",
-      name: "Mario R.",
-      email: "mario@example.com",
-      donationsCount: 8,
-    },
-    {
-      donorId: "2",
-      name: "Sara B.",
-      email: "sara@example.com",
-      donationsCount: 6,
-    },
-    {
-      donorId: "3",
-      name: "Luca M.",
-      email: "luca@example.com",
-      donationsCount: 5,
-    },
-    {
-      donorId: "4",
-      name: "Anna T.",
-      email: "anna@example.com",
-      donationsCount: 4,
-    },
-    {
-      donorId: "5",
-      name: "Giorgio F.",
-      email: "giorgio@example.com",
-      donationsCount: 3,
-    },
-  ],
-};
-
-const itemsReport = {
-  totals: { Frutta: 38, Verdura: 27, Pane: 20, Latticini: 9, Altro: 6 },
-  rows: {
-    "2025-04-30": { Frutta: 5, Verdura: 3, Pane: 2 },
-    "2025-05-01": { Frutta: 7, Verdura: 4, Pane: 3, Latticini: 2 },
-    "2025-05-02": { Frutta: 3, Verdura: 5, Pane: 4, Altro: 1 },
-    "2025-05-03": { Frutta: 6, Verdura: 2, Pane: 3, Latticini: 3 },
-    "2025-05-04": { Frutta: 4, Verdura: 6, Pane: 2, Altro: 2 },
-    "2025-05-05": { Frutta: 8, Verdura: 4, Pane: 3, Latticini: 2 },
-    "2025-05-06": { Frutta: 5, Verdura: 3, Pane: 3, Altro: 3 },
-  },
-};
+import { useStatistics } from "src/hooks/useStatistics";
+import { STATS_COLORS } from "src/utils/constants";
 
 function AssociationStatistics({ open, onClose }) {
-  const loading = false;
+  const { weeklyReport, itemsReport, loading, error } = useStatistics(open);
 
-  const days = Object.keys(itemsReport.rows);
+  console.log(weeklyReport);
+  console.log(itemsReport);
 
-  const stackedSeries = TYPES.map((type, i) => ({
-    data: days.map((day) => itemsReport.rows[day][type] ?? 0),
-    label: type,
-    stack: "main",
-    color: COLORS[i],
-    highlightScope: { fade: "global", highlight: "item" },
-  }));
+  const days = itemsReport
+    ? Object.keys(itemsReport.rows).sort((a, b) => new Date(a) - new Date(b))
+    : [];
 
-  const pieData = Object.entries(itemsReport.totals).map(
-    ([label, value], i) => ({
-      id: i,
-      label,
-      value,
-      color: COLORS[i],
-    }),
-  );
+  const types = itemsReport ? Object.keys(itemsReport.totals) : [];
 
-  const topDonors = [...weeklyReport.topDonors].reverse();
+  const topDonors = weeklyReport
+    ? [...weeklyReport.topDonors].filter(
+        (d) => d && d.name && d.donationsCount > 0,
+      )
+    : [];
+
+  const totalItems = itemsReport
+    ? Object.values(itemsReport.totals).reduce((sum, v) => sum + v, 0)
+    : 0;
+
+  const stackedSeries = itemsReport
+    ? types.map((type, i) => ({
+        data: days.map((day) => itemsReport.rows[day][type] ?? 0),
+        label: type,
+        stack: "main",
+        color: STATS_COLORS[i % STATS_COLORS.length],
+        highlightScope: { fade: "global", highlight: "item" },
+      }))
+    : [];
+
+  const pieData = itemsReport
+    ? Object.entries(itemsReport.totals).map(([label, value], i) => ({
+        id: i,
+        label,
+        value,
+        color: STATS_COLORS[i % STATS_COLORS.length],
+      }))
+    : [];
+
+  const getArcLabel = (item) => {
+    if (!totalItems || totalItems === 0) return "";
+    const pct = Math.round((item.value / totalItems) * 100);
+    return `${pct}%`;
+  };
 
   return (
     <Dialog
@@ -114,6 +87,8 @@ function AssociationStatistics({ open, onClose }) {
           <Box display="flex" justifyContent="center" py={4}>
             <CircularProgress />
           </Box>
+        ) : error ? (
+          <Alert severity="error">{error}</Alert>
         ) : (
           <Box display="flex" flexDirection="column" gap={4} py={1}>
             {/* Stat cards */}
@@ -156,13 +131,19 @@ function AssociationStatistics({ open, onClose }) {
                     {
                       data: topDonors.map((d) => d.name),
                       scaleType: "band",
+                      colorMap: {
+                        type: "ordinal",
+                        colors: STATS_COLORS,
+                      },
                     },
                   ]}
                   xAxis={[{ label: "Donazioni" }]}
                   series={[
                     {
                       data: topDonors.map((d) => d.donationsCount),
-                      highlightScope: { fade: "global", highlight: "item" },
+                      highlightScope: { fade: "global" },
+                      valueFormatter: (value) =>
+                        value == null ? "0" : value.toString(),
                     },
                   ]}
                   hideLegend
@@ -184,7 +165,7 @@ function AssociationStatistics({ open, onClose }) {
                   height={220}
                   series={[
                     {
-                      arcLabel: (item) => `${item.value}%`,
+                      arcLabel: getArcLabel,
                       arcLabelMinAngle: 30,
                       arcLabelRadius: "60%",
                       highlightScope: { fade: "global", highlight: "item" },
