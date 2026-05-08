@@ -55,6 +55,18 @@ function AssociationStatistics({ open, onClose }) {
     return `${pct}%`;
   };
 
+  const NoDataOverlay = () => (
+    <text
+      x="50%"
+      y="50%"
+      textAnchor="middle"
+      dominantBaseline="middle"
+      style={{ fontSize: 14, fill: "gray" }}
+    >
+      Nessun dato disponibile per il periodo selezionato
+    </text>
+  );
+
   return (
     <Dialog
       open={open}
@@ -165,6 +177,7 @@ function AssociationStatistics({ open, onClose }) {
                       position: { vertical: "middle", horizontal: "end" },
                     },
                   }}
+                  slots={{ noDataOverlay: NoDataOverlay }}
                 />
               </Box>
             </Box>
@@ -191,6 +204,7 @@ function AssociationStatistics({ open, onClose }) {
                   },
                 }}
                 margin={{ bottom: 10 }}
+                slots={{ noDataOverlay: NoDataOverlay }}
               />
             </Box>
             <DateRangeField
