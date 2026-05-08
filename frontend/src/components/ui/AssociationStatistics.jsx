@@ -26,18 +26,29 @@ import {
   STATS_COLORS,
 } from "src/utils/statsUtility";
 
-function AssociationStatistics({ open, onClose }) {
-  const { weeklyReport, itemsReport, loading, error } = useStatistics(open);
+import DateRangeField from "../form/DateRangeField";
+import { useDateRange } from "src/hooks/useDateRange";
 
+function AssociationStatistics({ open, onClose }) {
+  const { dateRange, setDateRange } = useDateRange();
+
+  const { weeklyReport, itemsReport, loading, error } = useStatistics(
+    open,
+    dateRange,
+  );
+
+  // elaborazione / formattazione dati per i grafici e le statistiche
   const days = getChartDays(itemsReport);
   const types = getChartTypes(itemsReport);
   const topDonors = getTopDonors(weeklyReport);
   const totalItems = getTotalItems(itemsReport);
 
+  // prepara i dati per i grafici
   const topDonorsChart = getTopDonorsChart(topDonors);
   const goodsPerType = getGoodsPerType(itemsReport);
   const goodsPerDay = getGoodsPerDay(itemsReport, days, types);
 
+  // genera le etichette percentuali per il PieChart
   const getArcLabel = (item) => {
     if (!totalItems || totalItems === 0) return "";
     const pct = Math.round((item.value / totalItems) * 100);
@@ -182,6 +193,11 @@ function AssociationStatistics({ open, onClose }) {
                 margin={{ bottom: 10 }}
               />
             </Box>
+            <DateRangeField
+              fromDate={dateRange.fromDate}
+              toDate={dateRange.toDate}
+              onChange={setDateRange}
+            />
           </Box>
         )}
       </DialogContent>
