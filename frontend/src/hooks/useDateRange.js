@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 // di default è l'ultima settimana, ma può essere modificato dall'utente tramite il DateRangePicker
 const getDefaultRange = () => ({
   fromDate: dayjs().subtract(7, "day").startOf("day").toISOString(),
-  toDate: dayjs().endOf("day").toISOString(),
+  toDate: dayjs().toISOString(),
 });
 
 // restituisce un oggetto con il range di date e una funzione per aggiornarlo
