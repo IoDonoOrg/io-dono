@@ -15,48 +15,28 @@ import { PieChart } from "@mui/x-charts/PieChart";
 
 import StatCard from "./StatCard";
 import { useStatistics } from "src/hooks/useStatistics";
-import { STATS_COLORS } from "src/utils/constants";
+import {
+  getChartDays,
+  getChartTypes,
+  getGoodsPerType,
+  getGoodsPerDay,
+  getTopDonors,
+  getTotalItems,
+  getTopDonorsChart,
+  STATS_COLORS,
+} from "src/utils/statsUtility";
 
 function AssociationStatistics({ open, onClose }) {
   const { weeklyReport, itemsReport, loading, error } = useStatistics(open);
 
-  console.log(weeklyReport);
-  console.log(itemsReport);
+  const days = getChartDays(itemsReport);
+  const types = getChartTypes(itemsReport);
+  const topDonors = getTopDonors(weeklyReport);
+  const totalItems = getTotalItems(itemsReport);
 
-  const days = itemsReport
-    ? Object.keys(itemsReport.rows).sort((a, b) => new Date(a) - new Date(b))
-    : [];
-
-  const types = itemsReport ? Object.keys(itemsReport.totals) : [];
-
-  const topDonors = weeklyReport
-    ? [...weeklyReport.topDonors].filter(
-        (d) => d && d.name && d.donationsCount > 0,
-      )
-    : [];
-
-  const totalItems = itemsReport
-    ? Object.values(itemsReport.totals).reduce((sum, v) => sum + v, 0)
-    : 0;
-
-  const stackedSeries = itemsReport
-    ? types.map((type, i) => ({
-        data: days.map((day) => itemsReport.rows[day][type] ?? 0),
-        label: type,
-        stack: "main",
-        color: STATS_COLORS[i % STATS_COLORS.length],
-        highlightScope: { fade: "global", highlight: "item" },
-      }))
-    : [];
-
-  const pieData = itemsReport
-    ? Object.entries(itemsReport.totals).map(([label, value], i) => ({
-        id: i,
-        label,
-        value,
-        color: STATS_COLORS[i % STATS_COLORS.length],
-      }))
-    : [];
+  const topDonorsChart = getTopDonorsChart(topDonors);
+  const goodsPerType = getGoodsPerType(itemsReport);
+  const goodsPerDay = getGoodsPerDay(itemsReport, days, types);
 
   const getArcLabel = (item) => {
     if (!totalItems || totalItems === 0) return "";
@@ -138,14 +118,7 @@ function AssociationStatistics({ open, onClose }) {
                     },
                   ]}
                   xAxis={[{ label: "Donazioni" }]}
-                  series={[
-                    {
-                      data: topDonors.map((d) => d.donationsCount),
-                      highlightScope: { fade: "global" },
-                      valueFormatter: (value) =>
-                        value == null ? "0" : value.toString(),
-                    },
-                  ]}
+                  series={topDonorsChart}
                   hideLegend
                   margin={{ left: 20 }}
                   borderRadius={4}
@@ -169,7 +142,7 @@ function AssociationStatistics({ open, onClose }) {
                       arcLabelMinAngle: 30,
                       arcLabelRadius: "60%",
                       highlightScope: { fade: "global", highlight: "item" },
-                      data: pieData,
+                      data: goodsPerType,
                       innerRadius: 15,
                       paddingAngle: 2,
                       cornerRadius: 4,
@@ -198,7 +171,7 @@ function AssociationStatistics({ open, onClose }) {
               <BarChart
                 height={250}
                 xAxis={[{ data: days, scaleType: "band" }]}
-                series={stackedSeries}
+                series={goodsPerDay}
                 grid={{ horizontal: true }}
                 slotProps={{
                   legend: {
