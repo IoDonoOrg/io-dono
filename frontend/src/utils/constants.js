@@ -1,3 +1,16 @@
+import {
+  blue,
+  green,
+  purple,
+  orange,
+  red,
+  cyan,
+  amber,
+  brown,
+  blueGrey,
+  pink,
+} from "@mui/material/colors";
+
 // ATTENZIONE: i valori sotto devono corrispondere ai valori aspettati dal backend
 // un oggetto tipo enum che rappresenta tutte possibili categorie di un utente
 export const USER_ROLE = {
@@ -79,3 +92,17 @@ export const DIALOGS = {
   MAP: 'map',
   STATISTICS: 'statistics',
 };
+
+// Colori per le statistiche (grafici)
+export const STATS_COLORS = [
+  blue[700],
+  green[700],
+  purple[500],
+  orange[800],
+  red[700],
+  cyan[500],
+  amber[500],
+  brown[500],
+  blueGrey[500],
+  pink[500],
+];
