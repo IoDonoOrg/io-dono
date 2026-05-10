@@ -51,13 +51,13 @@ export const DONATION_MENU_ACTIONS = [
     key: "accept",
     label: "Accetta",
     // solo se il ruolo dell'utente è admin o associazione e se la donazione può essere accetta
-    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION || role === USER_ROLE.ADMIN) && status === DONATION_STATUS.AVAILABLE,
+    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION) && status === DONATION_STATUS.AVAILABLE,
     onAction: ({ onAccept }) => onAccept(),
   },
   {
     key: "complete",
     label: "Completa",
-    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION || role === USER_ROLE.ADMIN) && status === DONATION_STATUS.ACCEPTED,
+    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION) && status === DONATION_STATUS.ACCEPTED,
     onAction: ({ onComplete }) => onComplete(),
   },
   {
@@ -79,4 +79,10 @@ export const DIALOGS = {
   MAP: 'map',
   STATISTICS: 'statistics',
   CREATE_ASSOC: 'create-association',
+};
+
+export const REPORT_TYPES = {
+  MALFUNCTION: "MALFUNCTION",
+  DONATION_ISSUE: "DONATION_ISSUE",
+  NO_TYPE: "",
 };

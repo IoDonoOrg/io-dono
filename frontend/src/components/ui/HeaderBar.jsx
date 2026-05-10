@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import FlagCircleIcon from "@mui/icons-material/FlagCircle";
 import MenuItem from "@mui/material/MenuItem";
@@ -11,9 +10,13 @@ import Menu from "@mui/material/Menu";
 import { useState } from "react";
 import { useAuth } from "src/hooks/useAuth";
 import ProfileDialog from "./ProfileDialog";
+import CreateReportDialog from "../form/CreateReportDialog";
+import { REPORT_TYPES } from "src/utils/constants";
 
 export default function MenuAppBar() {
   const [anchorEl, setAnchorEl] = useState(null);
+  // openDialog può assumere {"profile", "report", "viewReports"}
+  const [openDialog, setOpenDialog] = useState(null);
 
   const { user, logout } = useAuth();
 
@@ -23,17 +26,6 @@ export default function MenuAppBar() {
 
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const [openProfileDialog, setOpenProfileDialog] = useState(false);
-
-  const handleOpenProfile = () => {
-    setAnchorEl(null);
-    setOpenProfileDialog(true);
-  };
-
-  const handleCloseProfile = () => {
-    setOpenProfileDialog(false);
   };
 
   const [anchorElReport, setAnchorElReport] = useState(null);
@@ -81,7 +73,9 @@ export default function MenuAppBar() {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleOpenProfile}>Profilo</MenuItem>
+              <MenuItem onClick={() => setOpenDialog("profile")}>
+                Profilo
+              </MenuItem>
               <MenuItem onClick={logout}>Logout</MenuItem>
             </Menu>
           </div>
@@ -110,8 +104,8 @@ export default function MenuAppBar() {
             open={Boolean(anchorElReport)}
             onClose={handleCloseReportMenu}
           >
-            <MenuItem onClick={handleCloseReportMenu}>
-              Crea segnalazione
+            <MenuItem onClick={() => setOpenDialog("report")}>
+              Segnala malfunzionamento
             </MenuItem>
             <MenuItem onClick={handleCloseReportMenu}>
               Visualizza segnalazioni
@@ -120,9 +114,14 @@ export default function MenuAppBar() {
         </Toolbar>
       </AppBar>
       <ProfileDialog
-        open={openProfileDialog}
-        onClose={handleCloseProfile}
+        open={openDialog === "profile"}
+        onClose={() => setOpenDialog(null)}
         user={user}
+      />
+      <CreateReportDialog
+        open={openDialog === "report"}
+        onClose={() => setOpenDialog(null)}
+        reportType={REPORT_TYPES.MALFUNCTION}
       />
     </Box>
   );

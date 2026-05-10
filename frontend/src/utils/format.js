@@ -72,3 +72,16 @@ export const getChipColor = (status) => {
       return "default"; // grigio
   }
 };
+
+
+export const formatReportType = (type) => {
+  switch (type) {
+    case "MALFUNCTION":
+      return "Malfunzionamento";
+    case "DONATION_ISSUE":
+      return "Problema con donazione";
+    case "NO_TYPE":
+    default:
+      return "";
+  }
+};
