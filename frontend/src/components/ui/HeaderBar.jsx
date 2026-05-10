@@ -28,8 +28,8 @@ export default function MenuAppBar() {
   const [openProfileDialog, setOpenProfileDialog] = useState(false);
 
   const handleOpenProfile = () => {
-    setAnchorEl(null); // Close the dropdown menu
-    setOpenProfileDialog(true); // Open the dialog
+    setAnchorEl(null);
+    setOpenProfileDialog(true);
   };
 
   const handleCloseProfile = () => {
@@ -51,16 +51,21 @@ export default function MenuAppBar() {
       <AppBar position="static">
         <Toolbar>
           <div className="grow">
-            <IconButton
-              size="large"
-              aria-label="menu-profilo"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
+            <Box display="flex" alignItems="center">
+              <IconButton
+                size="large"
+                aria-label="menu-profilo"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Typography variant="body2" sx={{ ml: 1 }}>
+                {user?.name}
+              </Typography>
+            </Box>
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
@@ -95,7 +100,7 @@ export default function MenuAppBar() {
             anchorEl={anchorElReport}
             anchorOrigin={{
               vertical: "bottom",
-              horizontal: "right", // Aligns better to the right side of screen
+              horizontal: "right",
             }}
             keepMounted
             transformOrigin={{
