@@ -122,6 +122,7 @@ export default function MenuAppBar() {
         open={openDialog === "report"}
         onClose={() => setOpenDialog(null)}
         reportType={REPORT_TYPES.MALFUNCTION}
+        userID={user._id}
       />
     </Box>
   );

@@ -67,6 +67,12 @@ export const DONATION_MENU_ACTIONS = [
     onAction: ({ onEdit }) => onEdit()
   },
   {
+    key: "report",
+    label: "Segnala",
+    condition: ({ role, status }) => role === USER_ROLE.ASSOCIATION && status === DONATION_STATUS.ACCEPTED,
+    onAction: ({ onReport }) => onReport()
+  },
+  {
     key: "delete",
     label: "Elimina",
     condition: ({ role, status }) => role === USER_ROLE.DONOR && status === DONATION_STATUS.AVAILABLE,
@@ -83,6 +89,13 @@ export const DIALOGS = {
 
 export const REPORT_TYPES = {
   MALFUNCTION: "MALFUNCTION",
-  DONATION_ISSUE: "DONATION_ISSUE",
+  DONATION_ISSUE: "USER_BEHAVIOR",
   NO_TYPE: "",
+};
+
+export const DIALOGS_DONATION_BAR = {
+  EDIT: "edit",
+  VISUALIZE: "visualize",
+  COMPLETE: "complete",
+  REPORT: "report",
 };

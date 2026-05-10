@@ -7,21 +7,26 @@ import {
   TextField,
   Typography,
   DialogTitle,
-  Box,
+  Grid,
 } from "@mui/material";
 import { formatReportType } from "src/utils/format";
 import { createReport } from "src/services/reportsService";
 import { useAlert } from "src/hooks/useAlert";
 import AlertSnack from "../ui/AlertSnack";
-import { useAuth } from "src/hooks/useAuth";
+import { REPORT_TYPES } from "src/utils/constants";
+import DonationView from "../ui/DonationView";
 // import { useReport } from "src/hooks/useReport";
 
-function CreateReportDialog({ open, onClose, reportType }) {
+function CreateReportDialog({
+  open,
+  onClose,
+  reportType,
+  donation = undefined,
+  userID = undefined,
+}) {
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   // const { addReportLocally } = useReport();
-
-  const { user } = useAuth();
 
   const { alertData, hideAlert, alertError, alertSuccess } = useAlert();
 
@@ -30,8 +35,13 @@ function CreateReportDialog({ open, onClose, reportType }) {
       setError("La descrizione è obbligatoria");
       return;
     }
-    // TODO: pensare qualcosa per l'user id con malfunzionamenti
-    const result = await createReport(reportType, description, user._id);
+    const result = await createReport(
+      reportType,
+      description,
+      // TODO: pensare qualcosa per l'user id con malfunzionamenti
+      reportType === REPORT_TYPES.DONATION_ISSUE ? donation._id : undefined,
+      reportType === REPORT_TYPES.DONATION_ISSUE ? donation.donorId : userID,
+    );
     if (result.success) {
       // addReportLocally(result.report);
       resetForm();
@@ -71,12 +81,20 @@ function CreateReportDialog({ open, onClose, reportType }) {
           dividers
           sx={{ display: "flex", flexDirection: "column", gap: 2 }}
         >
-          <Typography variant="body1">
-            <Box component="span" fontWeight="bold">
-              {"Tipo: "}
-            </Box>
-            {formatReportType(reportType)}
-          </Typography>
+          <Grid container spacing={2}>
+            <Grid item size={12}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Tipo
+              </Typography>
+              <Typography variant="body1">
+                {formatReportType(reportType)}
+              </Typography>
+            </Grid>
+            {reportType === REPORT_TYPES.DONATION_ISSUE && (
+              <DonationView donation={donation} short />
+            )}
+          </Grid>
+
           <TextField
             label="Descrizione"
             multiline

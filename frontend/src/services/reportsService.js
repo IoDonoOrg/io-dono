@@ -1,6 +1,6 @@
 import api from "./api";
 
-export const createReport = async (reportType, description, reportedUserId, donationId) => {
+export const createReport = async (reportType, description, donationId, reportedUserId) => {
   try {
     const result = await api.post("/reports", {
       type: reportType,
