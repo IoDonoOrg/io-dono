@@ -78,4 +78,5 @@ export const DIALOGS = {
   HISTORY: 'history',
   MAP: 'map',
   STATISTICS: 'statistics',
+  CREATE_ASSOC: 'create-association',
 };

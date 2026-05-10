@@ -10,6 +10,7 @@ import TileClickable from "src/components/ui/TileClickable";
 import DonationMapDialog from "src/components/ui/DonationMapDialog";
 import { DIALOGS } from "src/utils/constants";
 import AssociationStatistics from "src/components/ui/AssociationStatistics";
+import CreateAssocDialog from "src/components/form/CreateAssocDialog";
 
 function AdminDashboard() {
   const [openDialog, setOpenDialog] = useState(null);
@@ -42,7 +43,11 @@ function AdminDashboard() {
               open={openDialog === DIALOGS.STATISTICS}
               onClose={() => setOpenDialog(null)}
             />
-            <Box className="flex flex-row gap-10 my-5">
+            <CreateAssocDialog
+              open={openDialog === DIALOGS.CREATE_ASSOC}
+              onClose={() => setOpenDialog(null)}
+            />
+            <Box className="grid grid-cols-3 gap-10 my-5">
               <TileClickable onClick={() => setOpenDialog(DIALOGS.HISTORY)}>
                 Donazioni
               </TileClickable>
@@ -51,6 +56,11 @@ function AdminDashboard() {
               </TileClickable>
               <TileClickable onClick={() => setOpenDialog(DIALOGS.STATISTICS)}>
                 Statistiche
+              </TileClickable>
+              <TileClickable
+                onClick={() => setOpenDialog(DIALOGS.CREATE_ASSOC)}
+              >
+                Gestione Associazioni
               </TileClickable>
             </Box>
           </Paper>
