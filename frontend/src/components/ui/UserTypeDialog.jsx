@@ -10,10 +10,8 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
-  MenuItem,
   Radio,
   RadioGroup,
-  TextField,
 } from "@mui/material";
 import { useState } from "react";
 import { validateUserType } from "src/utils/validation";
@@ -22,59 +20,29 @@ import { USER_ROLE, DONOR_TYPE } from "src/utils/constants";
 function UserTypeDialog({ onSubmit }) {
   const [open, setOpen] = useState(true);
 
-  // stato che rappresenta il tipo di utenza
-  // USER_ROLE è definito dentro file utils/validation.js
-  // e rappresenta tutti possibili tipi che un utente può assumere
-  const [userType, setUserType] = useState({
-    category: USER_ROLE.NO_CATEGORY,
-    donatorType: DONOR_TYPE.NO_TYPE,
-  });
+  // stato che rappresenta il tipo di donatore
+  const [donatorType, setDonatorType] = useState(DONOR_TYPE.NO_TYPE);
 
-  // stato per errori rilevati
-  // 2 tipi di error:
-  // userCategory - l'utente non ha selezionato una categoria (donatore / associazione)
-  // donatorType - l'utente non ha selezionato il tipo di donatore (privato / attività commerciale)
-  const [error, setError] = useState({
-    userCategory: "",
-    donatorType: "",
-  });
-
-  const handleUserCategory = (e) => {
-    let value = e.target.value;
-    setUserType({ ...userType, category: value });
-    setError({ ...error, userCategory: "" });
-  };
+  const [error, setError] = useState("");
 
   const handleDonatorType = (e) => {
-    let value = e.target.value;
-
-    setUserType({
-      ...userType,
-      donatorType: value,
-    });
-
-    setError({ ...error, donatorType: "" });
+    setDonatorType(e.target.value);
+    setError("");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // console.log(userType);
 
     // chiama la funzione definita dentro utils/validation
     // per dettagli guardare la definizone
-    const valdiationError = validateUserType(userType);
-
-    setError({
-      userCategory: valdiationError.userCategory,
-      donatorType: valdiationError.donatorType,
-    });
+    const validationError = validateUserType(donatorType);
+    setError(validationError);
 
     // se c'è stato rilevato almeno un error -> non chiude il dialogo
-    if (!!valdiationError.userCategory || !!valdiationError.donatorType) return;
+    if (validationError) return;
 
-    // se non ci sono error -> chiude il dialogo
     setOpen(false);
-    onSubmit(userType);
+    onSubmit({ category: USER_ROLE.DONOR, donatorType });
   };
 
   return (
@@ -84,67 +52,31 @@ function UserTypeDialog({ onSubmit }) {
         <Box className="flex flex-col gap-4">
           <DialogContentText color="textPrimary" fontSize={17}>
             Prima di procedere con la registrazione devi specificare il tipo di
-            utente che rappresenti
+            donatore che rappresenti
           </DialogContentText>
           <form onSubmit={handleSubmit} id="user-type-form">
-            <FormControl error={!!error.userCategory}>
-              <FormLabel id="radio-user-type" className="mb-3">
-                Rappresenti un..
+            <FormControl error={!!error}>
+              <FormLabel id="radio-donor-type" className="mb-3">
+                Sei un donatore..
               </FormLabel>
               <RadioGroup
-                aria-labelledby="radio-user-type"
-                defaultValue="female"
+                aria-labelledby="radio-donor-type"
                 name="radio-buttons-group"
                 className="flex flex-col gap-1"
-                onChange={handleUserCategory}
+                onChange={handleDonatorType}
               >
                 <FormControlLabel
-                  value={USER_ROLE.DONOR}
+                  value={DONOR_TYPE.PRIVATE}
                   control={<Radio />}
-                  label="Donatore"
+                  label="Privato (Un individuo)"
                 />
-                {userType.category === USER_ROLE.DONOR && (
-                  <TextField
-                    select
-                    label="Tipo"
-                    value={userType.donatorType}
-                    onChange={handleDonatorType}
-                    fullWidth
-                    size="small"
-                    error={!!error.donatorType}
-                    helperText={error.donatorType}
-                    slotProps={{
-                      select: {
-                        MenuProps: {
-                          anchorOrigin: {
-                            vertical: "bottom",
-                            horizontal: "left",
-                          },
-                          transformOrigin: {
-                            vertical: "top",
-                            horizontal: "left",
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <MenuItem value={DONOR_TYPE.PRIVATE}>
-                      Privato (Un individuo)
-                    </MenuItem>
-                    <MenuItem value={DONOR_TYPE.COMMERCIAL}>
-                      Commerciale (Una attività commericiale)
-                    </MenuItem>
-                  </TextField>
-                )}
                 <FormControlLabel
-                  value={USER_ROLE.ASSOCIATION}
+                  value={DONOR_TYPE.COMMERCIAL}
                   control={<Radio />}
-                  label="Associazione"
+                  label="Commerciale (Un'attività commerciale)"
                 />
               </RadioGroup>
-              {!!error.userCategory && (
-                <FormHelperText>{error.userCategory}</FormHelperText>
-              )}
+              {!!error && <FormHelperText>{error}</FormHelperText>}
             </FormControl>
           </form>
         </Box>

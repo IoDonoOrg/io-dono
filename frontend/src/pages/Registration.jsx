@@ -12,7 +12,7 @@ import { useRegistration } from "src/hooks/useRegistration";
 function Registration() {
   const { alertData, alertSuccess, alertError, alertInfo, hideAlert } =
     useAlert();
-  const { handleDialogSubmit, isGoogleMode } = useRegistration(
+  const { handleDialogSubmit, isGoogleMode, formData } = useRegistration(
     alertSuccess,
     alertError,
   );
@@ -49,6 +49,7 @@ function Registration() {
             <RegistrationForm
               alertSuccess={alertSuccess}
               alertError={alertError}
+              userType={formData.user}
             />
           </Box>
           <Box className="flex items-center gap-2 my-2">

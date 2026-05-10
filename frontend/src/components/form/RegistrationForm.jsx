@@ -14,11 +14,11 @@ import { DONOR_TYPE, USER_ROLE } from "src/utils/constants";
 function RegistrationForm({
   alertSuccess,
   alertError,
-  initialUserOverrides,
   onSubmitSuccess,
   // formId è usato per collegare un bottone di submit esterno al form, ad esempio quello definito in CreateAssocDialog
   formId = "registration-form",
   submitLabel = "Registrati",
+  userType,
 }) {
   const {
     formData,
@@ -26,7 +26,7 @@ function RegistrationForm({
     handleInputChange,
     handleSubmit,
     isGoogleMode,
-  } = useRegistration(alertSuccess, alertError, initialUserOverrides);
+  } = useRegistration(alertSuccess, alertError, userType);
 
   const handleFormSubmit = async (e) => {
     const success = await handleSubmit(e);

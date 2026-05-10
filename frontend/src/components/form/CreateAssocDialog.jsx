@@ -12,7 +12,6 @@ import RegistrationForm from "src/components/form/RegistrationForm";
 import { useAlert } from "src/hooks/useAlert";
 import { USER_ROLE } from "src/utils/constants";
 
-const ASSOC_USER_OVERRIDES = { category: USER_ROLE.ASSOCIATION };
 const FORM_ID = "create-assoc-form";
 
 function CreateAssocDialog({ open, onClose }) {
@@ -50,16 +49,16 @@ function CreateAssocDialog({ open, onClose }) {
           <RegistrationForm
             alertSuccess={alertSuccess}
             alertError={alertError}
-            initialUserOverrides={ASSOC_USER_OVERRIDES}
             onSubmitSuccess={onClose}
             formId={FORM_ID}
             submitLabel={null}
+            userType={{ category: USER_ROLE.ASSOCIATION }}
           />
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={onClose} variant="outlined" color="error">
-            Annulla
+        <DialogActions sx={{ gap: 1, justifyContent: "space-between" }}>
+          <Button onClick={onClose} variant="contained" color="error">
+            Chiudi
           </Button>
           <Button
             type="submit"
@@ -67,7 +66,7 @@ function CreateAssocDialog({ open, onClose }) {
             variant="contained"
             color="primary"
           >
-            Crea associazione
+            Conferma
           </Button>
         </DialogActions>
       </Dialog>
