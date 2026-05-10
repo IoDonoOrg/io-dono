@@ -26,11 +26,10 @@ function RegistrationForm({
     handleInputChange,
     handleSubmit,
     isGoogleMode,
-  } = useRegistration(alertSuccess, alertError, userType);
+  } = useRegistration(alertSuccess, alertError, userType, onSubmitSuccess);
 
   const handleFormSubmit = async (e) => {
-    const success = await handleSubmit(e);
-    if (success) onSubmitSuccess?.();
+    await handleSubmit(e);
   };
 
   const handleNameLabel = (user) => {

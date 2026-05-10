@@ -15,8 +15,15 @@ export const localRegistration = async (formData) => {
 
   console.log(payload);
 
+  let endpoint = '/auth/users';
+
+  // se si cerca di creare un'associazione, bisogna usare l'endpoint admin/users
+  if (formData.user.category === USER_ROLE.ASSOCIATION) {
+    endpoint = '/admin/users';
+  }
+
   try {
-    const response = await api.post('/auth/users', payload);
+    const response = await api.post(endpoint, payload);
 
     console.log('Registrazione effettuata con successo:', response.data);
     // una stringa vuota indica successo
@@ -159,4 +166,3 @@ export const googleRegistration = async (formData) => {
     }
   }
 };
-

@@ -5,7 +5,7 @@ import { confirmPasswords, normalizeName, validateAddress, validateEmail, valida
 import { USER_ROLE, DONOR_TYPE } from "src/utils/constants"
 import { useAuth } from "./useAuth";
 
-export const useRegistration = (alertSuccess, alertError, userType) => {
+export const useRegistration = (alertSuccess, alertError, userType, onSuccess) => {
   // flag che segnalizza che l'utente sta cercando di registrarsi tramite google
   const isGoogleMode = !!sessionStorage.getItem("registrationToken");
   console.log("Google mode: ", isGoogleMode);
@@ -149,9 +149,18 @@ export const useRegistration = (alertSuccess, alertError, userType) => {
       if (result)
         alertError(result);
       else {
-        alertSuccess("Registrazione effettuata con successo! Ora puoi accedere.");
-        // naviga l'utente alla pagina di login
-        setTimeout(() => navigate('/login'), 2000);
+
+
+        // se è stata passata una funzione onSuccess come argomento -> siamo un admin
+        if (onSuccess) {
+          alertSuccess("Associazione creata con successo!");
+          onSuccess(); // es: chiude un dialogo
+        }
+        else { // altrimenti -> siamo in una registrazione normale
+          alertSuccess("Registrazione effettuata con successo! Ora puoi accedere.");
+          setTimeout(() => navigate('/login'), 2000); // comportamento di default
+        }
+
       }
       return;
     }

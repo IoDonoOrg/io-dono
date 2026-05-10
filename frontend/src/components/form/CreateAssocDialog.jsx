@@ -35,12 +35,7 @@ function CreateAssocDialog({ open, onClose }) {
         maxWidth="sm"
       >
         <DialogTitle>
-          <Typography
-            className="text-center"
-            variant="h5"
-            gutterBottom
-            fontWeight="bold"
-          >
+          <Typography className="text-center" variant="h5" fontWeight="bold">
             Crea nuova associazione
           </Typography>
         </DialogTitle>
