@@ -15,7 +15,6 @@ import { useAlert } from "src/hooks/useAlert";
 import AlertSnack from "../ui/AlertSnack";
 import { REPORT_TYPES } from "src/utils/constants";
 import DonationView from "../ui/DonationView";
-// import { useReport } from "src/hooks/useReport";
 
 function CreateReportDialog({
   open,
@@ -26,7 +25,6 @@ function CreateReportDialog({
 }) {
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
-  // const { addReportLocally } = useReport();
 
   const { alertData, hideAlert, alertError, alertSuccess } = useAlert();
 

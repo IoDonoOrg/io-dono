@@ -99,3 +99,16 @@ export const DIALOGS_DONATION_BAR = {
   COMPLETE: "complete",
   REPORT: "report",
 };
+
+export const DIALOGS_REPORT_BAR = {
+  VISUALIZE: "visualize",
+};
+
+export const REPORT_MENU_ACTIONS = [
+  {
+    key: "visualize",
+    label: "Visualizza",
+    condition: () => true,
+    onAction: ({ onVisualize }) => onVisualize(),
+  },
+];

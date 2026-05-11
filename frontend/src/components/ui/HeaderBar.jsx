@@ -12,6 +12,7 @@ import { useAuth } from "src/hooks/useAuth";
 import ProfileDialog from "./ProfileDialog";
 import CreateReportDialog from "../form/CreateReportDialog";
 import { REPORT_TYPES } from "src/utils/constants";
+import ReportHistory from "./ReportHistory";
 
 export default function MenuAppBar() {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -107,7 +108,7 @@ export default function MenuAppBar() {
             <MenuItem onClick={() => setOpenDialog("report")}>
               Segnala malfunzionamento
             </MenuItem>
-            <MenuItem onClick={handleCloseReportMenu}>
+            <MenuItem onClick={() => setOpenDialog("viewReports")}>
               Visualizza segnalazioni
             </MenuItem>
           </Menu>
@@ -123,6 +124,10 @@ export default function MenuAppBar() {
         onClose={() => setOpenDialog(null)}
         reportType={REPORT_TYPES.MALFUNCTION}
         userID={user._id}
+      />
+      <ReportHistory
+        open={openDialog === "viewReports"}
+        onClose={() => setOpenDialog(null)}
       />
     </Box>
   );
