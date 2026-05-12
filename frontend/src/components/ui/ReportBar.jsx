@@ -20,9 +20,10 @@ import {
   formatReportStatus,
   getReportChipColor,
 } from "src/utils/format";
-import ViewReportDialog from "./ViewReportDialog";
 import { useAuth } from "src/hooks/useAuth";
 import CloseReportDialog from "../form/CloseReportDialog";
+import ReportView from "./ReportView";
+import ViewDialog from "./ViewDialog";
 
 const REPORT_TYPE_LABELS = {
   MALFUNCTION: "App",
@@ -66,11 +67,13 @@ function ReportBar({ report }) {
 
   return (
     <>
-      <ViewReportDialog
+      <ViewDialog
         open={openDialog === DIALOGS_REPORT_BAR.VISUALIZE}
         onClose={() => setOpenDialog(null)}
-        report={report}
-      />
+        title="Dettagli segnalazione"
+      >
+        <ReportView report={report} />
+      </ViewDialog>
       <CloseReportDialog
         open={openDialog === DIALOGS_REPORT_BAR.CLOSE}
         onClose={() => setOpenDialog(null)}

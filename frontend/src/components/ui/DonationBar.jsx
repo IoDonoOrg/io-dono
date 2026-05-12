@@ -18,10 +18,11 @@ import {
   REPORT_TYPES,
 } from "src/utils/constants";
 import { formatDate, formatStatus, getChipColor } from "src/utils/format";
-import ViewDonationDialog from "./ViewDonationDialog";
 import CreateDonationDialog from "../form/CreateDonationDialog";
 import CompleteDonationDialog from "../form/CompleteDonationDialog";
 import CreateReportDialog from "../form/CreateReportDialog";
+import ViewDialog from "./ViewDialog";
+import DonationView from "./DonationView";
 
 function DonationBar({ donation }) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -123,11 +124,13 @@ function DonationBar({ donation }) {
         ))}
       </Menu>
       {
-        <ViewDonationDialog
+        <ViewDialog
           open={openDialog === DIALOGS_DONATION_BAR.VISUALIZE}
           onClose={() => setOpenDialog(null)}
-          donation={donation}
-        />
+          title="Dettagli donazione"
+        >
+          <DonationView donation={donation} />
+        </ViewDialog>
       }
       {
         <CreateDonationDialog

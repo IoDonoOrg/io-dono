@@ -1,6 +1,8 @@
-// ReportView.jsx
 import { Grid, Typography, Box } from "@mui/material";
+import { useState } from "react";
 import { formatDate, formatReportStatus } from "src/utils/format";
+import UserView from "./UserView";
+import ViewDialog from "./ViewDialog";
 
 const REPORT_TYPE_LABELS = {
   MALFUNCTION: "Malfunzionamento",
@@ -8,6 +10,8 @@ const REPORT_TYPE_LABELS = {
 };
 
 function ReportView({ report }) {
+  const [selectedUserId, setSelectedUserId] = useState(null);
+
   if (!report) {
     return (
       <Typography color="text.secondary">
@@ -17,89 +21,87 @@ function ReportView({ report }) {
   }
 
   return (
-    <Grid container spacing={2}>
-      <Grid item size={6}>
-        <Typography variant="subtitle2" color="text.secondary">
-          Stato
-        </Typography>
-        <Typography variant="body1">
-          {formatReportStatus(report.status)}
-        </Typography>
-      </Grid>
-
-      <Grid item size={6}>
-        <Typography variant="subtitle2" color="text.secondary">
-          Tipo
-        </Typography>
-        <Typography variant="body1">
-          {REPORT_TYPE_LABELS[report.type] ?? report.type}
-        </Typography>
-      </Grid>
-
-      <Grid item size={6}>
-        <Typography variant="subtitle2" color="text.secondary">
-          ID Segnalazione
-        </Typography>
-        <Typography variant="body1">{report._id}</Typography>
-      </Grid>
-
-      <Grid item size={6}>
-        <Typography variant="subtitle2" color="text.secondary">
-          Data creazione
-        </Typography>
-        <Typography variant="body1">{formatDate(report.createdAt)}</Typography>
-      </Grid>
-
-      <Grid item size={6}>
-        <Typography variant="subtitle2" color="text.secondary">
-          Creata da
-        </Typography>
-        <Typography variant="body1">
-          {report.reporterId?.name ?? "—"}
-        </Typography>
-      </Grid>
-
-      <Grid item size={6}>
-        <Typography variant="subtitle2" color="text.secondary">
-          Utente segnalato
-        </Typography>
-        <Typography variant="body1">
-          {report.reportedUserId?.name ?? "—"}
-        </Typography>
-      </Grid>
-
-      {report.donationId && (
-        <Grid item size={12}>
+    <>
+      <ViewDialog
+        open={Boolean(selectedUserId)}
+        onClose={() => setSelectedUserId(null)}
+        title="Dettagli segnalazione"
+      >
+        <UserView user={selectedUserId} />
+      </ViewDialog>
+      <Grid container spacing={2}>
+        <Grid item size={6}>
           <Typography variant="subtitle2" color="text.secondary">
-            Donazione collegata
+            Stato
           </Typography>
-          <Typography variant="body1">{report.donationId._id}</Typography>
-        </Grid>
-      )}
-
-      <Grid item size={12}>
-        <Typography variant="subtitle2" color="text.secondary">
-          Descrizione
-        </Typography>
-        <Box
-          sx={{
-            bgcolor: "grey.50",
-            p: 1.5,
-            borderRadius: 1,
-            border: "1px solid",
-            borderColor: "grey.200",
-          }}
-        >
           <Typography variant="body1">
-            {report.description || "Nessuna descrizione fornita"}
+            {formatReportStatus(report.status)}
           </Typography>
-        </Box>
-      </Grid>
+        </Grid>
 
-      {report.resolution && (
+        <Grid item size={6}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Tipo
+          </Typography>
+          <Typography variant="body1">
+            {REPORT_TYPE_LABELS[report.type] ?? report.type}
+          </Typography>
+        </Grid>
+
+        <Grid item size={6}>
+          <Typography variant="subtitle2" color="text.secondary">
+            ID Segnalazione
+          </Typography>
+          <Typography variant="body1">{report._id}</Typography>
+        </Grid>
+
+        <Grid item size={6}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Data creazione
+          </Typography>
+          <Typography variant="body1">
+            {formatDate(report.createdAt)}
+          </Typography>
+        </Grid>
+
+        <Grid item size={6}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Creata da
+          </Typography>
+          <Typography variant="body1">
+            {report.reporterId?.name ?? "—"}
+          </Typography>
+        </Grid>
+
+        <Grid item size={6}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Utente segnalato
+          </Typography>
+          <Typography
+            onClick={() => setSelectedUserId(report.reporterId)}
+            sx={{
+              cursor: "pointer",
+              textDecoration: "underline",
+              color: "primary.main",
+            }}
+            variant="body1"
+          >
+            {report.reportedUserId?.name ?? "-"}
+          </Typography>
+        </Grid>
+
+        {report.donationId && (
+          <Grid item size={12}>
+            <Typography variant="subtitle2" color="text.secondary">
+              Donazione collegata
+            </Typography>
+            <Typography variant="body1">{report.donationId._id}</Typography>
+          </Grid>
+        )}
+
         <Grid item size={12}>
           <Typography variant="subtitle2" color="text.secondary">
-            Risoluzione
+            Descrizione
           </Typography>
           <Box
             sx={{
@@ -110,20 +112,43 @@ function ReportView({ report }) {
               borderColor: "grey.200",
             }}
           >
-            <Typography variant="body1">{report.resolution}</Typography>
+            <Typography variant="body1">
+              {report.description || "Nessuna descrizione fornita"}
+            </Typography>
           </Box>
         </Grid>
-      )}
 
-      {report.closedAt && (
-        <Grid item size={6}>
-          <Typography variant="subtitle2" color="text.secondary">
-            Chiusa il
-          </Typography>
-          <Typography variant="body1">{formatDate(report.closedAt)}</Typography>
-        </Grid>
-      )}
-    </Grid>
+        {report.resolution && (
+          <Grid item size={12}>
+            <Typography variant="subtitle2" color="text.secondary">
+              Risoluzione
+            </Typography>
+            <Box
+              sx={{
+                bgcolor: "grey.50",
+                p: 1.5,
+                borderRadius: 1,
+                border: "1px solid",
+                borderColor: "grey.200",
+              }}
+            >
+              <Typography variant="body1">{report.resolution}</Typography>
+            </Box>
+          </Grid>
+        )}
+
+        {report.closedAt && (
+          <Grid item size={6}>
+            <Typography variant="subtitle2" color="text.secondary">
+              Chiusa il
+            </Typography>
+            <Typography variant="body1">
+              {formatDate(report.closedAt)}
+            </Typography>
+          </Grid>
+        )}
+      </Grid>
+    </>
   );
 }
 
