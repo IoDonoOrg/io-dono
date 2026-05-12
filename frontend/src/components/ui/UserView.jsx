@@ -5,7 +5,7 @@ function UserView({ user }) {
     return <Typography color="text.secondary">Utente non trovato</Typography>;
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={1}>
       <Grid item size={12}>
         <Typography variant="subtitle2" color="text.secondary">
           ID

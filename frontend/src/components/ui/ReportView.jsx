@@ -1,8 +1,6 @@
 import { Grid, Typography, Box } from "@mui/material";
-import { useState } from "react";
 import { formatDate, formatReportStatus } from "src/utils/format";
-import UserView from "./UserView";
-import ViewDialog from "./ViewDialog";
+import ClickableUser from "./ClickableUser";
 
 const REPORT_TYPE_LABELS = {
   MALFUNCTION: "Malfunzionamento",
@@ -10,8 +8,6 @@ const REPORT_TYPE_LABELS = {
 };
 
 function ReportView({ report }) {
-  const [selectedUserId, setSelectedUserId] = useState(null);
-
   if (!report) {
     return (
       <Typography color="text.secondary">
@@ -22,13 +18,6 @@ function ReportView({ report }) {
 
   return (
     <>
-      <ViewDialog
-        open={Boolean(selectedUserId)}
-        onClose={() => setSelectedUserId(null)}
-        title="Dettagli segnalazione"
-      >
-        <UserView user={selectedUserId} />
-      </ViewDialog>
       <Grid container spacing={2}>
         <Grid item size={6}>
           <Typography variant="subtitle2" color="text.secondary">
@@ -68,26 +57,14 @@ function ReportView({ report }) {
           <Typography variant="subtitle2" color="text.secondary">
             Creata da
           </Typography>
-          <Typography variant="body1">
-            {report.reporterId?.name ?? "—"}
-          </Typography>
+          <ClickableUser user={report.reporterId} />
         </Grid>
 
         <Grid item size={6}>
           <Typography variant="subtitle2" color="text.secondary">
             Utente segnalato
           </Typography>
-          <Typography
-            onClick={() => setSelectedUserId(report.reporterId)}
-            sx={{
-              cursor: "pointer",
-              textDecoration: "underline",
-              color: "primary.main",
-            }}
-            variant="body1"
-          >
-            {report.reportedUserId?.name ?? "-"}
-          </Typography>
+          <ClickableUser user={report.reportedUserId} />
         </Grid>
 
         {report.donationId && (
