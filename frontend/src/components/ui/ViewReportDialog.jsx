@@ -1,4 +1,3 @@
-// ViewReportDialog.jsx
 import {
   Dialog,
   DialogTitle,

@@ -1,4 +1,3 @@
-// src/hooks/useReport.js
 import { useState, useEffect, useCallback } from "react";
 import { getReports } from "src/services/reportsService";
 export function useReport(params = {}) {

@@ -11,6 +11,7 @@ import DonationMapDialog from "src/components/ui/DonationMapDialog";
 import { DIALOGS } from "src/utils/constants";
 import AssociationStatistics from "src/components/ui/AssociationStatistics";
 import CreateAssocDialog from "src/components/form/CreateAssocDialog";
+import ReportHistory from "src/components/ui/ReportHistory";
 
 function AdminDashboard() {
   const [openDialog, setOpenDialog] = useState(null);
@@ -47,6 +48,12 @@ function AdminDashboard() {
               open={openDialog === DIALOGS.CREATE_ASSOC}
               onClose={() => setOpenDialog(null)}
             />
+            <ReportHistory
+              open={openDialog === DIALOGS.MANAGE_REPORTS}
+              onClose={() => setOpenDialog(null)}
+              title={"Gestine Associazioni"}
+              isAdmin
+            />
             <Box className="grid grid-cols-3 gap-10 my-5">
               <TileClickable onClick={() => setOpenDialog(DIALOGS.HISTORY)}>
                 Donazioni
@@ -61,6 +68,11 @@ function AdminDashboard() {
                 onClick={() => setOpenDialog(DIALOGS.CREATE_ASSOC)}
               >
                 Gestione Associazioni
+              </TileClickable>
+              <TileClickable
+                onClick={() => setOpenDialog(DIALOGS.MANAGE_REPORTS)}
+              >
+                Gestione Segnalazioni
               </TileClickable>
             </Box>
           </Paper>

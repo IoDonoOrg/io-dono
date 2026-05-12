@@ -4,8 +4,7 @@ import { formatDate, formatReportStatus } from "src/utils/format";
 
 const REPORT_TYPE_LABELS = {
   MALFUNCTION: "Malfunzionamento",
-  USER_BEHAVIOR: "Comportamento utente",
-  DONATION_ISSUE: "Problema donazione",
+  USER_BEHAVIOR: "Problema donazione",
 };
 
 function ReportView({ report }) {
@@ -53,7 +52,7 @@ function ReportView({ report }) {
 
       <Grid item size={6}>
         <Typography variant="subtitle2" color="text.secondary">
-          Segnalante
+          Creata da
         </Typography>
         <Typography variant="body1">
           {report.reporterId?.name ?? "—"}
@@ -68,6 +67,15 @@ function ReportView({ report }) {
           {report.reportedUserId?.name ?? "—"}
         </Typography>
       </Grid>
+
+      {report.donationId && (
+        <Grid item size={12}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Donazione collegata
+          </Typography>
+          <Typography variant="body1">{report.donationId._id}</Typography>
+        </Grid>
+      )}
 
       <Grid item size={12}>
         <Typography variant="subtitle2" color="text.secondary">
@@ -87,15 +95,6 @@ function ReportView({ report }) {
           </Typography>
         </Box>
       </Grid>
-
-      {report.donationId && (
-        <Grid item size={12}>
-          <Typography variant="subtitle2" color="text.secondary">
-            Donazione collegata
-          </Typography>
-          <Typography variant="body1">{report.donationId._id}</Typography>
-        </Grid>
-      )}
 
       {report.resolution && (
         <Grid item size={12}>

@@ -54,3 +54,32 @@ export const getReports = async (params = {}) => {
     };
   }
 };
+
+// PATCH /reports/:id
+// Chiude una segnalazione (solo ADMIN)
+// Imposta lo stato a CLOSED e opzionalmente una risoluzione
+export const closeReport = async (id, resolution = null) => {
+  try {
+    const result = await api.patch(`/reports/${id}`, {
+      status: 'CLOSED',
+      ...(resolution && { resolution }),
+    });
+    return {
+      success: true,
+      message: "Segnalazione chiusa con successo",
+      report: result.data.data.report,
+    };
+  } catch (e) {
+    if (e.response) {
+      console.log("Errore backend: ", e.response.data.message);
+      return {
+        success: false,
+        message: e.response.data.message,
+      };
+    }
+    return {
+      success: false,
+      message: "Errore server backend",
+    };
+  }
+};

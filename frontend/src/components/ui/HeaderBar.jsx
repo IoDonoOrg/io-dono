@@ -106,10 +106,10 @@ export default function MenuAppBar() {
             onClose={handleCloseReportMenu}
           >
             <MenuItem onClick={() => setOpenDialog("report")}>
-              Segnala malfunzionamento
+              Problema app
             </MenuItem>
             <MenuItem onClick={() => setOpenDialog("viewReports")}>
-              Visualizza segnalazioni
+              Segnalazioni
             </MenuItem>
           </Menu>
         </Toolbar>

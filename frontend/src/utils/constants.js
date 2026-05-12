@@ -85,6 +85,7 @@ export const DIALOGS = {
   MAP: 'map',
   STATISTICS: 'statistics',
   CREATE_ASSOC: 'create-association',
+  MANAGE_REPORTS: 'manage-reports'
 };
 
 export const REPORT_TYPES = {
@@ -102,6 +103,7 @@ export const DIALOGS_DONATION_BAR = {
 
 export const DIALOGS_REPORT_BAR = {
   VISUALIZE: "visualize",
+  CLOSE: "close"
 };
 
 export const REPORT_MENU_ACTIONS = [
@@ -110,5 +112,11 @@ export const REPORT_MENU_ACTIONS = [
     label: "Visualizza",
     condition: () => true,
     onAction: ({ onVisualize }) => onVisualize(),
+  },
+  {
+    key: "close",
+    label: "Chiudi",
+    condition: () => true,
+    onAction: ({ onClose }) => onClose(),
   },
 ];

@@ -12,11 +12,25 @@ import ReportBar from "./ReportBar";
 import { useReport } from "src/hooks/useReport";
 import { useAlert } from "src/hooks/useAlert";
 import AlertSnack from "./AlertSnack";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
-function ReportHistory({ open, onClose }) {
+function ReportHistory({
+  open,
+  onClose,
+  title = "Storico Segnalazioni",
+  isAdmin = false,
+}) {
   const { alertData, hideAlert } = useAlert();
-  const { allReports, loading, refreshReports } = useReport();
+
+  const hookProps = useMemo(
+    () => ({
+      scope: isAdmin ? "all" : "me",
+    }),
+    [isAdmin],
+  );
+  const { allReports, loading, refreshReports } = useReport(hookProps);
+
+  // console.log(isAdmin);
 
   useEffect(() => {
     if (open) refreshReports();
@@ -45,7 +59,7 @@ function ReportHistory({ open, onClose }) {
             gutterBottom
             fontWeight="bold"
           >
-            Storico Segnalazioni
+            {title}
           </Typography>
         </DialogTitle>
         <DialogContent dividers>
@@ -56,7 +70,9 @@ function ReportHistory({ open, onClose }) {
               </Box>
             ) : !allReports || allReports.length === 0 ? (
               <Typography color="textSecondary" align="center">
-                Non hai ancora effettuato segnalazioni.
+                {isAdmin
+                  ? "Non ci sono segnalazioni attive"
+                  : "Non hai ancora effettuato segnalazioni."}
               </Typography>
             ) : (
               allReports.map((el) => <ReportBar key={el._id} report={el} />)

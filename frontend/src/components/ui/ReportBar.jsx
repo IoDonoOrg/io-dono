@@ -22,6 +22,7 @@ import {
 } from "src/utils/format";
 import ViewReportDialog from "./ViewReportDialog";
 import { useAuth } from "src/hooks/useAuth";
+import CloseReportDialog from "../form/CloseReportDialog";
 
 const REPORT_TYPE_LABELS = {
   MALFUNCTION: "App",
@@ -51,6 +52,7 @@ function ReportBar({ report }) {
 
   const handlers = {
     onVisualize: () => setOpenDialog(DIALOGS_REPORT_BAR.VISUALIZE),
+    onClose: () => setOpenDialog(DIALOGS_REPORT_BAR.CLOSE),
   };
 
   const menuContext = {
@@ -66,6 +68,11 @@ function ReportBar({ report }) {
     <>
       <ViewReportDialog
         open={openDialog === DIALOGS_REPORT_BAR.VISUALIZE}
+        onClose={() => setOpenDialog(null)}
+        report={report}
+      />
+      <CloseReportDialog
+        open={openDialog === DIALOGS_REPORT_BAR.CLOSE}
         onClose={() => setOpenDialog(null)}
         report={report}
       />
