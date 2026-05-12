@@ -10,16 +10,20 @@ import ReportView from "../ui/ReportView";
 import { closeReport } from "src/services/reportsService";
 import { useAlert } from "src/hooks/useAlert";
 import AlertSnack from "../ui/AlertSnack";
+import { useReport } from "src/hooks/useReport";
 
 function CloseReportDialog({ open, onClose, report }) {
   const [resolution, setResolution] = useState("");
 
   const { alertData, alertSuccess, alertError, hideAlert } = useAlert();
 
+  const { refreshReports } = useReport();
+
   const handleSubmit = async () => {
     const result = await closeReport(report._id, resolution || null);
     console.log("closeReport result:", result);
     if (result.success) {
+      refreshReports();
       resetForm();
       alertSuccess(result.message);
       return;
