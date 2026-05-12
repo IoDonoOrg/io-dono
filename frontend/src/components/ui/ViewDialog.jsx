@@ -6,20 +6,20 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import ReportView from "./ReportView";
 
-export default function ViewReportDialog({ open, onClose, report }) {
+// componente generico per displayare un child
+function ViewDialog({ open, onClose, title, children }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>
         <Typography className="text-center" variant="h5" fontWeight="bold">
-          Dettagli segnalazione
+          {title}
         </Typography>
       </DialogTitle>
-      <DialogContent dividers>
-        <ReportView report={report} />
-      </DialogContent>
-      <DialogActions>
+
+      <DialogContent dividers>{children}</DialogContent>
+
+      <DialogActions className="flex">
         <Button onClick={onClose} variant="contained" color="error">
           Chiudi
         </Button>
@@ -27,3 +27,5 @@ export default function ViewReportDialog({ open, onClose, report }) {
     </Dialog>
   );
 }
+
+export default ViewDialog;
