@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import PasswordField from "src/components/form/PasswordField";
@@ -35,6 +35,17 @@ function Login() {
     alertSuccess,
     alertInfo,
   );
+
+  useEffect(() => {
+    // se arriviamo da un redirect con il messaggio di ban, mostriamo l'alert
+    if (location.state?.bannedMessage) {
+      alertError(location.state.bannedMessage);
+
+      // se l'utente ricarica la pagina, l'alert non riappare
+      window.history.replaceState({}, document.title);
+      return;
+    }
+  }, [location.state]);
 
   // determina se c'è un percorso "from"
   // si -> dopo l'autenticazione l'utente sarà reindirizzato lì
