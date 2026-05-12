@@ -85,7 +85,8 @@ export const DIALOGS = {
   MAP: 'map',
   STATISTICS: 'statistics',
   CREATE_ASSOC: 'create-association',
-  MANAGE_REPORTS: 'manage-reports'
+  MANAGE_REPORTS: 'manage-reports',
+  MANAGE_USERS: 'manage-users'
 };
 
 export const REPORT_TYPES = {

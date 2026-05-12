@@ -1,6 +1,6 @@
 import { Grid, Typography, Box } from "@mui/material";
 import { formatDate, formatReportStatus } from "src/utils/format";
-import ClickableUser from "./ClickableUser";
+import ClickableUser from "./HoverUser";
 
 const REPORT_TYPE_LABELS = {
   MALFUNCTION: "Malfunzionamento",

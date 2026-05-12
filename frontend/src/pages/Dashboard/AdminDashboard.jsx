@@ -32,18 +32,6 @@ function AdminDashboard() {
             }}
           >
             <ActiveDonationsTile displayNumber={4} />
-            <DonationHistory
-              open={openDialog === DIALOGS.HISTORY}
-              onClose={() => setOpenDialog(null)}
-            />
-            <DonationMapDialog
-              open={openDialog === DIALOGS.MAP}
-              onClose={() => setOpenDialog(null)}
-            />
-            <AssociationStatistics
-              open={openDialog === DIALOGS.STATISTICS}
-              onClose={() => setOpenDialog(null)}
-            />
             <CreateAssocDialog
               open={openDialog === DIALOGS.CREATE_ASSOC}
               onClose={() => setOpenDialog(null)}
@@ -51,19 +39,10 @@ function AdminDashboard() {
             <ReportHistory
               open={openDialog === DIALOGS.MANAGE_REPORTS}
               onClose={() => setOpenDialog(null)}
-              title={"Gestine Associazioni"}
+              title={"Gestione Segnalazioni"}
               isAdmin
             />
             <Box className="grid grid-cols-3 gap-10 my-5">
-              <TileClickable onClick={() => setOpenDialog(DIALOGS.HISTORY)}>
-                Donazioni
-              </TileClickable>
-              <TileClickable onClick={() => setOpenDialog(DIALOGS.MAP)}>
-                Mappa
-              </TileClickable>
-              <TileClickable onClick={() => setOpenDialog(DIALOGS.STATISTICS)}>
-                Statistiche
-              </TileClickable>
               <TileClickable
                 onClick={() => setOpenDialog(DIALOGS.CREATE_ASSOC)}
               >
@@ -73,6 +52,11 @@ function AdminDashboard() {
                 onClick={() => setOpenDialog(DIALOGS.MANAGE_REPORTS)}
               >
                 Gestione Segnalazioni
+              </TileClickable>
+              <TileClickable
+                onClick={() => setOpenDialog(DIALOGS.MANAGE_USERS)}
+              >
+                Gestione Utenti
               </TileClickable>
             </Box>
           </Paper>
