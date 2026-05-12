@@ -116,7 +116,12 @@ export const REPORT_MENU_ACTIONS = [
   {
     key: "close",
     label: "Chiudi",
-    condition: () => true,
+    condition: ({ role, status }) => role === USER_ROLE.ADMIN && status === REPORT_STATUS.OPEN,
     onAction: ({ onClose }) => onClose(),
   },
 ];
+
+export const REPORT_STATUS = {
+  OPEN: "OPEN",
+  CLOSED: "CLOSED"
+}

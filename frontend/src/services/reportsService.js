@@ -1,3 +1,4 @@
+import { REPORT_STATUS } from "src/utils/constants";
 import api from "./api";
 
 export const createReport = async (reportType, description, donationId, reportedUserId) => {
@@ -61,7 +62,7 @@ export const getReports = async (params = {}) => {
 export const closeReport = async (id, resolution = null) => {
   try {
     const result = await api.patch(`/reports/${id}`, {
-      status: 'CLOSED',
+      status: REPORT_STATUS.CLOSED,
       ...(resolution && { resolution }),
     });
     return {
