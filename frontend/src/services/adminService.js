@@ -35,7 +35,7 @@ export const banUser = async (id, isBanned, bannedReason = null) => {
 // - success: booleano che indica se la richiesta è andata a buon fine
 // - overview: dati overview (period, donations, reports, usersByRole) (se success è true)
 // - message: messaggio di errore (se success è false)
-export const getStatisticsOverview = async () => {
+export const getOverview = async () => {
   try {
     const res = await api.get("admin/statistics/overview");
     return {
@@ -57,7 +57,7 @@ export const getStatisticsOverview = async () => {
 // - success: booleano che indica se la richiesta è andata a buon fine
 // - trend: dati del trend (period, trend) (se success è true)
 // - message: messaggio di errore (se success è false)
-export const getStatisticsTrend = async ({ fromDate, toDate } = {}) => {
+export const getDonationsTrend = async ({ fromDate, toDate } = {}) => {
   try {
     const params = new URLSearchParams();
     if (fromDate) params.append("fromDate", fromDate);
@@ -77,13 +77,14 @@ export const getStatisticsTrend = async ({ fromDate, toDate } = {}) => {
   }
 };
 
+// TODO: implementare questa
 // Ottiene le statistiche filtrate per area, tipo di bene, periodo e/o associazione.
 // Accetta un oggetto opzionale { area, itemType, fromDate, toDate, associationId }.
 // Restituisce un oggetto con campi:
 // - success: booleano che indica se la richiesta è andata a buon fine
 // - statistics: dati statistiche (period, filtersApplied, totals, associationWeeklyReport) (se success è true)
 // - message: messaggio di errore (se success è false)
-export const getStatistics = async (
+export const getAssociationStats = async (
   { area, itemType, fromDate, toDate, associationId } = {}
 ) => {
   try {
