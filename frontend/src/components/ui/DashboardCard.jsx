@@ -1,6 +1,6 @@
 import { Paper, Typography } from "@mui/material";
 
-function DashboardCard({ title, children, sx = {} }) {
+function DashboardCard({ title, children, minHeight = 300, sx = {} }) {
   return (
     <Paper
       variant="elevation"
@@ -9,6 +9,7 @@ function DashboardCard({ title, children, sx = {} }) {
         p: 2,
         borderRadius: 2,
         bgcolor: "grey.40",
+        minHeight: minHeight,
         ...sx,
       }}
     >

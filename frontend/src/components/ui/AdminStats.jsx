@@ -6,11 +6,7 @@ import { useAdminStats } from "src/hooks/useAdminStats";
 import { STATS_COLORS } from "src/utils/statsUtility";
 
 export default function AdminStatistics() {
-  const dateRange = {
-    fromDate: null,
-    toDate: null,
-  };
-
+  // utilizza un hook per separare fetching e data processing dal componente
   const {
     overview,
     donationByCategory,
@@ -19,8 +15,9 @@ export default function AdminStatistics() {
     trendData,
     loading,
     error,
-  } = useAdminStats(true, dateRange);
+  } = useAdminStats(true);
 
+  // mostra un indicatore di caricamento mentre i dati vengono fetchati
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" py={4}>
@@ -29,6 +26,7 @@ export default function AdminStatistics() {
     );
   }
 
+  // mostra un messaggio di errore se c'è stato un problema nel fetch dei dati
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
@@ -55,7 +53,7 @@ export default function AdminStatistics() {
         </Stack>
       </Box>
 
-      <DashboardCard title="Trend donazioni (ultimi 30 giorni)">
+      <DashboardCard title="Trend donazioni (ultimi 30 giorni)" minHeight={150}>
         <LineChart
           xAxis={[
             {
@@ -78,7 +76,7 @@ export default function AdminStatistics() {
 
       <Grid container spacing={1}>
         <Grid item size={6}>
-          <DashboardCard title="Donazioni per categoria">
+          <DashboardCard title="Donazioni per categoria" minHeight={260}>
             <BarChart
               xAxis={[
                 {
@@ -94,6 +92,7 @@ export default function AdminStatistics() {
               series={[
                 {
                   data: donationByCategory.map((d) => d.value),
+                  highlightScope: { fade: "global", highlight: "item" },
                 },
               ]}
               height={200}
@@ -103,12 +102,12 @@ export default function AdminStatistics() {
         </Grid>
 
         <Grid item size={3}>
-          <DashboardCard title="Segnalazioni per stato">
+          <DashboardCard title="Segnalazioni per stato" minHeight={260}>
             <PieChart
               series={[
                 {
                   data: reportByStatus,
-                  highlightScope: { faded: "global", highlighted: "item" },
+                  highlightScope: { fade: "global", highlight: "item" },
                 },
               ]}
               height={100}
@@ -123,12 +122,12 @@ export default function AdminStatistics() {
         </Grid>
 
         <Grid item size={3}>
-          <DashboardCard title="Utenti per ruolo">
+          <DashboardCard title="Utenti per ruolo" minHeight={260}>
             <PieChart
               series={[
                 {
                   data: usersByRole,
-                  highlightScope: { faded: "global", highlighted: "item" },
+                  highlightScope: { fade: "global", highlight: "item" },
                 },
               ]}
               height={100}
