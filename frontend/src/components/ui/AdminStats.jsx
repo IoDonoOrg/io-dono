@@ -11,7 +11,15 @@ export default function AdminStatistics() {
     toDate: null,
   };
 
-  const { overview, trend, loading, error } = useAdminStats(true, dateRange);
+  const {
+    overview,
+    donationByCategory,
+    reportByStatus,
+    usersByRole,
+    trendData,
+    loading,
+    error,
+  } = useAdminStats(true, dateRange);
 
   if (loading) {
     return (
@@ -24,29 +32,6 @@ export default function AdminStatistics() {
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
-
-  const donationByCategory = Object.entries(overview.donations.byCategory).map(
-    ([label, value]) => ({ label, value }),
-  );
-
-  const reportByStatus = overview.reports.byStatus.map((s, index) => ({
-    id: index,
-    label: s._id,
-    value: s.count,
-    color: STATS_COLORS[index % STATS_COLORS.length],
-  }));
-
-  const usersByRole = overview.usersByRole.map((r, index) => ({
-    id: index,
-    label: r._id,
-    value: r.count,
-    color: STATS_COLORS[index % STATS_COLORS.length],
-  }));
-
-  const trendData = trend.trend.map((t) => ({
-    date: `${t._id.day}/${t._id.month}`,
-    count: t.count,
-  }));
 
   return (
     <Stack spacing={1.5}>
