@@ -58,6 +58,11 @@ const DEFAULT_ICON = createColoredIcon("#9e9e9e");
 export default function DonationMapDialog({ open, onClose }) {
   const { allDonations } = useDonation();
 
+  // filtriamo le donazioni per mostrare solo quelle non completate
+  const preparedDonations = allDonations?.filter(
+    (d) => d.status !== DONATION_STATUS.COMPLETED,
+  );
+
   return (
     <Dialog
       open={open}
@@ -98,7 +103,7 @@ export default function DonationMapDialog({ open, onClose }) {
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              {allDonations?.map((donation) => (
+              {preparedDonations?.map((donation) => (
                 <Marker
                   key={donation._id}
                   // GeoJSON è [Lng, Lat], Leaflet aspetta [Lat, Lng] => scambio

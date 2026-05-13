@@ -138,29 +138,12 @@ export const validateAddress = (addressData) => {
 
 
 // la funzione che valida il tipo di utenza
-export const validateUserType = (user) => {
-  // l'oggetto che contiene 2 possibili tipi di errori
-  // userCategory -> l'utente non ha selezionato una categoria
-  // donatorType -> l'utente ha selezionato la categoria donatore, 
-  // ma non ha specificato il tipo di donatore che rappresenta
-  let error = {
-    userCategory: "",
-    donatorType: ""
-  };
+export const validateUserType = (donatorType) => {
+  if (donatorType === DONOR_TYPE.NO_TYPE)
+    return "Selezionare il tipo di donatore è obbligatorio";
+  return "";
+};
 
-  if (user.category === USER_ROLE.NO_CATEGORY)
-    error.userCategory = "Selezionare il tipo di utenza è obbligatorio";
-
-  if (
-    user.category === USER_ROLE.DONOR &&
-    user.donatorType === DONOR_TYPE.NO_TYPE
-  )
-    error.donatorType = "Selezionare il tipo di donatore è obbligatorio";
-
-  // ritorna l'oggetto con testo degli errori
-  // se un campo contiene stringa vuota -> non ci sono errori
-  return error;
-}
 
 export const validateOpeningHours = (openingHours) => {
   let errors = {

@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { DONATION_STATUS } from "./constants";
+import { DONATION_STATUS, REPORT_TYPES } from "./constants";
 
 export const formatDate = (dateString) => {
   const date = dayjs(dateString);
@@ -70,5 +70,37 @@ export const getChipColor = (status) => {
     case DONATION_STATUS.NO_STATUS:
     default:
       return "default"; // grigio
+  }
+};
+
+
+export const formatReportType = (type) => {
+  switch (type) {
+    case REPORT_TYPES.MALFUNCTION:
+      return "Malfunzionamento";
+    case REPORT_TYPES.DONATION_ISSUE:
+      return "Problema con donazione";
+  }
+};
+
+export const formatReportStatus = (status) => {
+  switch (status) {
+    case "OPEN":
+      return "Aperta";
+    case "CLOSED":
+      return "Chiusa";
+    default:
+      return status;
+  }
+};
+
+export const getReportChipColor = (status) => {
+  switch (status) {
+    case "OPEN":
+      return "success";
+    case "CLOSED":
+      return "error";
+    default:
+      return "default";
   }
 };

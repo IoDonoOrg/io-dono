@@ -12,30 +12,25 @@ import {
 import { useState } from "react";
 import { useAuth } from "src/hooks/useAuth";
 import { useDonationActions } from "src/hooks/useDonationActions";
-import { DONATION_MENU_ACTIONS } from "src/utils/constants";
+import {
+  DIALOGS_DONATION_BAR,
+  DONATION_MENU_ACTIONS,
+  REPORT_TYPES,
+} from "src/utils/constants";
 import { formatDate, formatStatus, getChipColor } from "src/utils/format";
-import ViewDonationDialog from "./ViewDonationDialog";
 import CreateDonationDialog from "../form/CreateDonationDialog";
 import CompleteDonationDialog from "../form/CompleteDonationDialog";
+import CreateReportDialog from "../form/CreateReportDialog";
+import ViewDialog from "./ViewDialog";
+import DonationView from "./DonationView";
 
 function DonationBar({ donation }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const { user } = useAuth();
-  const {
-    handleDelete,
-    handleAccept,
-    handleEdit,
-    handleVisualize,
-    viewDialogOpen,
-    handleCloseViewDialog,
-    editDialogOpen,
-    handleCloseEditDialog,
-    handleComplete,
-    completeDialogOpen,
-    handleCloseCompleteDialog,
-  } = useDonationActions();
+  const { handleDelete, handleAccept, openDialog, setOpenDialog } =
+    useDonationActions();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -46,11 +41,12 @@ function DonationBar({ donation }) {
   };
 
   const handlers = {
-    onVisualize: () => handleVisualize(donation),
-    onEdit: () => handleEdit(donation),
+    onVisualize: () => setOpenDialog(DIALOGS_DONATION_BAR.VISUALIZE),
+    onEdit: () => setOpenDialog(DIALOGS_DONATION_BAR.EDIT),
     onDelete: () => handleDelete(donation._id),
     onAccept: () => handleAccept(donation._id),
-    onComplete: () => handleComplete(donation._id),
+    onComplete: () => setOpenDialog(DIALOGS_DONATION_BAR.COMPLETE),
+    onReport: () => setOpenDialog(DIALOGS_DONATION_BAR.REPORT),
   };
 
   const menuContext = {
@@ -128,24 +124,34 @@ function DonationBar({ donation }) {
         ))}
       </Menu>
       {
-        <ViewDonationDialog
-          open={viewDialogOpen}
-          onClose={handleCloseViewDialog}
-          donation={donation}
-        />
+        <ViewDialog
+          open={openDialog === DIALOGS_DONATION_BAR.VISUALIZE}
+          onClose={() => setOpenDialog(null)}
+          title="Dettagli donazione"
+        >
+          <DonationView donation={donation} />
+        </ViewDialog>
       }
       {
         <CreateDonationDialog
-          open={editDialogOpen}
-          onClose={handleCloseEditDialog}
+          open={openDialog === DIALOGS_DONATION_BAR.EDIT}
+          onClose={() => setOpenDialog(null)}
           inEditMode={true}
           donation={donation}
         />
       }
       {
         <CompleteDonationDialog
-          open={completeDialogOpen}
-          onClose={handleCloseCompleteDialog}
+          open={openDialog === DIALOGS_DONATION_BAR.COMPLETE}
+          onClose={() => setOpenDialog(null)}
+          donation={donation}
+        />
+      }
+      {
+        <CreateReportDialog
+          open={openDialog === DIALOGS_DONATION_BAR.REPORT}
+          onClose={() => setOpenDialog(null)}
+          reportType={REPORT_TYPES.DONATION_ISSUE}
           donation={donation}
         />
       }

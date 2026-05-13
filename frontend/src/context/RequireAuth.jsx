@@ -25,6 +25,19 @@ function RequireAuth() {
     return <Navigate to="/login" replace />;
   }
 
+  // reindirizza un untente bannato alla pagina di login
+  if (user.isBanned) {
+    return (
+      <Navigate
+        to="/login"
+        state={{
+          bannedMessage: "Il tuo account è stato sospeso dall'amministratore.",
+        }}
+        replace
+      />
+    );
+  }
+
   // controlla se l'utente è autenticato
   // se lo è gli permette di accedere ad una rotta protetta
   return user ? (

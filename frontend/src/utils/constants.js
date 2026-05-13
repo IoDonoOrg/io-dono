@@ -51,13 +51,13 @@ export const DONATION_MENU_ACTIONS = [
     key: "accept",
     label: "Accetta",
     // solo se il ruolo dell'utente è admin o associazione e se la donazione può essere accetta
-    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION || role === USER_ROLE.ADMIN) && status === DONATION_STATUS.AVAILABLE,
+    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION) && status === DONATION_STATUS.AVAILABLE,
     onAction: ({ onAccept }) => onAccept(),
   },
   {
     key: "complete",
     label: "Completa",
-    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION || role === USER_ROLE.ADMIN) && status === DONATION_STATUS.ACCEPTED,
+    condition: ({ role, status }) => (role === USER_ROLE.ASSOCIATION) && status === DONATION_STATUS.ACCEPTED,
     onAction: ({ onComplete }) => onComplete(),
   },
   {
@@ -65,6 +65,12 @@ export const DONATION_MENU_ACTIONS = [
     label: "Modifica",
     condition: ({ role, status }) => role === USER_ROLE.DONOR && status === DONATION_STATUS.AVAILABLE,
     onAction: ({ onEdit }) => onEdit()
+  },
+  {
+    key: "report",
+    label: "Segnala",
+    condition: ({ role, status }) => role === USER_ROLE.ASSOCIATION && status === DONATION_STATUS.ACCEPTED,
+    onAction: ({ onReport }) => onReport()
   },
   {
     key: "delete",
@@ -78,4 +84,45 @@ export const DIALOGS = {
   HISTORY: 'history',
   MAP: 'map',
   STATISTICS: 'statistics',
+  CREATE_ASSOC: 'create-association',
+  MANAGE_REPORTS: 'manage-reports',
+  MANAGE_USERS: 'manage-users'
 };
+
+export const REPORT_TYPES = {
+  MALFUNCTION: "MALFUNCTION",
+  DONATION_ISSUE: "USER_BEHAVIOR",
+  NO_TYPE: "",
+};
+
+export const DIALOGS_DONATION_BAR = {
+  EDIT: "edit",
+  VISUALIZE: "visualize",
+  COMPLETE: "complete",
+  REPORT: "report",
+};
+
+export const DIALOGS_REPORT_BAR = {
+  VISUALIZE: "visualize",
+  CLOSE: "close"
+};
+
+export const REPORT_MENU_ACTIONS = [
+  {
+    key: "visualize",
+    label: "Visualizza",
+    condition: () => true,
+    onAction: ({ onVisualize }) => onVisualize(),
+  },
+  {
+    key: "close",
+    label: "Chiudi",
+    condition: ({ role, status }) => role === USER_ROLE.ADMIN && status === REPORT_STATUS.OPEN,
+    onAction: ({ onClose }) => onClose(),
+  },
+];
+
+export const REPORT_STATUS = {
+  OPEN: "OPEN",
+  CLOSED: "CLOSED"
+}

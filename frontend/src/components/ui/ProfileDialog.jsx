@@ -42,10 +42,12 @@ export default function UserProfileDialog({ open, onClose, user }) {
       <DialogContent dividers>
         <Box className="flex justify-between items-center w-full mb-2">
           <Chip label={`Ruolo: ${user.role}`} color="primary" />
-          <Chip
-            label={`Punti Solidarietà: ${user.solidarityPoints}`}
-            color="primary"
-          />
+          {user.role === USER_ROLE.DONOR && (
+            <Chip
+              label={`Punti Solidarietà: ${user.solidarityPoints}`}
+              color="primary"
+            />
+          )}
         </Box>
         <Grid
           container

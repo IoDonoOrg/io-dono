@@ -12,7 +12,7 @@ function TileClickable({ children, onClick }) {
         borderRadius: 4,
         overflow: "hidden",
         transition: "0.2s",
-        width: "100%",
+        maxWidth: 150,
         height: "120",
         "&:hover": {
           backgroundColor: "primary.dark",
@@ -35,7 +35,15 @@ function TileClickable({ children, onClick }) {
           textAlign: "center",
         }}
       >
-        <Typography variant="body1">{children}</Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            width: "120%",
+            overflowWrap: "break-word",
+          }}
+        >
+          {children}
+        </Typography>
       </ButtonBase>
     </Paper>
   );

@@ -5,7 +5,7 @@ import { confirmPasswords, normalizeName, validateAddress, validateEmail, valida
 import { USER_ROLE, DONOR_TYPE } from "src/utils/constants"
 import { useAuth } from "./useAuth";
 
-export const useRegistration = (alertSuccess, alertError) => {
+export const useRegistration = (alertSuccess, alertError, userType, onSuccess) => {
   // flag che segnalizza che l'utente sta cercando di registrarsi tramite google
   const isGoogleMode = !!sessionStorage.getItem("registrationToken");
   console.log("Google mode: ", isGoogleMode);
@@ -41,10 +41,11 @@ export const useRegistration = (alertSuccess, alertError) => {
       end: "18:00",
     },
 
-    user: {
-      category: USER_ROLE.NO_CATEGORY,
-      donatorType: DONOR_TYPE.NO_TYPE,
+    user: userType ?? {
+      category: USER_ROLE.DONOR,
+      donatorType: DONOR_TYPE.PRIVATE,
     }
+
   });
 
   // non c'è campo user, perché gli errori relativi all'utente vengono gestiti dal 
@@ -67,6 +68,12 @@ export const useRegistration = (alertSuccess, alertError) => {
       end: ""
     }
   });
+
+  useEffect(() => {
+    if (userType) {
+      setFormData(prev => ({ ...prev, user: userType }));
+    }
+  }, [userType]);
 
   // la funzione che passa su i dati dal componente-figlio UserTypeDialog
   // al componente-padre Registration 
@@ -142,9 +149,18 @@ export const useRegistration = (alertSuccess, alertError) => {
       if (result)
         alertError(result);
       else {
-        alertSuccess("Registrazione effettuata con successo! Ora puoi accedere.");
-        // naviga l'utente alla pagina di login
-        setTimeout(() => navigate('/login'), 2000);
+
+
+        // se è stata passata una funzione onSuccess come argomento -> siamo un admin
+        if (onSuccess) {
+          alertSuccess("Associazione creata con successo!");
+          onSuccess(); // es: chiude un dialogo
+        }
+        else { // altrimenti -> siamo in una registrazione normale
+          alertSuccess("Registrazione effettuata con successo! Ora puoi accedere.");
+          setTimeout(() => navigate('/login'), 2000); // comportamento di default
+        }
+
       }
       return;
     }

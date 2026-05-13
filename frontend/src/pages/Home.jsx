@@ -2,8 +2,8 @@ import { useAuth } from "src/hooks/useAuth";
 
 import AssociationDashboard from "./Dashboard/AssociationDashboard.jsx";
 import DonorDashboard from "./Dashboard/DonorDashboard.jsx";
-import AdminDashboard from "./Example.jsx";
 import { USER_ROLE } from "src/utils/constants";
+import AdminDashboard from "./Dashboard/AdminDashboard.jsx";
 
 // un componente "switch"
 // cambia il contenuto della rotta "/" in base al tipo dell'user

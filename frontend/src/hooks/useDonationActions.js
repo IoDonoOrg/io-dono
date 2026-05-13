@@ -4,29 +4,9 @@ import { useDonation } from "./useDonation";
 import { useState } from "react";
 
 export const useDonationActions = () => {
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-
-  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(null);
 
   const { removeDonationLocally, updateDonationLocally } = useDonation();
-
-  const handleEdit = () => {
-    setEditDialogOpen(true);
-  };
-
-  const handleCloseEditDialog = () => {
-    setEditDialogOpen(false);
-  };
-
-  const handleVisualize = () => {
-    setViewDialogOpen(true);
-  };
-
-  const handleCloseViewDialog = () => {
-    setViewDialogOpen(false);
-  };
 
   const handleDelete = async (id) => {
     try {
@@ -41,6 +21,7 @@ export const useDonationActions = () => {
     const result = await acceptDonation(id);
 
     if (result.success) {
+      // TODO: aggiungere gli alert qua
       // alertSuccess(result.message);
       updateDonationLocally(result.donation);
     } else {
@@ -48,26 +29,10 @@ export const useDonationActions = () => {
     }
   }
 
-  const handleComplete = async () => {
-    setCompleteDialogOpen(true);
-  };
-
-  const handleCloseCompleteDialog = () => {
-    setCompleteDialogOpen(false);
-  };
-
   return {
-    editDialogOpen,
-    handleEdit,
-    handleCloseEditDialog,
-    viewDialogOpen,
-    handleVisualize,
-    handleCloseViewDialog,
-    completeDialogOpen,
-    handleCloseCompleteDialog,
+    openDialog,
+    setOpenDialog,
     handleDelete,
     handleAccept,
-    handleComplete,
   };
-
 }
