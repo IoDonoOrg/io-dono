@@ -28,3 +28,82 @@ export const banUser = async (id, isBanned, bannedReason = null) => {
     };
   }
 };
+
+
+// Ottiene la panoramica delle statistiche KPI per la dashboard admin.
+// Restituisce un oggetto con campi:
+// - success: booleano che indica se la richiesta è andata a buon fine
+// - overview: dati overview (period, donations, reports, usersByRole) (se success è true)
+// - message: messaggio di errore (se success è false)
+export const getStatisticsOverview = async () => {
+  try {
+    const res = await api.get("admin/statistics/overview");
+    return {
+      success: true,
+      overview: res.data,
+    };
+  } catch (e) {
+    if (e.response) {
+      console.error("Errore backend:", e.response.data.message);
+      return { success: false, message: e.response.data.message };
+    }
+    return { success: false, message: "Errore server backend" };
+  }
+};
+
+// Ottiene il trend delle donazioni nel tempo.
+// Accetta un oggetto opzionale { fromDate, toDate } per filtrare il periodo.
+// Restituisce un oggetto con campi:
+// - success: booleano che indica se la richiesta è andata a buon fine
+// - trend: dati del trend (period, trend) (se success è true)
+// - message: messaggio di errore (se success è false)
+export const getStatisticsTrend = async ({ fromDate, toDate } = {}) => {
+  try {
+    const params = new URLSearchParams();
+    if (fromDate) params.append("fromDate", fromDate);
+    if (toDate) params.append("toDate", toDate);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    const res = await api.get(`admin/statistics/trend${query}`);
+    return {
+      success: true,
+      trend: res.data,
+    };
+  } catch (e) {
+    if (e.response) {
+      console.error("Errore backend:", e.response.data.message);
+      return { success: false, message: e.response.data.message };
+    }
+    return { success: false, message: "Errore server backend" };
+  }
+};
+
+// Ottiene le statistiche filtrate per area, tipo di bene, periodo e/o associazione.
+// Accetta un oggetto opzionale { area, itemType, fromDate, toDate, associationId }.
+// Restituisce un oggetto con campi:
+// - success: booleano che indica se la richiesta è andata a buon fine
+// - statistics: dati statistiche (period, filtersApplied, totals, associationWeeklyReport) (se success è true)
+// - message: messaggio di errore (se success è false)
+export const getStatistics = async (
+  { area, itemType, fromDate, toDate, associationId } = {}
+) => {
+  try {
+    const params = new URLSearchParams();
+    if (area) params.append("area", area);
+    if (itemType) params.append("itemType", itemType);
+    if (fromDate) params.append("fromDate", fromDate);
+    if (toDate) params.append("toDate", toDate);
+    if (associationId) params.append("associationId", associationId);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    const res = await api.get(`admin/statistics${query}`);
+    return {
+      success: true,
+      statistics: res.data,
+    };
+  } catch (e) {
+    if (e.response) {
+      console.error("Errore backend:", e.response.data.message);
+      return { success: false, message: e.response.data.message };
+    }
+    return { success: false, message: "Errore server backend" };
+  }
+};
