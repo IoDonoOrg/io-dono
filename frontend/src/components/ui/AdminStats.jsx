@@ -1,76 +1,70 @@
-import { Box, Grid, Stack } from "@mui/material";
+import { Box, Grid, Stack, CircularProgress, Alert } from "@mui/material";
 import { BarChart, LineChart, PieChart } from "@mui/x-charts";
 import StatCard from "./StatCard";
 import DashboardCard from "./DashboardCard";
-
-const DONATION_BY_CATEGORY = [
-  { label: "Abbigliamento", value: 42 },
-  { label: "Cibo", value: 78 },
-  { label: "Mobili", value: 19 },
-  { label: "Elettronica", value: 31 },
-  { label: "Giocattoli", value: 24 },
-];
-
-const REPORT_BY_STATUS = [
-  { id: 0, label: "Aperta", value: 14 },
-  { id: 1, label: "In revisione", value: 9 },
-  { id: 2, label: "Chiusa", value: 37 },
-];
-
-const USERS_BY_ROLE = [
-  { id: 0, label: "Admin", value: 4 },
-  { id: 1, label: "Associazione", value: 18 },
-  { id: 2, label: "Utente", value: 134 },
-];
-
-const TREND = [
-  { date: "13/04", count: 5 },
-  { date: "14/04", count: 8 },
-  { date: "15/04", count: 6 },
-  { date: "16/04", count: 11 },
-  { date: "17/04", count: 14 },
-  { date: "18/04", count: 9 },
-  { date: "19/04", count: 7 },
-  { date: "20/04", count: 13 },
-  { date: "21/04", count: 17 },
-  { date: "22/04", count: 12 },
-  { date: "23/04", count: 10 },
-  { date: "24/04", count: 15 },
-  { date: "25/04", count: 21 },
-  { date: "26/04", count: 18 },
-  { date: "27/04", count: 16 },
-];
-
-// const fetchOverviewData = async () => {
-//   const result = getStatisticsOverview();
-//   console.log(result);
-// };
-
-// const fetchTrendData = async () => {
-//   const result = getStatisticsTrend();
-//   console.log(result);
-// };
+import { useAdminStats } from "src/hooks/useAdminStats";
+import { STATS_COLORS } from "src/utils/statsUtility";
 
 export default function AdminStatistics() {
-  // fetchOverviewData();
-  // fetchTrendData();
+  const dateRange = {
+    fromDate: null,
+    toDate: null,
+  };
+
+  const { overview, trend, loading, error } = useAdminStats(true, dateRange);
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" py={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
+  const donationByCategory = Object.entries(overview.donations.byCategory).map(
+    ([label, value]) => ({ label, value }),
+  );
+
+  const reportByStatus = overview.reports.byStatus.map((s, index) => ({
+    id: index,
+    label: s._id,
+    value: s.count,
+    color: STATS_COLORS[index % STATS_COLORS.length],
+  }));
+
+  const usersByRole = overview.usersByRole.map((r, index) => ({
+    id: index,
+    label: r._id,
+    value: r.count,
+    color: STATS_COLORS[index % STATS_COLORS.length],
+  }));
+
+  const trendData = trend.trend.map((t) => ({
+    date: `${t._id.day}/${t._id.month}`,
+    count: t.count,
+  }));
+
   return (
     <Stack spacing={1.5}>
       <Box>
         <Stack direction="row" spacing={1} flexWrap="wrap">
           <StatCard
             label="Donazioni totali"
-            value={194}
-            sub={`Ultimi 30 giorni`}
+            value={overview.donations.total}
+            sub="Ultimi 30 giorni"
           />
           <StatCard
             label="Segnalazioni totali"
-            value={60}
-            sub="Relative all'app e donazioni"
+            value={overview.reports.total}
+            sub="Relative all'app e alle donazioni"
           />
           <StatCard
             label="Utenti registrati"
-            value={156}
+            value={overview.usersByRole.reduce((sum, r) => sum + r.count, 0)}
             sub="Donatori, Associazioni, Admin"
           />
         </Stack>
@@ -81,35 +75,40 @@ export default function AdminStatistics() {
           xAxis={[
             {
               scaleType: "point",
-              data: TREND.map((d) => d.date),
+              data: trendData.map((d) => d.date),
             },
           ]}
           series={[
             {
-              data: TREND.map((d) => d.count),
+              data: trendData.map((d) => d.count),
               area: true,
               curve: "linear",
+              color: STATS_COLORS[0],
             },
           ]}
           height={140}
           grid={{ horizontal: true, vertical: true }}
         />
       </DashboardCard>
+
       <Grid container spacing={1}>
-        {/* BarChart occupies the majority (8 out of 12 columns) */}
         <Grid item size={6}>
           <DashboardCard title="Donazioni per categoria">
             <BarChart
               xAxis={[
                 {
                   scaleType: "band",
-                  data: DONATION_BY_CATEGORY.map((d) => d.label),
+                  data: donationByCategory.map((d) => d.label),
+                  colorMap: {
+                    type: "ordinal",
+                    colors: STATS_COLORS,
+                  },
                 },
               ]}
               yAxis={[{ scaleType: "linear" }]}
               series={[
                 {
-                  data: DONATION_BY_CATEGORY.map((d) => d.value),
+                  data: donationByCategory.map((d) => d.value),
                 },
               ]}
               height={200}
@@ -123,7 +122,7 @@ export default function AdminStatistics() {
             <PieChart
               series={[
                 {
-                  data: REPORT_BY_STATUS,
+                  data: reportByStatus,
                   highlightScope: { faded: "global", highlighted: "item" },
                 },
               ]}
@@ -138,13 +137,12 @@ export default function AdminStatistics() {
           </DashboardCard>
         </Grid>
 
-        {/* Second PieChart occupies the rest of the space (2 columns) */}
         <Grid item size={3}>
           <DashboardCard title="Utenti per ruolo">
             <PieChart
               series={[
                 {
-                  data: USERS_BY_ROLE,
+                  data: usersByRole,
                   highlightScope: { faded: "global", highlighted: "item" },
                 },
               ]}
