@@ -20,7 +20,7 @@ async function registerAndLoginDonor() {
     expect([200, 201]).toContain(registerRes.statusCode);
 
     const loginRes = await request(app)
-        .post('/api/auth/sessions')
+        .post('/api/auth/tokens')
         .send({ email, password });
 
     expect(loginRes.statusCode).toBe(200);

@@ -7,8 +7,8 @@ const { isAuth } = require('../../middleware/auth.middleware'); // Verifica aute
 // Espone la creazione utente locale.
 router.post('/users', authController.registerUser);
 
-// Espone la creazione sessione locale (login).
-router.post('/sessions', authController.createSession);
+// Espone la creazione token locale (login).
+router.post('/tokens', authController.createSession);
 
 // Espone le rotte OAuth Google.
 
@@ -35,19 +35,8 @@ router.post('/google/sessions', authController.exchangeGoogleToken);
 // Completa la registrazione di un utente Google.
 router.post('/google/users', authController.registerGoogleUser);
 
-// Restituisce la sessione autenticata corrente.
-router.get('/sessions/me',
-    isAuth, // Applica protezione JWT.
-    (req, res) => {
-        // Restituisce i dati utente caricati dal middleware.
-        res.json({
-            message: 'Sei autenticato con successo!',
-            user: req.user
-        });
-    }
-);
+// Restituisce l'utente autenticato corrente (canonical: /me)
+router.get('/me', isAuth, authController.getCurrentUser);
 
-// Logout esplicito (stateless JWT: placeholder)
-router.delete('/sessions', isAuth, authController.deleteSession);
-
+// NOTE: deprecated `/sessions` routes removed to keep API RESTful.
 module.exports = router;

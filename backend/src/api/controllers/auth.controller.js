@@ -264,13 +264,15 @@ exports.registerGoogleUser = async (req, res) => {
     }
 };
 
-// Logout / invalidate session (stateless JWT placeholder)
-exports.deleteSession = async (req, res) => {
+
+// Restituisce l'utente autenticato corrente (usato da GET /auth/me)
+exports.getCurrentUser = async (req, res) => {
     try {
-        // Con JWT stateless non c'è lato server da invalidare a meno di blacklist.
-        // Restituisce 204 per indicare logout eseguito lato client.
-        return res.status(204).send();
+        if (!req.user) {
+            return res.status(401).json({ message: 'Non autenticato.' });
+        }
+        return res.status(200).json({ message: 'Sei autenticato con successo!', user: req.user });
     } catch (error) {
-        return res.status(500).json({ message: 'Errore durante il logout.', error: error.message });
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
     }
 };
