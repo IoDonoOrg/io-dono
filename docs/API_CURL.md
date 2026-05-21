@@ -1,5 +1,11 @@
 # API - Comandi curl per testare l'applicazione
 
+> Sincronizzazione: questo documento è mantenuto manualmente e riflette lo stato della API descritto in `docs/OpenApi.yaml`.
+>
+> Ultima sincronizzazione: 2026-05-21
+>
+> Per mantenere aggiornato questo file: aggiornare `docs/OpenApi.yaml` e poi adattare gli esempi `curl` presenti qui in base ai nuovi percorsi/parametri. Commitare entrambe le modifiche.
+
 Questo file raccoglie comandi `curl` (con esempi) per verificare i flussi principali: autenticazione (locale e Google), donazioni, segnalazioni e operazioni amministrative.
 
 Prerequisiti
@@ -325,6 +331,8 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" "$BASE_URL/admin/statistics?area=Mi
 ```bash
 curl -H "Authorization: Bearer $ASSOC_TOKEN" "$BASE_URL/associations/reports/weekly"
 ```
+
+Nota: le rotte legacy `/associations/weekly` e `/associations/items` sono state rimosse (2026-05-21). Usare i percorsi sotto `/associations/reports/` mostrati sopra.
 
 Ritorna: donazioni completate, top 5 donatori, stima peso rifiuti evitati.
 

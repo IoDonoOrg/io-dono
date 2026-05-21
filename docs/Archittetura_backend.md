@@ -1,3 +1,9 @@
+> Sincronizzazione: questo documento descrive l'architettura del backend e deve rimanere coerente con `docs/OpenApi.yaml`.
+>
+> Ultima sincronizzazione: 2026-05-21
+>
+> Procedura di aggiornamento: modificare `docs/OpenApi.yaml` e aggiornare le sezioni rilevanti di questo file (`API RESTful`, `Router principali`, ecc.), quindi committare entrambe le modifiche.
+
 ## Dipendenze Principali
 
 * **`express`**: Il framework web per Node.js. Lo usiamo per creare e gestire tutti gli endpoint della nostra API (es. `/api/donations`, `/api/login`).

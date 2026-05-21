@@ -263,3 +263,14 @@ exports.registerGoogleUser = async (req, res) => {
         res.status(500).json({ message: 'Errore del server', error: error.message });
     }
 };
+
+// Logout / invalidate session (stateless JWT placeholder)
+exports.deleteSession = async (req, res) => {
+    try {
+        // Con JWT stateless non c'è lato server da invalidare a meno di blacklist.
+        // Restituisce 204 per indicare logout eseguito lato client.
+        return res.status(204).send();
+    } catch (error) {
+        return res.status(500).json({ message: 'Errore durante il logout.', error: error.message });
+    }
+};

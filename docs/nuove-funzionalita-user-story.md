@@ -337,6 +337,8 @@ Visualizzare report automatici e statistiche beni raccolti per supportare il mon
 - `GET /api/associations/reports/weekly`
 - `GET /api/associations/reports/items?fromDate=&toDate=`
 
+> Nota: le rotte legacy `/associations/weekly` e `/associations/items` sono state rimosse il 2026-05-21. Usare i nuovi endpoint sotto `/api/associations/reports/`.
+
 ### Modelli coinvolti
 
 - `Donation` (status, items, associationId, dates)

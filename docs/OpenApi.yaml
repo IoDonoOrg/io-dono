@@ -447,7 +447,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/associations/weekly:
+  /api/associations/reports/weekly:
     get:
       tags: [Associations]
       summary: Report settimanale per associazione
@@ -462,7 +462,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/associations/items:
+  /api/associations/reports/items:
     get:
       tags: [Associations]
       summary: Tabella beni raccolti per tipologia e giorno
@@ -515,6 +515,17 @@ paths:
               examples:
                 success:
                   $ref: '#/components/examples/AuthLoginResponseExample'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Auth]
+      summary: Logout esplicito (invalidate client token)
+      operationId: deleteSession
+      responses:
+        '204':
+          description: Sessione terminata
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':

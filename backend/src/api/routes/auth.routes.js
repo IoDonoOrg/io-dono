@@ -47,5 +47,7 @@ router.get('/sessions/me',
     }
 );
 
+// Logout esplicito (stateless JWT: placeholder)
+router.delete('/sessions', isAuth, authController.deleteSession);
 
 module.exports = router;
