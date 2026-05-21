@@ -19,7 +19,7 @@ tags:
   - name: Root
     description: Endpoint di servizio API
   - name: Auth
-    description: Registrazione, login e sessioni
+    description: Registrazione, login e token
   - name: Donations
     description: Gestione donazioni
   - name: Reports
