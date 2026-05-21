@@ -22,15 +22,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-            cache-dependency-path: backend/package-lock.json
-
-      - name: Cache backend node modules
-        uses: actions/cache@v4
-        with:
-          path: backend/node_modules
-          key: backend-node-modules-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
-          restore-keys: |
-            backend-node-modules-${{ runner.os }}-
+          cache-dependency-path: 'backend/package-lock.json'
 
       - name: Install backend deps
         working-directory: backend
@@ -39,5 +31,3 @@ jobs:
       - name: Run backend tests
         working-directory: backend
         run: npm test -- --runInBand
-
-  
