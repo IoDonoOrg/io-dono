@@ -51,7 +51,7 @@ Ecco il ruolo di ogni cartella in `src/`:
 * `/src/api/routes/`
   * **Cosa fa:** Definisce gli **endpoint** (gli URL) della nostra API e li collega ai "Controller".
   * **Route file disponibili:**
-    - `auth.routes.js` - `/auth/users` (POST reg), `/auth/sessions` (POST login), `/auth/google/*` (OAuth)
+    - `auth.routes.js` - `/auth/users` (POST reg), `/auth/tokens` (POST login), `/auth/google/*` (OAuth)
     - `donation.routes.js` - `/donations` (POST create, GET list, GET/:id detail, PATCH/:id update, DELETE/:id)
     - `report.routes.js` - `/reports` (POST create, GET list, GET/:id, PATCH/:id solo admin con isAdmin middleware)
     - `notification.routes.js` - `/me/notifications` (GET list+filter, PATCH bulk, PATCH/:id single)
@@ -117,8 +117,8 @@ Segui sempre questi passaggi. Esempio:  **"Creare la Registrazione Utente" (`POS
    // POST /api/auth/users (registrazione)
    router.post('/users', authController.registerUser);
 
-   // POST /api/auth/sessions (login)
-   router.post('/sessions', authController.createSession);
+  // POST /api/auth/tokens (login)
+   router.post('/tokens', authController.createSession);
 
    // Aggiungeremo qui /google/*, ecc.
 
@@ -186,8 +186,8 @@ Ora, se avvii il server (`npm start`) e invii una richiesta `POST` a `http://loc
 ### Auth (`/api/auth`)
 
 * `POST /api/auth/users` — registrazione locale (crea utente)
-* `POST /api/auth/sessions` — login locale (crea sessione JWT)
-* `GET /api/auth/sessions/me` — utente corrente autenticato
+* `POST /api/auth/tokens` — login locale (emissione token JWT)
+* `GET /api/auth/me` — utente corrente autenticato
 * `GET /api/auth/google/authorize` — avvio OAuth Google
 * `GET /api/auth/google/callback` — callback OAuth Google
 * `POST /api/auth/google/sessions` — exchange token Google → login token o registration token

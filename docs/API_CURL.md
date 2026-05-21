@@ -41,12 +41,12 @@ curl -s -X POST "$BASE_URL/auth/users" \
   -d '{"email":"'$DONOR_EMAIL'","password":"'$DONOR_PW'","role":"DONOR","name":"Donor Test","phoneNumber":"+39 02 1234567","address":"Via Roma 123, Milano"}' | jq
 
 # Login e salvataggio token (risposta attesa: { token: "..." })
-TOKEN=$(curl -s -X POST "$BASE_URL/auth/sessions" \
+TOKEN=$(curl -s -X POST "$BASE_URL/auth/tokens" \
   -H "Content-Type: application/json" \
   -d '{"email":"'$DONOR_EMAIL'","password":"'$DONOR_PW'"}' | jq -r .token)
 
 # Verifica token
-curl -s "$BASE_URL/auth/sessions/me" -H "Authorization: Bearer $TOKEN" | jq
+curl -s "$BASE_URL/auth/me" -H "Authorization: Bearer $TOKEN" | jq
 ```
 
 Nota sicurezza: `POST /api/auth/users` consente solo `DONOR`.
@@ -55,7 +55,7 @@ Per creare utenti `ASSOCIATION` usare `POST /api/admin/users` con `ADMIN_TOKEN`.
 Se non hai `jq`, stampa la risposta intera:
 
 ```bash
-curl -i -X POST "$BASE_URL/auth/sessions" -H "Content-Type: application/json" -d '{"email":"'$DONOR_EMAIL'","password":"'$DONOR_PW'"}'
+curl -i -X POST "$BASE_URL/auth/tokens" -H "Content-Type: application/json" -d '{"email":"'$DONOR_EMAIL'","password":"'$DONOR_PW'"}'
 ```
 
 Flusso Donazioni (Donor)

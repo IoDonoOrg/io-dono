@@ -13,7 +13,7 @@ import api from "./api";
 // "password": "Test123$"
 // }
 
-// POST /auth/sessions
+// POST /auth/tokens
 // Questa funzione gestisce il login locale, inviando email e password al backend per ottenere un token di autenticazione
 // Se il login ha successo, restituisce il token e i dati dell'utente
 // In caso di errore, restituisce un messaggio di errore appropriato
@@ -24,7 +24,7 @@ const localLogin = async (email, password) => {
   };
 
   try {
-    const response = await api.post('/auth/sessions', loginData);
+    const response = await api.post('/auth/tokens', loginData);
 
     console.log('Login effettuato con successo:', response.data);
 

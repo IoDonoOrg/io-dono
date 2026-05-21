@@ -490,14 +490,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/auth/sessions:
+  /api/auth/tokens:
     post:
       tags: [Auth]
-      summary: Login locale
+      summary: Emissione token (login locale)
       description: >
-        Autentica un utente locale tramite email/password.
+        Autentica un utente locale tramite email/password e restituisce un token JWT.
         Per account creati con Google OAuth il login locale è bloccato.
-      operationId: createSession
+      operationId: createToken
       security: []
       requestBody:
         required: true
@@ -521,24 +521,24 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags: [Auth]
-      summary: Logout esplicito (invalidate client token)
-      operationId: deleteSession
+      summary: Revoca token lato client (logout)
+      operationId: deleteToken
       responses:
         '204':
-          description: Sessione terminata
+          description: Token revocato
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/auth/sessions/me:
+  /api/auth/me:
     get:
       tags: [Auth]
       summary: Utente autenticato corrente
-      operationId: getCurrentSession
+      operationId: getCurrentUser
       responses:
         '200':
-          description: Sessione valida
+          description: Utente autenticato
           content:
             application/json:
               schema:
@@ -1180,8 +1180,9 @@ components:
           type: string
           example: 5kg
 
-    DonationGeo:
+    Position:
       type: object
+      description: GeoJSON Point representing a geographic position. Coordinates are in [longitude, latitude] order.
       required: [type, coordinates]
       properties:
         type:
@@ -1204,7 +1205,7 @@ components:
           type: string
           example: Via Mesiano, Trento
         geo:
-          $ref: '#/components/schemas/DonationGeo'
+          $ref: '#/components/schemas/Position'
 
     DonationEvaluation:
       type: object

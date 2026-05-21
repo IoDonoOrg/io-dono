@@ -34,7 +34,7 @@ npm run test:coverage
 
 - `auth.api.test.js` (9 test)
   - Registrazione pubblica `POST /api/auth/users`
-  - Login `POST /api/auth/sessions`
+  - Login `POST /api/auth/tokens`
   - **Role hardening esplicito:**
     - `DONOR` consentito
     - `ASSOCIATION` e `ADMIN` negati sul signup pubblico (`403`)
