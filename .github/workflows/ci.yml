@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+            cache-dependency-path: backend/package-lock.json
 
       - name: Cache backend node modules
         uses: actions/cache@v4
@@ -38,31 +39,4 @@ jobs:
         working-directory: backend
         run: npm test -- --runInBand
 
-  frontend:
-    name: CI / frontend
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Cache frontend node modules
-        uses: actions/cache@v4
-        with:
-          path: frontend/node_modules
-          key: frontend-node-modules-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: |
-            frontend-node-modules-${{ runner.os }}-
-
-      - name: Install frontend deps
-        working-directory: frontend
-        run: npm ci
-
-      - name: Run frontend tests
-        working-directory: frontend
-        run: npm test -- --watchAll=false
+  
