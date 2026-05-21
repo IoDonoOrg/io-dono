@@ -19,11 +19,21 @@ tags:
   - name: Root
     description: Endpoint di servizio API
   - name: Auth
-    description: Registrazione, login e sessioni
+    description: Registrazione, login e token
   - name: Donations
     description: Gestione donazioni
   - name: Reports
     description: Gestione segnalazioni
+  - name: Notifications
+    description: Notifiche relative all'account autenticato
+  - name: Rewards
+    description: Ricompense disponibili e attivazioni
+  - name: RewardClaims
+    description: Attivazioni/claim delle ricompense per l'utente
+  - name: Admin
+    description: Operazioni amministrative e statistiche
+  - name: Associations
+    description: Report e statistiche per le associazioni
 
 security:
   - bearerAuth: []
@@ -79,14 +89,415 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/auth/sessions:
+  /api/me/notifications:
+    get:
+      tags: [Notifications]
+      summary: Elenca le notifiche dell'utente autenticato
+      operationId: listMyNotifications
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: isRead
+          in: query
+          schema:
+            type: boolean
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista notifiche
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationListResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags: [Notifications]
+      summary: Aggiorna in blocco le notifiche dell'utente
+      operationId: patchMyNotifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isRead]
+              properties:
+                isRead:
+                  type: boolean
+      responses:
+        '200':
+          description: Risultato aggiornamento notifiche
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matchedCount:
+                    type: integer
+                  modifiedCount:
+                    type: integer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/me/notifications/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+    patch:
+      tags: [Notifications]
+      summary: Aggiorna una notifica specifica
+      operationId: patchMyNotification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isRead:
+                  type: boolean
+      responses:
+        '200':
+          description: Notifica aggiornata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/rewards:
+    get:
+      tags: [Rewards]
+      summary: Elenca le ricompense disponibili
+      operationId: listRewards
+      responses:
+        '200':
+          description: Elenco ricompense
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardListResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/me/rewards/claims:
+    get:
+      tags: [RewardClaims]
+      summary: Elenca le attivazioni di reward dell'utente
+      operationId: listMyRewardClaims
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista attivazioni
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RewardClaim'
+                  meta:
+                    $ref: '#/components/schemas/DonationListMeta'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [RewardClaims]
+      summary: Attiva una ricompensa
+      operationId: createRewardClaim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rewardId]
+              properties:
+                rewardId:
+                  $ref: '#/components/schemas/ObjectId'
+      responses:
+        '201':
+          description: Attivazione creata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  claim:
+                    $ref: '#/components/schemas/RewardClaim'
+                  pointsSpent:
+                    type: integer
+                  remainingPoints:
+                    type: integer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/me/rewards/claims/{claimId}:
+    parameters:
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+    patch:
+      tags: [RewardClaims]
+      summary: Aggiorna stato attivazione reward
+      operationId: patchRewardClaim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [USED, EXPIRED]
+      responses:
+        '200':
+          description: Attivazione aggiornata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardClaim'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/users:
+    post:
+      tags: [Admin]
+      summary: Crea account associazione (admin only)
+      operationId: createAssociationUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateAssociationRequest'
+      responses:
+        '201':
+          description: Associazione creata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserPublic'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+    patch:
+      tags: [Admin]
+      summary: Aggiorna stato amministrativo utente
+      operationId: patchUserAdminState
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isBanned:
+                  type: boolean
+                bannedReason:
+                  type: string
+      responses:
+        '200':
+          description: Utente aggiornato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserPublic'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/statistics/overview:
+    get:
+      tags: [Admin]
+      summary: KPI overview per admin
+      operationId: getStatisticsOverview
+      responses:
+        '200':
+          description: Overview statistiche
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStatisticsOverview'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/statistics/trend:
+    get:
+      tags: [Admin]
+      summary: Trend donazioni
+      operationId: getStatisticsTrend
+      parameters:
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Trend donazioni
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStatisticsTrend'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/statistics:
+    get:
+      tags: [Admin]
+      summary: Statistiche filtrate
+      operationId: getStatistics
+      parameters:
+        - name: area
+          in: query
+          schema:
+            type: string
+        - name: itemType
+          in: query
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: associationId
+          in: query
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Statistiche
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStatisticsFiltered'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/associations/reports/weekly:
+    get:
+      tags: [Associations]
+      summary: Report settimanale per associazione
+      operationId: getAssociationWeeklyReport
+      responses:
+        '200':
+          description: Report settimanale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociationWeeklyReport'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/associations/reports/items:
+    get:
+      tags: [Associations]
+      summary: Tabella beni raccolti per tipologia e giorno
+      operationId: getAssociationItemsReport
+      parameters:
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Report beni per giorno e tipo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociationItemsReport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/auth/tokens:
     post:
       tags: [Auth]
-      summary: Login locale
+      summary: Emissione token (login locale)
       description: >
-        Autentica un utente locale tramite email/password.
+        Autentica un utente locale tramite email/password e restituisce un token JWT.
         Per account creati con Google OAuth il login locale è bloccato.
-      operationId: createSession
+      operationId: createToken
       security: []
       requestBody:
         required: true
@@ -108,15 +519,26 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Auth]
+      summary: Revoca token lato client (logout)
+      operationId: deleteToken
+      responses:
+        '204':
+          description: Token revocato
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
-  /api/auth/sessions/me:
+  /api/auth/me:
     get:
       tags: [Auth]
       summary: Utente autenticato corrente
-      operationId: getCurrentSession
+      operationId: getCurrentUser
       responses:
         '200':
-          description: Sessione valida
+          description: Utente autenticato
           content:
             application/json:
               schema:
@@ -758,8 +1180,9 @@ components:
           type: string
           example: 5kg
 
-    DonationGeo:
+    Position:
       type: object
+      description: GeoJSON Point representing a geographic position. Coordinates are in [longitude, latitude] order.
       required: [type, coordinates]
       properties:
         type:
@@ -782,7 +1205,7 @@ components:
           type: string
           example: Via Mesiano, Trento
         geo:
-          $ref: '#/components/schemas/DonationGeo'
+          $ref: '#/components/schemas/Position'
 
     DonationEvaluation:
       type: object
@@ -1012,6 +1435,217 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Report'
+
+    Notification:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        recipientId:
+          $ref: '#/components/schemas/ObjectId'
+        type:
+          type: string
+          example: REWARD_ACTIVATED
+        title:
+          type: string
+        message:
+          type: string
+        isRead:
+          type: boolean
+          default: false
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    NotificationListResponse:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        meta:
+          $ref: '#/components/schemas/DonationListMeta'
+
+    Reward:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        title:
+          type: string
+        description:
+          type: string
+        pointsCost:
+          type: integer
+        isActive:
+          type: boolean
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    RewardListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reward'
+        solidarityPoints:
+          type: integer
+        defaultPointsThreshold:
+          type: integer
+
+    RewardClaim:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        userId:
+          $ref: '#/components/schemas/ObjectId'
+        rewardId:
+          anyOf:
+            - $ref: '#/components/schemas/ObjectId'
+            - $ref: '#/components/schemas/Reward'
+        status:
+          type: string
+          enum: [ACTIVATED, USED, EXPIRED]
+        activationCode:
+          type: string
+        activatedAt:
+          type: string
+          format: date-time
+        usedAt:
+          type: string
+          format: date-time
+
+    AdminCreateAssociationRequest:
+      type: object
+      required: [email, password, name, phoneNumber, address]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        name:
+          type: string
+        phoneNumber:
+          type: string
+        address:
+          type: string
+        profile:
+          type: object
+          additionalProperties: true
+
+    AdminStatisticsOverview:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+        donations:
+          type: object
+          properties:
+            total:
+              type: integer
+            byCategory:
+              type: object
+              additionalProperties:
+                type: number
+        reports:
+          type: object
+          properties:
+            total:
+              type: integer
+            byStatus:
+              type: array
+              items:
+                type: object
+        usersByRole:
+          type: array
+          items:
+            type: object
+
+    AdminStatisticsTrend:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+        trend:
+          type: array
+          items:
+            type: object
+
+    AdminStatisticsFiltered:
+      type: object
+      properties:
+        period:
+          type: object
+        filtersApplied:
+          type: object
+        totals:
+          type: object
+        associationWeeklyReport:
+          type: object
+
+    AssociationWeeklyReport:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+        donationsReceived:
+          type: integer
+        topDonors:
+          type: array
+          items:
+            type: object
+        estimatedWasteReduced:
+          type: number
+
+    AssociationItemsReport:
+      type: object
+      properties:
+        period:
+          type: object
+        rows:
+          type: object
+          additionalProperties:
+            type: object
+        totals:
+          type: object
+          additionalProperties:
+            type: number
 
   examples:
     AuthRegisterRequestExample:

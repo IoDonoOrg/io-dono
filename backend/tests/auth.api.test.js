@@ -60,7 +60,7 @@ describe('Auth API (registrazione e login)', () => {
         });
     });
 
-    describe('POST /api/auth/sessions', () => {
+    describe('POST /api/auth/tokens', () => {
         test('effettua login con credenziali valide', async () => {
             const password = 'SecretPassword123!';
             await User.create({
@@ -73,7 +73,7 @@ describe('Auth API (registrazione e login)', () => {
             });
 
             const res = await request(app)
-                .post('/api/auth/sessions')
+                .post('/api/auth/tokens')
                 .send({
                     email: 'login@test.it',
                     password
@@ -95,7 +95,7 @@ describe('Auth API (registrazione e login)', () => {
             });
 
             const res = await request(app)
-                .post('/api/auth/sessions')
+                .post('/api/auth/tokens')
                 .send({
                     email: 'wrongpwd@test.it',
                     password: 'BadPassword123!'

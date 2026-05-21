@@ -1,3 +1,7 @@
+> Sincronizzazione: questo documento riepiloga le implementazioni recenti e va mantenuto coerente con `docs/OpenApi.yaml`.
+>
+> Ultima sincronizzazione: 2026-05-21
+>
 # Implementazione API Aggiunte - Spiegazione Operativa
 
 ## 1. Scopo del documento
@@ -169,6 +173,8 @@ Questo rende il ban effettivo subito sulle richieste autenticate.
   - Report ultimi 7 giorni: numero donazioni, top donatori, stima impatto
 - `GET /api/associations/reports/items?fromDate=&toDate=`
   - Tabella beni raccolti per giorno/tipologia + totali
+
+> Nota: le rotte legacy `/associations/weekly` e `/associations/items` sono state rimosse il 2026-05-21. Usare i nuovi endpoint sotto `/api/associations/reports/`.
 
 ### Validazioni implementate
 

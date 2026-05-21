@@ -35,7 +35,7 @@ describe('Admin API', () => {
         adminId = adminUser._id;
 
         const adminRes = await request(app)
-            .post('/api/auth/sessions')
+            .post('/api/auth/tokens')
             .send({
                 email: 'admin@test.it',
                 password: 'SecureAdmin123!'
@@ -70,7 +70,7 @@ describe('Admin API', () => {
         associationId = assocRes.body.user._id;
 
         const assocLoginRes = await request(app)
-            .post('/api/auth/sessions')
+            .post('/api/auth/tokens')
             .send({
                 email: 'assoc@test.it',
                 password: 'AssocPass123!'

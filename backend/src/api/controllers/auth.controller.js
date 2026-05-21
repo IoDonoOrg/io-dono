@@ -263,3 +263,16 @@ exports.registerGoogleUser = async (req, res) => {
         res.status(500).json({ message: 'Errore del server', error: error.message });
     }
 };
+
+
+// Restituisce l'utente autenticato corrente (usato da GET /auth/me)
+exports.getCurrentUser = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Non autenticato.' });
+        }
+        return res.status(200).json({ message: 'Sei autenticato con successo!', user: req.user });
+    } catch (error) {
+        return res.status(500).json({ message: 'Errore del server', error: error.message });
+    }
+};

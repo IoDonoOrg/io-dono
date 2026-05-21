@@ -33,7 +33,7 @@ async function registerAndLogin({ role, emailPrefix }) {
     }
 
     const loginRes = await request(app)
-        .post('/api/auth/sessions')
+        .post('/api/auth/tokens')
         .send({ email, password });
 
     expect(loginRes.statusCode).toBe(200);
