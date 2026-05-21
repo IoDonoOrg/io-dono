@@ -12,8 +12,8 @@ export const getAssociationReport = async ({ fromDate, toDate } = {}) => {
 
     // esegue entrambe le richieste in parallelo
     const [weeklyRes, itemsRes] = await Promise.all([
-      api.get("/associations/weekly"),
-      api.get(`/associations/items?${params}`),
+      api.get("/associations/reports/weekly"),
+      api.get(`/associations/reports/items?${params}`),
     ]);
 
     // console.log("Report settimanale:", weeklyRes.data);
