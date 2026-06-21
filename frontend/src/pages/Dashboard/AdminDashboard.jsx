@@ -38,7 +38,7 @@ function AdminDashboard() {
           />
           <Box className="grid grid-cols-3 gap-10 my-5">
             <TileClickable onClick={() => setOpenDialog(DIALOGS.CREATE_ASSOC)}>
-              Gestione Associazioni
+              Aggiungi Associazione
             </TileClickable>
             <TileClickable
               onClick={() => setOpenDialog(DIALOGS.MANAGE_REPORTS)}
